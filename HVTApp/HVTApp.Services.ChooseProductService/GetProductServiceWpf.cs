@@ -40,6 +40,7 @@ namespace HVTApp.Services.GetProductService
             return this.GetProduct(_bankFactory.CreateBank(requiredParameters.ChangeUnitOfWork(UnitOfWork)));
         }
 
+        private List<Product> _products = new List<Product>();
         private Product GetProduct(Bank bank, Product originProduct = null)
         {
             try
@@ -54,25 +55,27 @@ namespace HVTApp.Services.GetProductService
 
                 //если необходимо выбрать комплект
                 if (window.ShouldSelectComplect)
-                {
                     return Container.Resolve<IGetProductService>().GetKit(originProduct);
-                }
 
                 //выходим, если пользователь отменил выбор продукта.
-                if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) return originProduct;
+                if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) 
+                    return originProduct;
 
                 var result = productSelector.SelectedProduct;
                 productSelector.Dispose();
 
+                var selectedProductResult = _products.SingleOrDefault(product => product.Equals(result));
+                if (selectedProductResult != null)
+                    return selectedProductResult;
+
+                //загрузка актуальных продуктов
+                this._products = UnitOfWork.Repository<Product>().GetAll();
+
                 //если выбранного продукта нет в базе
-                if (((IProductRepository)UnitOfWork.Repository<Product>()).CanAdd(result).OperationCompletedSuccessfully)
+                if (_products.Contains(result) == false)
                 {
                     SaveProduct(result);
-                }
-                else
-                {
-                    var result1 = result;
-                    result = UnitOfWork.Repository<Product>().FindAsNoTracking(x => x.Equals(result1)).Single();
+                    _products.Add(result);
                 }
 
                 return result;
@@ -268,7 +271,7 @@ namespace HVTApp.Services.GetProductService
                 }
             }
 
-            return _productBlocks.Single(block => block.Equals(productBlock));
+            return productBlock;
         }
 
         public IEnumerable<ProductBlock> GenerateBlocks()
