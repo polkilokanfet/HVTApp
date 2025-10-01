@@ -198,25 +198,7 @@ namespace HVTApp.Services.GetProductService
             //выходим, если пользователь отменил выбор блока продукта.
             if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) return originProductBlock;
 
-            var result = productBlockSelector.SelectedBlock;
-
-            //загрузка актуальных блоков продуктов
-            var productBlocks = UnitOfWork.Repository<ProductBlock>().GetAll();
-            //если выбранного блока продукта нет в базе
-            if (productBlocks.Contains(result) == false)
-            {
-                if (UnitOfWork.SaveEntity(result).OperationCompletedSuccessfully)
-                {
-                    Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductBlockEvent>().Publish(result);
-                    return result;
-                }
-                else
-                {
-                    throw new Exception("Ошибка при сохранении нового блока продукта в базу данных.");
-                }
-            }
-
-            return productBlocks.Single(x => x.Equals(result));
+            return this.SaveProductBlock(productBlockSelector.SelectedBlock);
         }
 
         public ProductBlock GetProductBlock(IEnumerable<IParametersContainer> parametersContainers, ProductBlock originProductBlock = null)
@@ -257,19 +239,28 @@ namespace HVTApp.Services.GetProductService
             window.ShowDialog();
 
             //выходим, если пользователь отменил выбор блока продукта.
-            if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) return originProductBlock;
+            if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) 
+                return originProductBlock;
 
-            var result = productBlockSelector.SelectedBlock;
+            return this.SaveProductBlock(productBlockSelector.SelectedBlock);
+        }
+
+        private List<ProductBlock> _productBlocks = new List<ProductBlock>();
+        private ProductBlock SaveProductBlock(ProductBlock productBlock)
+        {
+            var result = _productBlocks.SingleOrDefault(block => block.Equals(productBlock));
+            if (result != null)
+                return result;
 
             //загрузка актуальных блоков продуктов
-            var productBlocks = UnitOfWork.Repository<ProductBlock>().GetAll();
+            _productBlocks = UnitOfWork.Repository<ProductBlock>().GetAll();
             //если выбранного блока продукта нет в базе
-            if (productBlocks.Contains(result) == false)
+            if (_productBlocks.Contains(productBlock) == false)
             {
-                if (UnitOfWork.SaveEntity(result).OperationCompletedSuccessfully)
+                if (UnitOfWork.SaveEntity(productBlock).OperationCompletedSuccessfully)
                 {
-                    Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductBlockEvent>().Publish(result);
-                    return result;
+                    _productBlocks.Add(productBlock);
+                    Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductBlockEvent>().Publish(productBlock);
                 }
                 else
                 {
@@ -277,7 +268,7 @@ namespace HVTApp.Services.GetProductService
                 }
             }
 
-            return productBlocks.Single(x => x.Equals(result));
+            return _productBlocks.Single(block => block.Equals(productBlock));
         }
 
         public IEnumerable<ProductBlock> GenerateBlocks()

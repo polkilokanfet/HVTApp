@@ -15,6 +15,21 @@ namespace HVTApp.Services.GetProductService
             _unitOfWork = unitOfWork;
         }
 
+        private List<Parameter> _parameters;
+        private List<ProductRelation> _productRelations;
+        private IEnumerable<Parameter> GetParameters()
+        {
+            if (_parameters is null)
+                _parameters = _unitOfWork.Repository<Parameter>().GetAll();
+            return _parameters;
+        }
+        private IEnumerable<ProductRelation> GetProductRelations()
+        {
+            if (_productRelations is null)
+                _productRelations = _unitOfWork.Repository<ProductRelation>().GetAll();
+            return _productRelations;
+        }
+
         /// <summary>
         /// Формирование банка для выбора продукта.
         /// </summary>
@@ -75,7 +90,7 @@ namespace HVTApp.Services.GetProductService
 
         private Bank GetBank(IEnumerable<Parameter> parameters)
         {
-            var relations = _unitOfWork.Repository<ProductRelation>().GetAll();
+            var relations = GetProductRelations();
             var blocks = _unitOfWork.Repository<ProductBlock>()
                 .Find(block => block.DesignationSpecial != null);
             var specialDesignationsDictionary = blocks
@@ -86,8 +101,7 @@ namespace HVTApp.Services.GetProductService
 
         private IEnumerable<Parameter> GetParameters(Product originProduct = null)
         {
-            return _unitOfWork.Repository<Parameter>()
-                .GetAll()
+            return this.GetParameters()
                 .WithoutComplects(originProduct)
                 .WithoutNew(originProduct);
         }
