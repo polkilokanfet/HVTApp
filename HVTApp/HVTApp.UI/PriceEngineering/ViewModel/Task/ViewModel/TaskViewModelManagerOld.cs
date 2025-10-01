@@ -127,6 +127,14 @@ namespace HVTApp.UI.PriceEngineering
             #endregion
         }
 
+        private Product Pp(IUnitOfWork unitOfWork, Product product)
+        {
+            var getProductService = Container.Resolve<IGetProductService>();
+            var result = getProductService.GetSavedOrSaveProduct(product);
+            result = unitOfWork.Repository<Product>().GetById(result.Id);
+            return result;
+        }
+
         /// <summary>
         /// Заменить продукт в SalesUnit на продукт из ТСП
         /// </summary>
@@ -142,7 +150,7 @@ namespace HVTApp.UI.PriceEngineering
 
                 priceEngineeringTask = unitOfWork.Repository<PriceEngineeringTask>().GetById(priceEngineeringTask.Id);
 
-                var product = getProductService.GetProduct(unitOfWork, priceEngineeringTask.GetProduct());
+                var product = this.Pp(unitOfWork, priceEngineeringTask.GetProduct());
                 var salesUnits = priceEngineeringTask.SalesUnits;
 
                 var productBlocksAdded = priceEngineeringTask
@@ -156,7 +164,7 @@ namespace HVTApp.UI.PriceEngineering
                     .Where(added => added.IsOnBlock == false)
                     .Select(x => new ProductIncluded
                     {
-                        Product = getProductService.GetProduct(unitOfWork, x.GetProduct()),
+                        Product = this.Pp(unitOfWork, x.GetProduct()),
                         Amount = x.Amount
                     })
                     .ToList();
@@ -183,7 +191,7 @@ namespace HVTApp.UI.PriceEngineering
                         .Where(x => x.IsOnBlock == true)
                         .Select(x => new ProductIncluded
                         {
-                            Product = getProductService.GetProduct(unitOfWork, x.GetProduct()),
+                            Product = this.Pp(unitOfWork, x.GetProduct()),
                             Amount = x.Amount
                         })
                         .ToList();
@@ -192,7 +200,7 @@ namespace HVTApp.UI.PriceEngineering
                     {
                         productsIncludedOnBlock.Add(new ProductIncluded()
                         {
-                            Product = getProductService.GetProduct(unitOfWork, new Product
+                            Product = this.Pp(unitOfWork, new Product
                             {
                                 ProductBlock = task.ProductBlock
                             })

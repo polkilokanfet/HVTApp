@@ -58,28 +58,14 @@ namespace HVTApp.Services.GetProductService
                     return Container.Resolve<IGetProductService>().GetKit(originProduct);
 
                 //выходим, если пользователь отменил выбор продукта.
-                if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) 
+                if (window.DialogResult.HasValue == false || 
+                    window.DialogResult.Value == false) 
                     return originProduct;
 
                 var result = productSelector.SelectedProduct;
                 productSelector.Dispose();
 
-                var selectedProductResult = _products.SingleOrDefault(product => product.Equals(result));
-                if (selectedProductResult != null)
-                    return selectedProductResult;
-
-                //загрузка актуальных продуктов
-                this._products = UnitOfWork.Repository<Product>().GetAll();
-
-                //если выбранного продукта нет в базе
-                if (_products.Contains(result) == false)
-                {
-                    SaveProduct(result);
-                    _products.Add(result);
-                }
-
-                return result;
-
+                return this.GetOrSaveProduct(result);
             }
             catch (DependencyParameterException e)
             {
@@ -93,37 +79,58 @@ namespace HVTApp.Services.GetProductService
             }
         }
 
-        public Product GetProduct(IUnitOfWork unitOfWork, Product product)
+        public Product GetSavedOrSaveProduct(Product product)
         {
-            //загрузка актуальных продуктов
-            var products = unitOfWork.Repository<Product>().GetAll();
+            var result = this.CheckReloadCheckAgain(product);
+            if (result != null)
+                return result;
 
-            var result = products.SingleOrDefault(x => x.Equals(product));
-            if (result != null) return result;
+            this.SubstitutionBlocksAndProducts(
+                product, 
+                _products,
+                UnitOfWork.Repository<ProductBlock>().GetAll());
 
-            //если выбранного продукта нет в базе, сохраняем его
-            result = product;
-            this.SaveProduct(result, unitOfWork);
-
-            return result;
+            return this.SaveProduct(product);
         }
 
-
-        private void SaveProduct(Product product, IUnitOfWork unitOfWork = null)
+        private Product CheckReloadCheckAgain(Product product)
         {
-            unitOfWork = unitOfWork ?? UnitOfWork;
-            var products = unitOfWork.Repository<Product>().GetAll();
-            var blocks = unitOfWork.Repository<ProductBlock>().GetAll();
+            var existsProduct = _products.SingleOrDefault(p => p.Equals(product));
+            if (existsProduct != null)
+                return existsProduct;
 
-            SubstitutionBlocksAndProducts(product, products, blocks);
+            //загрузка актуальных продуктов
+            this._products = UnitOfWork.Repository<Product>().GetAll();
 
-            var operationResult = unitOfWork.SaveEntity(product);
+            return _products.SingleOrDefault(p => p.Equals(product));
+        }
+
+        private Product GetOrSaveProduct(Product product)
+        {
+            var result = this.CheckReloadCheckAgain(product);
+            if (result != null)
+                return result;
+
+            //если выбранного продукта нет в базе
+            return this.SaveProduct(product);
+        }
+
+        private Product SaveProduct(Product product)
+        {
+            //если выбранного продукта нет в базе
+            var operationResult = UnitOfWork.SaveEntity(product);
 
             if (operationResult.OperationCompletedSuccessfully == false)
                 throw new Exception("Ошибка при сохранении нового продукта в базу данных.", operationResult.Exception);
 
             Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductEvent>().Publish(product);
+
+            _products.Add(product);
+
+            return product;
         }
+
+
 
         public Product GetKit(Product originProduct = null)
         {

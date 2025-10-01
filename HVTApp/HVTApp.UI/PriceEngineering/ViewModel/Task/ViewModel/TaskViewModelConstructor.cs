@@ -303,7 +303,8 @@ namespace HVTApp.UI.PriceEngineering
                     using (var unitOfWork = Container.Resolve<IUnitOfWorkFactory>().GetUnitOfWork())
                     {
                         block = unitOfWork.Repository<ProductBlock>().GetById(block.Id);
-                        var product = getProductService.GetProduct(unitOfWork, new Product { ProductBlock = block });
+                        var product = getProductService.GetSavedOrSaveProduct(new Product { ProductBlock = block });
+                        product = unitOfWork.Repository<Product>().GetById(product.Id);
 
                         var taskViewModel = new TaskViewModelManagerNew(Container, unitOfWork, product)
                         {
