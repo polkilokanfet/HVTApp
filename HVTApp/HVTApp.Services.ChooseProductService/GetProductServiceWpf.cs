@@ -65,7 +65,7 @@ namespace HVTApp.Services.GetProductService
                 var result = productSelector.SelectedProduct;
                 productSelector.Dispose();
 
-                return this.GetOrSaveProduct(result);
+                return this.GetSavedOrSaveProduct(result);
             }
             catch (DependencyParameterException e)
             {
@@ -87,9 +87,10 @@ namespace HVTApp.Services.GetProductService
 
             this.SubstitutionBlocksAndProducts(
                 product, 
-                _products,
+                UnitOfWork.Repository<Product>().GetAll(),
                 UnitOfWork.Repository<ProductBlock>().GetAll());
 
+            //если выбранного продукта нет в базе
             return this.SaveProduct(product);
         }
 
@@ -105,15 +106,15 @@ namespace HVTApp.Services.GetProductService
             return _products.SingleOrDefault(p => p.Equals(product));
         }
 
-        private Product GetOrSaveProduct(Product product)
-        {
-            var result = this.CheckReloadCheckAgain(product);
-            if (result != null)
-                return result;
+        //private Product GetOrSaveProduct(Product product)
+        //{
+        //    var result = this.CheckReloadCheckAgain(product);
+        //    if (result != null)
+        //        return result;
 
-            //если выбранного продукта нет в базе
-            return this.SaveProduct(product);
-        }
+        //    //если выбранного продукта нет в базе
+        //    return this.SaveProduct(product);
+        //}
 
         private Product SaveProduct(Product product)
         {
@@ -162,18 +163,17 @@ namespace HVTApp.Services.GetProductService
         /// <param name="product"></param>
         /// <param name="savedProducts">Сохраненные продукты</param>
         /// <param name="savedBlocks"></param>
-        private void SubstitutionBlocksAndProducts(Product product, ICollection<Product> savedProducts, ICollection<ProductBlock> savedBlocks)
+        private void SubstitutionBlocksAndProducts(
+            Product product, 
+            ICollection<Product> savedProducts, 
+            ICollection<ProductBlock> savedBlocks)
         {
             //замена блоков на сохранённые
             var block = savedBlocks.SingleOrDefault(productBlock => product.ProductBlock.Equals(productBlock));
             if (block != null)
-            {
                 product.ProductBlock = block;
-            }
             else
-            {
                 savedBlocks.Add(product.ProductBlock);
-            }
 
             //для каждого зависиммого продукта
             foreach (var dependentProduct in product.DependentProducts)
@@ -181,13 +181,9 @@ namespace HVTApp.Services.GetProductService
                 var savedProduct = savedProducts.SingleOrDefault(product1 => product1.Equals(dependentProduct.Product));
                 //если продукт есть в сохраненных, меняем его
                 if (savedProduct != null)
-                {
                     dependentProduct.Product = savedProduct;
-                }
                 else
-                {
                     savedProducts.Add(dependentProduct.Product);
-                }
 
                 SubstitutionBlocksAndProducts(dependentProduct.Product, savedProducts, savedBlocks);
             }

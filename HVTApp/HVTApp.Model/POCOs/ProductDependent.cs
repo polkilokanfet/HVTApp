@@ -28,8 +28,7 @@ namespace HVTApp.Model.POCOs
         {
             unchecked
             {
-                int hashCode = base.GetHashCode();
-                hashCode = (hashCode * 397) ^ MainProductId.GetHashCode();
+                int hashCode = 7;
                 hashCode = (hashCode * 397) ^ (Product != null ? Product.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ Amount;
                 return hashCode;

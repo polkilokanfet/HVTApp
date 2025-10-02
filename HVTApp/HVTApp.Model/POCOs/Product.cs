@@ -79,9 +79,7 @@ namespace HVTApp.Model.POCOs
                 int hashCode = ProductBlock != null 
                     ? ProductBlock.GetHashCode() 
                     : 0;
-                hashCode = (hashCode * 397) ^ (DependentProducts != null 
-                    ? DependentProducts.GetHashSum() 
-                    : 0);
+                hashCode = (hashCode * 397) ^ (DependentProducts != null ? DependentProducts.GetHashSum() : 0);
                 return hashCode;
             }
         }
@@ -95,7 +93,7 @@ namespace HVTApp.Model.POCOs
             if (this.ProductBlock.Equals(other.ProductBlock) == false) 
                 return false;
 
-            if (this.GetHashCode() != other.GetHashCode()) 
+            if (this.GetHashCode() != other.GetHashCode())
                 return false;
 
             //если зависимые продукты не совпадают / совпадают
