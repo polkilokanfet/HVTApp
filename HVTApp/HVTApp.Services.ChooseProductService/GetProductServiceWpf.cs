@@ -278,7 +278,7 @@ namespace HVTApp.Services.GetProductService
                 }
             }
 
-            return productBlock;
+            return _productBlocks.SingleOrDefault(block => block.Equals(productBlock));
         }
 
         public IEnumerable<ProductBlock> GenerateBlocks()

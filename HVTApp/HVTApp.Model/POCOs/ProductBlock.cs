@@ -12,7 +12,7 @@ using HVTApp.Model.Comparers;
 namespace HVTApp.Model.POCOs
 {
     [Designation("Блок")]
-    public partial class ProductBlock : BaseEntity
+    public partial class ProductBlock : BaseEntity//, IEquatable<ProductBlock>
     {
         [Designation("Специальное обозначение"), MaxLength(256), OrderStatus(8)]
         public string DesignationSpecial { get; set; }
@@ -110,12 +110,18 @@ namespace HVTApp.Model.POCOs
 
         public override bool Equals(object other)
         {
-            return base.Equals(other) || Equals(other as ProductBlock);
+            return base.Equals(other) || 
+                   Equals(other as ProductBlock);
         }
 
         protected bool Equals(ProductBlock other)
         {
-            if (other == null) return false;
+            if (other == null) 
+                return false;
+
+            if (this.GetHashCode() != other.GetHashCode()) 
+                return false;
+
             return this.Parameters.MembersAreSame(other.Parameters, new ParameterComparer());
         }
 

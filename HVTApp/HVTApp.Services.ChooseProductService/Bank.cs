@@ -13,13 +13,14 @@ namespace HVTApp.Services.GetProductService
         private readonly List<ProductRelation> _relations;
         private readonly Dictionary<int, string> _specialDesignationsDictionary;
 
-        public HashSet<Parameter> Parameters { get; }
+        private readonly HashSet<Parameter> _parameters;
+        public IEnumerable<Parameter> Parameters => _parameters.ToHashSet();
 
         public Bank(IEnumerable<Parameter> parameters,
             Dictionary<int, string> specialDesignationsDictionary, 
                     IEnumerable<ProductRelation> relations)
         {
-            Parameters = parameters.ToHashSet();
+            _parameters = parameters.ToHashSet();
             _relations = relations.ToList();
             _specialDesignationsDictionary = specialDesignationsDictionary;
         }

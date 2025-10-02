@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -11,7 +12,7 @@ using HVTApp.Model.Comparers;
 namespace HVTApp.Model.POCOs
 {
     [Designation("Продукт"), DesignationPlural("Продукты")]
-    public partial class Product : BaseEntity
+    public partial class Product : BaseEntity//, IEquatable<Product>
     {
         private string _designation = null;
 
@@ -67,25 +68,35 @@ namespace HVTApp.Model.POCOs
 
         public override bool Equals(object obj)
         {
-            return base.Equals(obj) || Equals(obj as Product);
+            return base.Equals(obj) || 
+                   Equals(obj as Product);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = ProductBlock != null ? ProductBlock.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ (DependentProducts != null ? DependentProducts.GetHashSum() : 0);
+                int hashCode = ProductBlock != null 
+                    ? ProductBlock.GetHashCode() 
+                    : 0;
+                hashCode = (hashCode * 397) ^ (DependentProducts != null 
+                    ? DependentProducts.GetHashSum() 
+                    : 0);
                 return hashCode;
             }
         }
 
         protected bool Equals(Product other)
         {
-            if (other == null) return false;
+            if (other == null) 
+                return false;
 
             //если составные части не совпадают
-            if (!this.ProductBlock.Equals(other.ProductBlock)) return false;
+            if (this.ProductBlock.Equals(other.ProductBlock) == false) 
+                return false;
+
+            if (this.GetHashCode() != other.GetHashCode()) 
+                return false;
 
             //если зависимые продукты не совпадают / совпадают
             return DependentProducts.MembersAreSame(other.DependentProducts, new ProductDependentComparer());

@@ -38,7 +38,13 @@ namespace HVTApp.Model.POCOs
 
         protected bool Equals(ProductDependent other)
         {
-            return Amount == other?.Amount && this.Product.Equals(other.Product);
+            if (other is null) 
+                return false;
+
+            if (this.GetHashCode() != other.GetHashCode())
+                return false;
+
+            return Amount == other.Amount && this.Product.Equals(other.Product);
         }
 
         public override string ToString()

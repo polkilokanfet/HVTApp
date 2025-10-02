@@ -21,8 +21,7 @@ namespace HVTApp.Infrastructure
         {
             if (ReferenceEquals(this, obj)) return true;
 
-            var other = obj as BaseEntity;
-            if (other == null) return false;
+            if ((obj is BaseEntity other) == false) return false;
             if (Equals(this.Id, other.Id)) return true;
             return base.Equals(obj);
         }

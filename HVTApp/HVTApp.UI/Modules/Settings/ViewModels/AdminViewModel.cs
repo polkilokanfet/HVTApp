@@ -49,28 +49,50 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
 
                     using (var unitOfWork = container.Resolve<IUnitOfWork>())
                     {
-                        var products = unitOfWork.Repository<Product>().GetAll();
-                        var tasks = unitOfWork.Repository<PriceEngineeringTask>()
-                            .Find(task => task.DesignDepartment != null && task.ProductBlocksAdded.Any());
+                        //var productsAll = unitOfWork.Repository<Product>().GetAll();
 
-                        foreach (var task in tasks)
+                        //var productGroups = productsAll
+                        //    .GroupBy(x => x)
+                        //    .Where(x => x.Count() > 1)
+                        //    .ToList();
+
+                        //sb.AppendLine("   Products");
+                        //foreach (var productsGroup in productGroups)
+                        //{
+                        //    var productOk = productsGroup.Single(x => x.ProductBlock.StructureCostNumber != null);
+                        //    var productRemove = productsGroup.Single(x => x.ProductBlock.StructureCostNumber is null);
+                            
+                        //    sb.AppendLine(productRemove.ToString());
+
+                        //    foreach (var productDependent in unitOfWork.Repository<ProductDependent>().Find(x => x.Product.Equals(productRemove)))
+                        //        productDependent.Product = productOk;
+
+                        //    unitOfWork.Repository<Product>().Delete(productRemove);
+                        //}
+                        //unitOfWork.SaveChanges();
+                        //container.Resolve<IMessageService>().Message(sb.ToString());
+
+
+                        //sb.AppendLine("   Blocks");
+                        var blocks = unitOfWork.Repository<ProductBlock>().GetAll();
+
+                        var blocksGroups = blocks
+                            .GroupBy(x => x)
+                            .Where(x => x.Count() > 1)
+                            .ToList();
+
+                        foreach (var blockGroup in blocksGroups)
                         {
-                            foreach (var blockAdded in task.ProductBlocksAdded)
+                            var productBlock = blockGroup.Single(x => x.StructureCostNumber is null);
+                            sb.AppendLine($"- block {productBlock}");
+
+                            foreach (var product in unitOfWork.Repository<Product>().Find(x => x.ProductBlock != null && x.ProductBlock.Id == productBlock.Id))
                             {
-                                var kitBlock = blockAdded.ProductBlock;
-                                if (kitBlock == null)
-                                    continue;
-                                if (kitBlock.IsKit == false)
-                                    continue;
-
-                                var kitProduct = products.Single(product => product.ProductBlock.Id == kitBlock.Id);
-
-                                if (task.DesignDepartment.Kits.Contains(kitProduct))
-                                    continue;
-                                
-                                task.DesignDepartment.Kits.Add(kitProduct);
-                                sb.AppendLine($"{kitProduct.Designation} ({task.DesignDepartment.Name})");
+                                sb.AppendLine($"- product {product}");
+                                unitOfWork.Repository<Product>().Delete(product);
                             }
+
+                            unitOfWork.Repository<ProductBlock>().Delete(productBlock);
                         }
 
                         unitOfWork.SaveChanges();
