@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HVTApp.Infrastructure;
+using HVTApp.Infrastructure.Services;
 using HVTApp.Model;
 using HVTApp.Model.POCOs;
 
@@ -9,24 +11,33 @@ namespace HVTApp.Services.GetProductService
     class BankFactory
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILastUpdateMomentService _lastUpdateMomentService;
 
-        public BankFactory(IUnitOfWork unitOfWork)
+        public BankFactory(IUnitOfWork unitOfWork, ILastUpdateMomentService lastUpdateMomentService)
         {
             _unitOfWork = unitOfWork;
+            _lastUpdateMomentService = lastUpdateMomentService;
         }
 
         private List<Parameter> _parameters;
         private List<ProductRelation> _productRelations;
+        private DateTime _lastUpdateMomentOfParameters;
         private IEnumerable<Parameter> GetParameters()
         {
-            if (_parameters is null)
+            if (_parameters is null || _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
+            {
                 _parameters = _unitOfWork.Repository<Parameter>().GetAll();
+                _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
+            }
             return _parameters;
         }
         private IEnumerable<ProductRelation> GetProductRelations()
         {
-            if (_productRelations is null)
+            if (_productRelations is null || _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
+            {
                 _productRelations = _unitOfWork.Repository<ProductRelation>().GetAll();
+                _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
+            }
             return _productRelations;
         }
 

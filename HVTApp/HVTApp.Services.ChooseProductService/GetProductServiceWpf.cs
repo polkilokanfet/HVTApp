@@ -27,7 +27,7 @@ namespace HVTApp.Services.GetProductService
         {
             Container = container;
             UnitOfWork = container.Resolve<IUnitOfWork>();
-            _bankFactory = new BankFactory(UnitOfWork);
+            _bankFactory = new BankFactory(UnitOfWork, container.Resolve<ILastUpdateMomentService>());
         }
 
         public Product GetProduct(Product originProduct = null)

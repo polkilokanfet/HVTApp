@@ -184,6 +184,7 @@
     <Compile Include="Interfaces\Services\IUpdateDetailsService.cs" />
     <Compile Include="Interfaces\Services\SelectService\ISelectService.cs" />
     <Compile Include="IOutlookBarGroup.cs" />
+    <Compile Include="Services\ILastUpdateMomentService.cs" />
     <Compile Include="Services\INotificationUnitWatcher.cs" />
     <Compile Include="Services\IGetInformationFromExcelFileService.cs" />
     <Compile Include="Services\IGetFilePaths.cs" />

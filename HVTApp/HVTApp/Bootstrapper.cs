@@ -174,6 +174,7 @@ namespace HVTApp
             Container.RegisterType<IModelsStore, ModelsStore>(new ContainerControlledLifetimeManager());
             //Container.RegisterInstance(typeof(IModelsStore), new ModelsStore(Container));
 
+            Container.RegisterType<ILastUpdateMomentService, LastUpdateMomentService>(new ContainerControlledLifetimeManager());
 
             //костыли
             var user = this.Container.Resolve<IAuthenticationService>().GetAuthenticationUser();

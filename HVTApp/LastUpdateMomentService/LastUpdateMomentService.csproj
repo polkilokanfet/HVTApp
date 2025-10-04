@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HVTApp.Infrestructure\HVTApp.Infrastructure.csproj" />
+    <ProjectReference Include="..\HVTApp.Model\HVTApp.Model.csproj" />
+  </ItemGroup>
+
+</Project>

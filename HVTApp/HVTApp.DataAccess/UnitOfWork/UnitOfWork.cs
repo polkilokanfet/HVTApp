@@ -7,6 +7,7 @@ using System.Runtime.Remoting.Contexts;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Services;
+using HVTApp.Model.POCOs;
 using Microsoft.Practices.Unity;
 
 
@@ -56,6 +57,21 @@ namespace HVTApp.DataAccess
                 }
 #else
 #endif
+                //обновление момента обновления параметров
+                var parametersIsUpdating = _context.ChangeTracker.Entries<Parameter>().Any(dbEntityEntry =>
+                    dbEntityEntry.State == EntityState.Added ||
+                    dbEntityEntry.State == EntityState.Modified ||
+                    dbEntityEntry.State == EntityState.Deleted);
+                var parameterRelationsIsUpdating = _context.ChangeTracker.Entries<ParameterRelation>().Any(dbEntityEntry =>
+                    dbEntityEntry.State == EntityState.Added ||
+                    dbEntityEntry.State == EntityState.Modified ||
+                    dbEntityEntry.State == EntityState.Deleted);
+
+                if (parametersIsUpdating || parameterRelationsIsUpdating)
+                {
+                    _container.Resolve<ILastUpdateMomentService>().SetLastUpdateMomentOfParameters();
+                }
+
                 _context.SaveChanges(); 
                 result = new UnitOfWorkOperationResult();
 #if DEBUG
