@@ -10,18 +10,17 @@ namespace HVTApp.Services.GetProductService
 {
     public class ProductBlockSelector : BindableBase, IDisposable
     {
-
         #region fields
 
-        private readonly Bank _bank;
+        private readonly IProductBlocksContainer _productBlocksContainer;
 
         #endregion
 
         #region private props
 
         private List<Parameter> SelectedParameters => ParameterSelectors
-            .Select(x => x.SelectedParameterFlaged)
-            .Where(x => x != null)
+            .Select(selector => selector.SelectedParameterFlaged)
+            .Where(x => x != null && x.IsActual)
             .Select(x => x.Parameter)
             .ToList();
 
@@ -29,23 +28,27 @@ namespace HVTApp.Services.GetProductService
 
         #region props
 
-        public ObservableCollection<ParameterSelector> ParameterSelectors { get; }
+        public IReadOnlyCollection<ParameterSelector> ParameterSelectors { get; }
 
         /// <summary>
         /// ¬ыбранный блок
         /// </summary>
         public ProductBlock SelectedBlock
         {
-            get
-            {
-                var result = new ProductBlock {Parameters = SelectedParameters};
-                result.DesignationSpecial = _bank.GetBlockSpecialDesignation(result.GetHashCode());
-                return result;
-            }
+            get => _productBlocksContainer.GetProductBlock(SelectedParameters) 
+                   ?? new ProductBlock { Parameters = SelectedParameters };
             set
             {
                 var blockToSet = value;
-                if(blockToSet == null) throw new ArgumentNullException(nameof(blockToSet));
+
+                if (blockToSet == null) 
+                    throw new ArgumentNullException(nameof(blockToSet));
+
+                var parameters = this.ParameterSelectors
+                    .SelectMany(x => x.ParametersFlaged)
+                    .Select(x => x.Parameter);
+                if (blockToSet.Parameters.AllContainsInById(parameters) == false)
+                        throw new ArgumentException("ѕараметры блока не соответствуют возможным параметрам.");
 
                 //если совпадают выбранные параметры и параметры нового блока
                 if (SelectedParameters.MembersAreSame(blockToSet.Parameters)) return;
@@ -80,26 +83,22 @@ namespace HVTApp.Services.GetProductService
 
         #region ctor
 
-        public ProductBlockSelector(IEnumerable<Parameter> parameters, Bank bank, ProductBlock selectedProductBlock = null)
+        internal ProductBlockSelector(
+            IEnumerable<Parameter> parameters, 
+            IProductBlocksContainer productBlocksContainer)
         {
-            _bank = bank;
-
-            var parametersArray = parameters as Parameter[] ?? parameters.ToArray();
+            _productBlocksContainer = productBlocksContainer;
 
             //создаем селекторы параметров
-            ParameterSelectors = new ObservableCollection<ParameterSelector>(GetParameterSelectors(parametersArray));
+            var parameterSelectors = parameters
+                .GroupBy(parameter => parameter.ParameterGroup.Id)
+                .Select(x => new ParameterSelector(x))
+                .OrderBy(parameterSelector => parameterSelector)
+                .ToList();
+            ParameterSelectors = new ReadOnlyCollection<ParameterSelector>(parameterSelectors);
 
             //подписка на смену параметра в селекторе
             ParameterSelectors.ForEach(selector => selector.SelectedParameterFlagedChanged += OnSelectedParameterChanged);
-
-            //если есть выбранный блок
-            if (selectedProductBlock != null)
-            {
-                if(selectedProductBlock.Parameters.AllContainsIn(parametersArray) == false)
-                    throw new ArgumentException("ѕараметры блока не соответствуют возможным параметрам.");
-
-                SelectedBlock = selectedProductBlock;
-            }
         }
 
         #endregion
@@ -114,37 +113,17 @@ namespace HVTApp.Services.GetProductService
         #endregion
 
         /// <summary>
-        /// группировка параметров и упор€дочивание их
-        /// </summary>
-        /// <param name="parameters">параметры</param>
-        /// <returns></returns>
-        private IEnumerable<ParameterSelector> GetParameterSelectors(IEnumerable<Parameter> parameters)
-        {
-            //группировка параметров по группам и упор€дочивание их.
-            var groups = parameters
-                .GroupBy(parameter => parameter.ParameterGroup.Id)
-                //.OrderBy(x => x, new ParametersEnumerableComparerByPaths())
-                .Select(x => new ParameterSelector(x))
-                .OrderBy(x => x);
-
-            foreach (var group in groups)
-            {
-                yield return group;
-            }
-        }
-
-        /// <summary>
         /// –еакци€ на изменение выбранного параметра в селекторе.
         /// </summary>
         /// <param name="parameterSelector"></param>
         private void OnSelectedParameterChanged(ParameterSelector parameterSelector)
         {
             //перепроверка актуальности параметров
-            var parametersFlaged = ParameterSelectors.SelectMany(x => x.ParametersFlaged);
-            foreach (var parameter in parametersFlaged)
+            var parametersAll = ParameterSelectors.SelectMany(selector => selector.ParametersFlaged);
+            foreach (var parameter in parametersAll)
             {
                 parameter.IsActual = parameter.Parameter.IsOrigin ||
-                                     parameter.Parameter.ParameterRelations.Any(x => x.RequiredParameters.AllContainsIn(SelectedParameters));
+                                     parameter.Parameter.ParameterRelations.Any(parameterRelation => parameterRelation.RequiredParameters.AllContainsInById(SelectedParameters));
             }
 
             //событие смены блока
@@ -157,6 +136,25 @@ namespace HVTApp.Services.GetProductService
             //отмена подписки на смену параметра в селекторе
             ParameterSelectors.ForEach(selector => selector.SelectedParameterFlagedChanged -= OnSelectedParameterChanged);
             ParameterSelectors.ForEach(selector => selector.Dispose());
+        }
+
+        /// <summary>
+        /// ”становка об€зательных параметров в соотвтествующие селекторы
+        /// </summary>
+        /// <param name="requiredParameters">ќб€зательные параметры дл€ блока</param>
+        public void SetRequiredParameters(IEnumerable<Parameter> requiredParameters)
+        {
+            this.ParameterSelectors.ForEach(selector => selector.DropRequiredParameters());
+            if (requiredParameters == null) return;
+
+            var parametersGrouped = requiredParameters.GroupBy(x => x.ParameterGroup);
+
+            foreach (var parameters in parametersGrouped)
+            {
+                this.ParameterSelectors
+                    .Single(selector => selector.ParametersFlaged.First().Parameter.ParameterGroup.Id == parameters.Key.Id)
+                    .SetRequiredParameters(parameters);
+            }
         }
     }
 }

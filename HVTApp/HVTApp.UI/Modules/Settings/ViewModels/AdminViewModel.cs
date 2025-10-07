@@ -27,6 +27,7 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
     {
         public DelegateLogCommand Command1 { get; }
         public DelegateLogCommand Command2 { get; }
+        public DelegateLogCommand Command3 { get; }
 
         public AdminViewModel(IUnityContainer container)
         {
@@ -120,6 +121,18 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
                     sb.AppendLine("");
                 }
                 container.Resolve<IMessageService>().Message("", sb.ToString());
+            });
+
+            Command3 = new DelegateLogCommand(() =>
+            {
+                var getProductService = container.Resolve<IGetProductService>();
+
+                ProductBlock productBlock = null;
+
+                while (true)
+                {
+                    productBlock = getProductService.GetProductBlock(productBlock);
+                }
             });
         }
     }

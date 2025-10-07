@@ -8,6 +8,7 @@
     <StackPanel Orientation="Vertical">
         <Button Content="Command1" Command="{Binding Command1}"/>
         <Button Content="Command2" Command="{Binding Command2}"/>
+        <Button Content="Command3" Command="{Binding Command3}"/>
     </StackPanel>
     
 </inf:ViewBase>

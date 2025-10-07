@@ -47,50 +47,51 @@ namespace HVTApp.Services.GetProductService
 
         public ProductSelector(Bank bank, IEnumerable<Parameter> parameters, Product selectedProduct = null, int amount = 1)
         {
-            if (parameters == null) throw new ArgumentNullException(nameof(parameters));
+            throw new NotImplementedException();
+            //if (parameters == null) throw new ArgumentNullException(nameof(parameters));
 
-            Bank = bank;
-            Amount = amount;
+            //Bank = bank;
+            //Amount = amount;
 
-            //создаем селектор блока
-            BlockSelector = new ProductBlockSelector(parameters, Bank, selectedProduct?.ProductBlock);
-            //подписываемся на событие его изменения
-            BlockSelector.SelectedBlockChanged += selector =>
-            {
-                RefreshProductSelectors();
-                SelectedProductChanged?.Invoke();
-                RaisePropertyChanged(nameof(SelectedProduct));
-            };
+            ////создаем селектор блока
+            //BlockSelector = new ProductBlockSelector(parameters, Bank, selectedProduct?.ProductBlock);
+            ////подписываемся на событие его изменения
+            //BlockSelector.SelectedBlockChanged += selector =>
+            //{
+            //    RefreshProductSelectors();
+            //    SelectedProductChanged?.Invoke();
+            //    RaisePropertyChanged(nameof(SelectedProduct));
+            //};
 
-            //удаление/добавление селекторов дочерних продуктов
-            ProductSelectors.CollectionChanged += (sender, args) =>
-            {
-                args.NewItems?.Cast<ProductSelector>().ForEach(x => x.SelectedProductChanged += OnChildProductChanged);
-                args.OldItems?.Cast<ProductSelector>().ForEach(x => x.SelectedProductChanged -= OnChildProductChanged);
-            };
+            ////удаление/добавление селекторов дочерних продуктов
+            //ProductSelectors.CollectionChanged += (sender, args) =>
+            //{
+            //    args.NewItems?.Cast<ProductSelector>().ForEach(x => x.SelectedProductChanged += OnChildProductChanged);
+            //    args.OldItems?.Cast<ProductSelector>().ForEach(x => x.SelectedProductChanged -= OnChildProductChanged);
+            //};
 
-            if (selectedProduct == null)
-            {
-                //поиск селектора, содержащего базовые параметры
-                var parameterSelector = BlockSelector.ParameterSelectors.Single(x => x.ParametersFlaged.All(p => p.Parameter.IsOrigin));
-                //выбор параметра
-                parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
-            }
-            else
-            {
-                foreach (var kvp in GetDictionaryOfMatching(selectedProduct))
-                {
-                    if (Equals(kvp.Value, default(IEnumerable<Product>))) continue;
+            //if (selectedProduct == null)
+            //{
+            //    //поиск селектора, содержащего базовые параметры
+            //    var parameterSelector = BlockSelector.ParameterSelectors.Single(x => x.ParametersFlaged.All(p => p.Parameter.IsOrigin));
+            //    //выбор параметра
+            //    parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
+            //}
+            //else
+            //{
+            //    foreach (var kvp in GetDictionaryOfMatching(selectedProduct))
+            //    {
+            //        if (Equals(kvp.Value, default(IEnumerable<Product>))) continue;
 
-                    foreach (var product in kvp.Value)
-                    {
-                        //редактируем список параметров
-                        var usefullParameters = bank.Parameters.GetUsefull(kvp.Key);
-                        var productSelector = new ProductSelector(bank, usefullParameters, product);
-                        ProductSelectors.Add(productSelector);
-                    }
-                }
-            }
+            //        foreach (var product in kvp.Value)
+            //        {
+            //            //редактируем список параметров
+            //            var usefullParameters = bank.Parameters.GetUsefull(kvp.Key);
+            //            var productSelector = new ProductSelector(bank, usefullParameters, product);
+            //            ProductSelectors.Add(productSelector);
+            //        }
+            //    }
+            //}
         }
 
         private void RefreshProductSelectors()

@@ -20,10 +20,13 @@ namespace HVTApp.Services.GetProductService
         {
             get => _selectedParameterFlaged;
             set => this.SetProperty(ref _selectedParameterFlaged, value,
-                () => SelectedParameterFlagedChanged?.Invoke(this));
+                () =>
+                {
+                    SelectedParameterFlagedChanged?.Invoke(this);
+                });
         }
 
-        public ObservableCollection<ParameterFlaged> ParametersFlaged { get; }
+        public IReadOnlyCollection<ParameterFlaged> ParametersFlaged { get; }
 
         #endregion
 
@@ -34,12 +37,15 @@ namespace HVTApp.Services.GetProductService
             var parametersArray = parameters as Parameter[] ?? parameters.ToArray();
 
             if (parametersArray == null) throw new ArgumentNullException(nameof(parameters));
-            if (parametersArray.Any() == false) throw new ArgumentException(nameof(parameters), "В селектор пришло пустое перечисление параметров");
-            if (parametersArray.GroupBy(x => x.ParameterGroup.Id).Count() > 1) throw new ArgumentException(nameof(parameters), "В селектор пришли параметры из разных групп");
+            if (parametersArray.Any() == false) throw new ArgumentException("В селектор пришло пустое перечисление параметров", nameof(parameters));
+            if (parametersArray.GroupBy(parameter => parameter.ParameterGroup.Id).Count() > 1) throw new ArgumentException("В селектор пришли параметры из разных групп", nameof(parameters));
 
             //упорядочивание параметров
-            var parametersFlaged = parametersArray.Select(parameter => new ParameterFlaged(parameter));
-            ParametersFlaged = new ObservableCollection<ParameterFlaged>(parametersFlaged.OrderBy(x => x));
+            var parametersFlaged = parametersArray
+                .Select(parameter => new ParameterFlaged(parameter))
+                .OrderBy(parameterFlaged => parameterFlaged)
+                .ToList();
+            ParametersFlaged = new ReadOnlyCollection<ParameterFlaged>(parametersFlaged);
 
             //реакция на изменение актуальности параметра
             ParametersFlaged.ForEach(parameter => parameter.IsActualChanged += ParameterOnActualChanged);
@@ -64,6 +70,24 @@ namespace HVTApp.Services.GetProductService
         }
 
         #endregion
+
+        /// <summary>
+        /// Установка обязательных параметров
+        /// </summary>
+        /// <param name="parameters"></param>
+        public void SetRequiredParameters(IEnumerable<Parameter> parameters)
+        {
+            foreach (var parameterFlaged in this.ParametersFlaged)
+            {
+                parameterFlaged.IsRequired = parameters.ContainsById(parameterFlaged.Parameter);
+            }
+        }
+
+        public void DropRequiredParameters()
+        {
+            this.ParametersFlaged.ForEach(x => x.IsRequired = null);
+        }
+
 
         #region events
 
@@ -134,7 +158,6 @@ namespace HVTApp.Services.GetProductService
 
         public void Dispose()
         {
-            //реакция на изменение актуальности параметра
             ParametersFlaged.ForEach(parameter => parameter.IsActualChanged -= ParameterOnActualChanged);
         }
     }

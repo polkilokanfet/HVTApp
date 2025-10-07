@@ -85,6 +85,7 @@
   <ItemGroup>
     <Compile Include="Bank.cs" />
     <Compile Include="BankFactory.cs" />
+    <Compile Include="IProductBlocksContainer.cs" />
     <Compile Include="Kits\Kit.cs" />
     <Compile Include="Kits\KitsViewModel.cs" />
     <Compile Include="Kits\KitTypesViewModel.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="PathNode.cs" />
     <Compile Include="PathNodesGenerator.cs" />
     <Compile Include="ProductGeneration\BlockGeneration.cs" />
+    <Compile Include="GetParametersService.cs" />
     <Compile Include="Selectors\ParameterFlaged.cs" />
     <Compile Include="Selectors\ParameterSelector.cs" />
     <Compile Include="Selectors\ProductBlockSelector.cs" />
