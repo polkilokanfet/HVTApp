@@ -10,7 +10,7 @@ namespace HVTApp.Services.GetProductService
 {
     public class ProductSelector : BindableBase, IDisposable
     {
-        private Bank Bank { get; }
+        private readonly GetService _getService;
 
         public ProductBlockSelector BlockSelector { get; }
 
@@ -45,64 +45,64 @@ namespace HVTApp.Services.GetProductService
                 DependentProducts = this.ProductDependents.ToList(),
             };
 
-        public ProductSelector(Bank bank, IEnumerable<Parameter> parameters, Product selectedProduct = null, int amount = 1)
+        public ProductSelector(
+            GetService getService,
+            IEnumerable<Parameter> requiredParameters = null,
+            Product selectedProduct = null, 
+            int amount = 1)
         {
-            throw new NotImplementedException();
-            //if (parameters == null) throw new ArgumentNullException(nameof(parameters));
+            _getService = getService;
+            Amount = amount;
 
-            //Bank = bank;
-            //Amount = amount;
+            //создаем селектор блока
+            BlockSelector = _getService.GetProductBlockSelector(false, selectedProduct?.ProductBlock, requiredParameters);
 
-            ////создаем селектор блока
-            //BlockSelector = new ProductBlockSelector(parameters, Bank, selectedProduct?.ProductBlock);
-            ////подписываемся на событие его изменения
-            //BlockSelector.SelectedBlockChanged += selector =>
-            //{
-            //    RefreshProductSelectors();
-            //    SelectedProductChanged?.Invoke();
-            //    RaisePropertyChanged(nameof(SelectedProduct));
-            //};
+            //подписываемся на событие его изменения
+            BlockSelector.SelectedBlockChanged += selector =>
+            {
+                RefreshProductSelectors();
+                SelectedProductChanged?.Invoke();
+                RaisePropertyChanged(nameof(SelectedProduct));
+            };
 
-            ////удаление/добавление селекторов дочерних продуктов
-            //ProductSelectors.CollectionChanged += (sender, args) =>
-            //{
-            //    args.NewItems?.Cast<ProductSelector>().ForEach(x => x.SelectedProductChanged += OnChildProductChanged);
-            //    args.OldItems?.Cast<ProductSelector>().ForEach(x => x.SelectedProductChanged -= OnChildProductChanged);
-            //};
+            //удаление/добавление селекторов дочерних продуктов
+            ProductSelectors.CollectionChanged += (sender, args) =>
+            {
+                args.NewItems?.Cast<ProductSelector>().ForEach(selector => selector.SelectedProductChanged += OnChildProductChanged);
+                args.OldItems?.Cast<ProductSelector>().ForEach(selector => selector.SelectedProductChanged -= OnChildProductChanged);
+            };
 
-            //if (selectedProduct == null)
-            //{
-            //    //поиск селектора, содержащего базовые параметры
-            //    var parameterSelector = BlockSelector.ParameterSelectors.Single(x => x.ParametersFlaged.All(p => p.Parameter.IsOrigin));
-            //    //выбор параметра
-            //    parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
-            //}
-            //else
-            //{
-            //    foreach (var kvp in GetDictionaryOfMatching(selectedProduct))
-            //    {
-            //        if (Equals(kvp.Value, default(IEnumerable<Product>))) continue;
+            if (selectedProduct == null)
+            {
+                BlockSelector.SelectFirstParameter();
+            }
+            else
+            {
+                foreach (var kvp in GetDictionaryOfMatching(selectedProduct))
+                {
+                    if (Equals(kvp.Value, default(IEnumerable<Product>))) continue;
 
-            //        foreach (var product in kvp.Value)
-            //        {
-            //            //редактируем список параметров
-            //            var usefullParameters = bank.Parameters.GetUsefull(kvp.Key);
-            //            var productSelector = new ProductSelector(bank, usefullParameters, product);
-            //            ProductSelectors.Add(productSelector);
-            //        }
-            //    }
-            //}
+                    foreach (var product in kvp.Value)
+                    {
+                        //редактируем список параметров
+                        var productSelector = new ProductSelector(_getService, kvp.Key.ChildProductParameters, product);
+                        ProductSelectors.Add(productSelector);
+                    }
+                }
+            }
         }
 
         private void RefreshProductSelectors()
         {
             //упорядочиваем селектры продуктов по уменьшению количества параметров в блоке
-            var productSelectors = ProductSelectors.OrderByDescending(x => x.SelectedProduct.ProductBlock.Parameters.Count).ToList();
+            var productSelectors = ProductSelectors
+                .OrderByDescending(selector => selector.SelectedProduct.ProductBlock.Parameters.Count)
+                .ToList();
 
             //загружаем связи к дочерним продуктам, упорядоченные по количеству параметров, зависимого продукта
-            var childProductsRelations = Bank
+            var childProductsRelations = _getService
                 .GetActualRelationsToChildProducts(SelectedProduct)
-                .OrderBy(x => x.ChildProductParameters.Count)
+                .OrderByDescending(productRelation => productRelation.ChildProductParameters.Count)
                 .ToList();
 
             var relationsDictionary = new Dictionary<ProductRelation, int>();
@@ -115,7 +115,7 @@ namespace HVTApp.Services.GetProductService
             foreach (var productSelector in productSelectors.ToList())
             {
                 //ищем связь, которая соответствует селектору
-                var relation = childProductsRelations.FirstOrDefault(x => x.ChildProductParameters.AllContainsIn(productSelector.BlockSelector.SelectedBlock.Parameters));
+                var relation = childProductsRelations.FirstOrDefault(productRelation => productRelation.ChildProductParameters.AllContainsIn(productSelector.BlockSelector.SelectedBlock.Parameters));
 
                 //если не находим - сносим ее
                 if (relation == null)
@@ -142,7 +142,7 @@ namespace HVTApp.Services.GetProductService
                 for (int i = 0; i < relationsDictionary[productRelation]; i++)
                 {
                     //новый селектор с усеченными под связь параметрами
-                    var productSelector = new ProductSelector(Bank, Bank.Parameters.GetUsefull(productRelation));
+                    var productSelector = new ProductSelector(_getService, productRelation.ChildProductParameters);
                     ProductSelectors.Add(productSelector);
                 }
             }
@@ -167,7 +167,7 @@ namespace HVTApp.Services.GetProductService
         {
             var result = new Dictionary<ProductRelation, IEnumerable<Product>>();
             //получаем актуальные для выбранных параметров связи
-            var actualProductRelations = Bank.GetActualRelationsToChildProducts(product);
+            var actualProductRelations = _getService.GetActualRelationsToChildProducts(product);
             actualProductRelations.ForEach(x => result.Add(x, default(IEnumerable<Product>)));
 
             //составляем список дочерних продуктов

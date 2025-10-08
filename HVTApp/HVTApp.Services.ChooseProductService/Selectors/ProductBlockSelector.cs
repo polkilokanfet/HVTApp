@@ -215,5 +215,11 @@ namespace HVTApp.Services.GetProductService
             return requiredParametersInPaths.Union(requiredParameters).Distinct();
         }
 
+        public void SelectFirstParameter()
+        {
+            var parameterSelector = this.ParameterSelectors
+                .Single(selector => selector.ParametersFlaged.All(p => p.Parameter.IsOrigin));
+            parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First(x => x.IsActual);
+        }
     }
 }

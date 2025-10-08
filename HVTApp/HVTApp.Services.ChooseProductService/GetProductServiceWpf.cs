@@ -20,7 +20,7 @@ namespace HVTApp.Services.GetProductService
         private IUnityContainer Container { get; }
         
         private readonly IUnitOfWork _unitOfWork;
-        private readonly GetParametersService _getParametersService;
+        private readonly GetService _getService;
 
         private List<Product> _products = new List<Product>();
 
@@ -28,29 +28,30 @@ namespace HVTApp.Services.GetProductService
         {
             Container = container;
             _unitOfWork = container.Resolve<IUnitOfWork>();
-            _getParametersService = new GetParametersService(_unitOfWork, container.Resolve<ILastUpdateMomentService>());
+            _getService = new GetService(_unitOfWork, container.Resolve<ILastUpdateMomentService>(), container.Resolve<IEventAggregator>());
         }
+
+        #region GetProduct
 
         public Product GetProduct(Product originProduct = null)
         {
-            throw new NotImplementedException();
-            //return this.GetProduct(_bankFactory.CreateBank(originProduct), originProduct);
+            var selector = new ProductSelector(_getService, selectedProduct: originProduct);
+            return this.GetProduct(selector, originProduct);
         }
 
         public Product GetProduct(IEnumerable<Parameter> requiredParameters)
         {
-            throw new NotImplementedException();
-            //return this.GetProduct(_bankFactory.CreateBank(requiredParameters.ChangeUnitOfWork(_unitOfWork)));
+            var selector = new ProductSelector(_getService, requiredParameters);
+            return this.GetProduct(selector);
         }
 
-        private Product GetProduct(Bank bank, Product originProduct = null)
+        private Product GetProduct(ProductSelector productSelector, Product originProduct = null)
         {
             try
             {
                 //предварительно выбранный продукт
                 var selectedProduct = originProduct?.ChangeUnitOfWork(_unitOfWork);
 
-                var productSelector = new ProductSelector(bank, bank.Parameters, selectedProduct);
                 var owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
                 var window = new SelectProductWindow { DataContext = productSelector, Owner = owner };
                 window.ShowDialog();
@@ -108,6 +109,8 @@ namespace HVTApp.Services.GetProductService
             return _products.SingleOrDefault(p => p.Equals(product));
         }
 
+        #endregion
+
         //private Product GetOrSaveProduct(Product product)
         //{
         //    var result = this.CheckReloadCheckAgain(product);
@@ -134,6 +137,7 @@ namespace HVTApp.Services.GetProductService
         }
 
 
+        #region GetKit
 
         public Product GetKit(Product originProduct = null)
         {
@@ -157,6 +161,8 @@ namespace HVTApp.Services.GetProductService
                 ? kitsViewModel.SelectedItem.Product
                 : originProduct;
         }
+
+        #endregion
 
         /// <summary>
         /// Замена новых блоков и продуктов на сохранённые
@@ -190,6 +196,8 @@ namespace HVTApp.Services.GetProductService
             }
         }
 
+        #region GetProductBlock
+
         private ProductBlock GetProductBlockBase(ProductBlockSelector selector, ProductBlock originProductBlock)
         {
             var owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
@@ -201,14 +209,14 @@ namespace HVTApp.Services.GetProductService
                 window.DialogResult.Value == false)
                 return originProductBlock;
 
-            return this.SaveProductBlock(selector.SelectedBlock);
+            return _getService.SaveProductBlock(selector.SelectedBlock);
         }
 
         public ProductBlock GetProductBlock(
             ProductBlock originProductBlock = null, 
             IEnumerable<Parameter> requiredParameters = null)
         {
-            var selector = this.GetProductBlockSelector(originProductBlock, requiredParameters);
+            var selector = this._getService.GetProductBlockSelector(true, originProductBlock, requiredParameters);
             return this.GetProductBlockBase(selector, originProductBlock);
         }
 
@@ -216,108 +224,12 @@ namespace HVTApp.Services.GetProductService
             IEnumerable<IParametersContainer> parametersContainers, 
             ProductBlock originProductBlock = null)
         {
-            var selector = this.GetProductBlockSelector(originProductBlock, containers: parametersContainers);
+            var selector = this._getService.GetProductBlockSelector(true, originProductBlock, containers: parametersContainers);
             return this.GetProductBlockBase(selector, originProductBlock);
         }
 
+        #endregion
 
-        private ProductBlockSelector GetProductBlockSelector(
-            ProductBlock selectedProductBlock = null,
-            IEnumerable<Parameter> required = null,
-            IEnumerable<IParametersContainer> containers = null)
-        {
-            var result = new ProductBlockSelector(this._getParametersService.GetParameters(), this._getParametersService);
-
-            if (required != null)
-                result.SetRequiredParameters(required);
-
-            if (containers != null)
-                result.SetRequiredParameters(containers);
-
-            if (selectedProductBlock != null)
-            {
-                //ранее выбранный блок
-                result.SelectedBlock = selectedProductBlock;
-            }
-            else
-            {
-                //первый выбранный параметр
-                var originParameterSelector = result
-                    .ParameterSelectors
-                    .Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
-                originParameterSelector.SelectedParameterFlaged = originParameterSelector.ParametersFlaged.First(x => x.IsActual);
-            }
-
-            return result;
-        }
-
-        public IEnumerable<Parameter> GetUnreachableParameters(ICollection<Parameter> requiredParameters)
-        {
-            if (requiredParameters == null) 
-                throw new ArgumentException("В GetUnreachableParameters недопустим null", nameof(requiredParameters));
-
-            if (requiredParameters.Any() == false)
-                yield break;
-
-            //находим максимальное количество пересечений путей параметров
-            List<Parameter> requiredParametersInPaths = null;
-            foreach (var requiredParameter in requiredParameters)
-            {
-                var parametersInPaths = requiredParameter.Paths()
-                    .SelectMany(path => path.Parameters)
-                    .Distinct()
-                    .ToList();
-
-                requiredParametersInPaths = requiredParametersInPaths == null
-                    ? parametersInPaths
-                    : parametersInPaths
-                        .Intersect(requiredParametersInPaths)
-                        .ToList();
-            }
-
-            var parametersAll = _getParametersService.GetParameters().ToList();
-            var parametersGroups = requiredParametersInPaths
-                .Union(requiredParameters)
-                .Distinct()
-                .GroupBy(parameter => parameter.ParameterGroup.Id);
-            foreach (var parametersGroup in parametersGroups)
-            {
-                var unreachableParameters = parametersAll
-                    .GetParametersOfGroup(parametersGroup.Key)
-                    .Except(parametersGroup);
-                foreach (var unreachableParameter in unreachableParameters)
-                {
-                    yield return unreachableParameter;
-                }
-            }
-        }
-
-
-        private List<ProductBlock> _productBlocks = new List<ProductBlock>();
-        private ProductBlock SaveProductBlock(ProductBlock productBlock)
-        {
-            var result = _productBlocks.SingleOrDefault(block => block.Equals(productBlock));
-            if (result != null)
-                return result;
-
-            //загрузка актуальных блоков продуктов
-            _productBlocks = _unitOfWork.Repository<ProductBlock>().GetAll();
-            //если выбранного блока продукта нет в базе
-            if (_productBlocks.Contains(productBlock) == false)
-            {
-                if (_unitOfWork.SaveEntity(productBlock).OperationCompletedSuccessfully)
-                {
-                    _productBlocks.Add(productBlock);
-                    Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductBlockEvent>().Publish(productBlock);
-                }
-                else
-                {
-                    throw new Exception("Ошибка при сохранении нового блока продукта в базу данных.");
-                }
-            }
-
-            return _productBlocks.SingleOrDefault(block => block.Equals(productBlock));
-        }
 
         public IEnumerable<ProductBlock> GenerateBlocks()
         {
