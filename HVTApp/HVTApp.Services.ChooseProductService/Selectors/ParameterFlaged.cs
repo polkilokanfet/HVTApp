@@ -8,57 +8,16 @@ namespace HVTApp.Services.GetProductService
     {
         #region props
 
-        private bool _isActual;
-        private bool? _isRequired;
+        private bool _isActual = false;
 
         /// <summary>
         /// јктуальность параметра (с учЄтом об€зательных и выбранных параметров).
         /// </summary>
         public bool IsActual
         {
-            get
-            {
-                if (this.IsRequired.HasValue &&
-                    this.IsRequired.Value == false)
-                {
-                    return false;
-                }
-
-                return _isActual;
-            }
-            set
-            {
-                bool result = value;
-                if (this.IsRequired.HasValue &&
-                    this.IsRequired.Value == false)
-                {
-                    result = false;
-                }
-
-                this.SetProperty(ref _isActual, result, () => { IsActualChanged?.Invoke(this); });
-            }
+            get => _isUnreachable != true && _isActual;
+            set => this.SetProperty(ref _isActual, value, () => { IsActualChanged?.Invoke(this); });
         }
-
-        /// <summary>
-        /// ѕараметр €вл€етс€ об€зательным в выбранном блоке
-        /// </summary>
-        public bool? IsRequired
-        {
-            get => _isRequired;
-            set => SetProperty(ref _isRequired, value, () =>
-            {
-                if (this.IsRequired.HasValue &&
-                    this.IsRequired.Value == false)
-                {
-                    this.IsActual = false;
-                }
-            });
-        }
-
-        /// <summary>
-        /// ƒанный параметр недостижим (из-за об€зательных к выбору параметров в блоке)
-        /// </summary>
-        public bool IsUnreachable { get; set; }
 
         public Parameter Parameter { get; }
 
@@ -83,12 +42,37 @@ namespace HVTApp.Services.GetProductService
 
         #endregion
 
+        #region Reachable
+
+         // ƒанный параметр недостижим (из-за об€зательных к выбору параметров в блоке)
+        private bool _isUnreachable = false;
+
+        public void SetAsUnreachable()
+        {
+            if (_isUnreachable == true)
+                return;
+
+            _isUnreachable = true;
+            IsActual = false;
+        }
+
+        public void SetAsReachable()
+        {
+            if (_isUnreachable == false)
+                return;
+
+            _isUnreachable = false;
+            RaisePropertyChanged(nameof(IsActual));
+        }
+
         public override string ToString()
         {
             return this.IsActual 
                 ? $"{this.Parameter} - актуален" 
                 : $"{this.Parameter} - не актуален";
         }
+
+       #endregion
 
         public int CompareTo(ParameterFlaged other)
         {

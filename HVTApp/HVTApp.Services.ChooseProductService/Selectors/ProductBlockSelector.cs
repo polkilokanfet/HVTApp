@@ -160,7 +160,7 @@ namespace HVTApp.Services.GetProductService
 
         public void SetRequiredParameters(IEnumerable<IParametersContainer> containers)
         {
-            this.ParameterSelectors.ForEach(selector => selector.DropRequiredParameters());
+            this.ParameterSelectors.ForEach(selector => selector.SetAllParametersAsReachable());
             if (containers == null) return;
 
             var requiredParameters = containers
@@ -173,9 +173,12 @@ namespace HVTApp.Services.GetProductService
 
             foreach (var parameters in parametersGrouped)
             {
-                this.ParameterSelectors
-                    .Single(selector => selector.ParametersFlaged.First().Parameter.ParameterGroup.Id == parameters.Key.Id)
-                    .SetRequiredParameters(parameters);
+                var parameterSelector = ParameterSelectors
+                    .Single(selector => selector.ParametersFlaged.First().Parameter.ParameterGroup.Id == parameters.Key.Id);
+                var unreachable = parameterSelector.ParametersFlaged
+                    .Select(x => x.Parameter)
+                    .Except(parameters);
+                parameterSelector.SetParametersAsUnreachable(unreachable);
             }
         }
 

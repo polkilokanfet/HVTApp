@@ -72,23 +72,22 @@ namespace HVTApp.Services.GetProductService
         #endregion
 
         /// <summary>
-        /// Установка обязательных параметров
+        /// Сделать параметры недостижимыми
         /// </summary>
         /// <param name="parameters"></param>
-        public void SetRequiredParameters(IEnumerable<Parameter> parameters)
+        public void SetParametersAsUnreachable(IEnumerable<Parameter> parameters)
         {
-            foreach (var parameterFlaged in this.ParametersFlaged)
-            {
-                parameterFlaged.IsRequired = parameters.ContainsById(parameterFlaged.Parameter);
-            }
+            parameters
+                .Select(parameter => this.ParametersFlaged.Single(pf => pf.Parameter.Id == parameter.Id))
+                .ForEach(parameterFlaged => parameterFlaged.SetAsUnreachable());
         }
 
         /// <summary>
-        /// Скинуть обязательность параметра
+        /// Сделать все параметры достижимыми
         /// </summary>
-        public void DropRequiredParameters()
+        public void SetAllParametersAsReachable()
         {
-            this.ParametersFlaged.ForEach(x => x.IsRequired = null);
+            this.ParametersFlaged.ForEach(parameterFlaged => parameterFlaged.SetAsReachable());
         }
 
 
