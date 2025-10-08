@@ -198,6 +198,13 @@ namespace HVTApp.Model
             }
         }
 
+        public static IEnumerable<Parameter> GetParametersOfGroup(
+            this IEnumerable<Parameter> parameters,
+            Guid idOfParametersGroup)
+        {
+            return parameters.Where(x => x.ParameterGroup.Id == idOfParametersGroup);
+        }
+
         /// <summary>
         /// Оставить параметры единственными в своих группах
         /// </summary>

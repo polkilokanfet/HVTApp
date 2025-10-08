@@ -83,6 +83,9 @@ namespace HVTApp.Services.GetProductService
             }
         }
 
+        /// <summary>
+        /// Скинуть обязательность параметра
+        /// </summary>
         public void DropRequiredParameters()
         {
             this.ParametersFlaged.ForEach(x => x.IsRequired = null);

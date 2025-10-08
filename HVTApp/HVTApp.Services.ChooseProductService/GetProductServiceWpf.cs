@@ -5,6 +5,7 @@ using System.Windows;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Services;
+using HVTApp.Model;
 using HVTApp.Model.Events;
 using HVTApp.Model.POCOs;
 using HVTApp.Model.Services;
@@ -189,80 +190,108 @@ namespace HVTApp.Services.GetProductService
             }
         }
 
+        private ProductBlock GetProductBlockBase(ProductBlockSelector selector, ProductBlock originProductBlock)
+        {
+            var owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
+            var window = new SelectProductBlockWindow { DataContext = selector, Owner = owner };
+            window.ShowDialog();
+
+            //выходим, если пользователь отменил выбор блока продукта.
+            if (window.DialogResult.HasValue == false ||
+                window.DialogResult.Value == false)
+                return originProductBlock;
+
+            return this.SaveProductBlock(selector.SelectedBlock);
+        }
+
         public ProductBlock GetProductBlock(
             ProductBlock originProductBlock = null, 
             IEnumerable<Parameter> requiredParameters = null)
         {
-            var productBlockSelector = this.GetProductBlockSelector(originProductBlock, requiredParameters);
-            var owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            var window = new SelectProductBlockWindow { DataContext = productBlockSelector, Owner = owner };
-            window.ShowDialog();
-
-            //выходим, если пользователь отменил выбор блока продукта.
-            if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) return originProductBlock;
-
-            return this.SaveProductBlock(productBlockSelector.SelectedBlock);
+            var selector = this.GetProductBlockSelector(originProductBlock, requiredParameters);
+            return this.GetProductBlockBase(selector, originProductBlock);
         }
+
+        public ProductBlock GetProductBlock(
+            IEnumerable<IParametersContainer> parametersContainers, 
+            ProductBlock originProductBlock = null)
+        {
+            var selector = this.GetProductBlockSelector(originProductBlock, containers: parametersContainers);
+            return this.GetProductBlockBase(selector, originProductBlock);
+        }
+
 
         private ProductBlockSelector GetProductBlockSelector(
             ProductBlock selectedProductBlock = null,
-            IEnumerable<Parameter> required = null)
+            IEnumerable<Parameter> required = null,
+            IEnumerable<IParametersContainer> containers = null)
         {
             var result = new ProductBlockSelector(this._getParametersService.GetParameters(), this._getParametersService);
 
-            result.SetRequiredParameters(required);
+            if (required != null)
+                result.SetRequiredParameters(required);
+
+            if (containers != null)
+                result.SetRequiredParameters(containers);
 
             if (selectedProductBlock != null)
+            {
+                //ранее выбранный блок
                 result.SelectedBlock = selectedProductBlock;
+            }
+            else
+            {
+                //первый выбранный параметр
+                var originParameterSelector = result
+                    .ParameterSelectors
+                    .Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
+                originParameterSelector.SelectedParameterFlaged = originParameterSelector.ParametersFlaged.First(x => x.IsActual);
+            }
 
             return result;
         }
 
-
-        public ProductBlock GetProductBlock(IEnumerable<IParametersContainer> parametersContainers, ProductBlock originProductBlock = null)
+        public IEnumerable<Parameter> GetUnreachableParameters(ICollection<Parameter> requiredParameters)
         {
-            throw new NotImplementedException();
-            //var parameterContainers = parametersContainers as IParametersContainer[] ?? parametersContainers.ToArray();
-            //var banks = parameterContainers
-            //    .Select(x => _bankFactory.CreateBank(x.Parameters.ChangeUnitOfWork(UnitOfWork)))
-            //    .ToList();
+            if (requiredParameters == null) 
+                throw new ArgumentException("В GetUnreachableParameters недопустим null", nameof(requiredParameters));
 
-            ////обязательные параметры в группах
-            //var requiredParameters = parameterContainers
-            //    .SelectMany(x => x.Parameters)
-            //    .Distinct()
-            //    .ToList();
+            if (requiredParameters.Any() == false)
+                yield break;
 
-            ////удаляем из групп обязательных параметров всё, кроме обязательных параметров
-            //var bankParameters = banks
-            //    .SelectMany(x => x.Parameters)
-            //    .Distinct()
-            //    .LeaveParametersAloneInGroup(requiredParameters)
-            //    .RemoveUnreachable()
-            //    .ToList();
+            //находим максимальное количество пересечений путей параметров
+            List<Parameter> requiredParametersInPaths = null;
+            foreach (var requiredParameter in requiredParameters)
+            {
+                var parametersInPaths = requiredParameter.Paths()
+                    .SelectMany(path => path.Parameters)
+                    .Distinct()
+                    .ToList();
 
-            //var bank = _bankFactory.CreateBank(bankParameters);
+                requiredParametersInPaths = requiredParametersInPaths == null
+                    ? parametersInPaths
+                    : parametersInPaths
+                        .Intersect(requiredParametersInPaths)
+                        .ToList();
+            }
 
-            ////предварительно выбранный блок продукта
-            //var selectedProductBlock = originProductBlock?.ChangeUnitOfWork(UnitOfWork);
-
-            //var productBlockSelector = new ProductBlockSelector(bank.Parameters, selectedProductBlock);
-            //var originParameterSelector = productBlockSelector.ParameterSelectors.FirstOrDefault(x => x.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
-            //if (originParameterSelector != null)
-            //{
-            //    originParameterSelector.SelectedParameterFlaged = originParameterSelector.ParametersFlaged.First();
-            //}
-
-            //var owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
-            //var window = new SelectProductBlockWindow() { DataContext = productBlockSelector, Owner = owner };
-            //window.ShowDialog();
-
-            ////выходим, если пользователь отменил выбор блока продукта.
-            //if (window.DialogResult.HasValue == false || window.DialogResult.Value == false) 
-            //    return originProductBlock;
-
-            //return this.SaveProductBlock(productBlockSelector.SelectedBlock);
+            var parametersAll = _getParametersService.GetParameters().ToList();
+            var parametersGroups = requiredParametersInPaths
+                .Union(requiredParameters)
+                .Distinct()
+                .GroupBy(parameter => parameter.ParameterGroup.Id);
+            foreach (var parametersGroup in parametersGroups)
+            {
+                var unreachableParameters = parametersAll
+                    .GetParametersOfGroup(parametersGroup.Key)
+                    .Except(parametersGroup);
+                foreach (var unreachableParameter in unreachableParameters)
+                {
+                    yield return unreachableParameter;
+                }
+            }
         }
+
 
         private List<ProductBlock> _productBlocks = new List<ProductBlock>();
         private ProductBlock SaveProductBlock(ProductBlock productBlock)

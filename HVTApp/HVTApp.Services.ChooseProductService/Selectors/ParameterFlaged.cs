@@ -55,6 +55,11 @@ namespace HVTApp.Services.GetProductService
             });
         }
 
+        /// <summary>
+        /// Данный параметр недостижим (из-за обязательных к выбору параметров в блоке)
+        /// </summary>
+        public bool IsUnreachable { get; set; }
+
         public Parameter Parameter { get; }
 
         #endregion

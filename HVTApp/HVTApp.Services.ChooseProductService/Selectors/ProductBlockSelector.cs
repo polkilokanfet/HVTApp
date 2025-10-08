@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using HVTApp.Infrastructure.Extensions;
+using HVTApp.Model;
 using HVTApp.Model.POCOs;
 using Prism.Mvvm;
 
@@ -144,10 +145,31 @@ namespace HVTApp.Services.GetProductService
         /// <param name="requiredParameters">Обязательные параметры для блока</param>
         public void SetRequiredParameters(IEnumerable<Parameter> requiredParameters)
         {
-            this.ParameterSelectors.ForEach(selector => selector.DropRequiredParameters());
-            if (requiredParameters == null) return;
+            this.SetRequiredParameters(new []{ new Co(requiredParameters) });
+        }
 
-            var parametersGrouped = requiredParameters.GroupBy(x => x.ParameterGroup);
+        private class Co : IParametersContainer
+        {
+            public Co(IEnumerable<Parameter> parameters)
+            {
+                Parameters = parameters.ToList();
+            }
+
+            public List<Parameter> Parameters { get; }
+        }
+
+        public void SetRequiredParameters(IEnumerable<IParametersContainer> containers)
+        {
+            this.ParameterSelectors.ForEach(selector => selector.DropRequiredParameters());
+            if (containers == null) return;
+
+            var requiredParameters = containers
+                .SelectMany(container => this.GetRequiredParametersWithPath(container.Parameters))
+                .Distinct()
+                .ToList();
+
+            var parametersGrouped = requiredParameters
+                .GroupBy(parameter => parameter.ParameterGroup);
 
             foreach (var parameters in parametersGrouped)
             {
@@ -156,5 +178,39 @@ namespace HVTApp.Services.GetProductService
                     .SetRequiredParameters(parameters);
             }
         }
+
+        /// <summary>
+        /// Возвращает обязательные к выбору параметры с параметрами из пути к началу
+        /// </summary>
+        /// <param name="requiredParameters"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        private IEnumerable<Parameter> GetRequiredParametersWithPath (ICollection<Parameter> requiredParameters)
+        {
+            if (requiredParameters == null)
+                throw new ArgumentException("В GetUnreachableParameters недопустим null", nameof(requiredParameters));
+
+            if (requiredParameters.Any() == false)
+                return requiredParameters;
+
+            //находим максимальное количество пересечений путей параметров
+            List<Parameter> requiredParametersInPaths = null;
+            foreach (var requiredParameter in requiredParameters)
+            {
+                var parametersInPaths = requiredParameter.Paths()
+                    .SelectMany(path => path.Parameters)
+                    .Distinct()
+                    .ToList();
+
+                requiredParametersInPaths = requiredParametersInPaths == null
+                    ? parametersInPaths
+                    : parametersInPaths
+                        .Intersect(requiredParametersInPaths)
+                        .ToList();
+            }
+
+            return requiredParametersInPaths.Union(requiredParameters).Distinct();
+        }
+
     }
 }
