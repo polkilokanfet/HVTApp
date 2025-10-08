@@ -49,9 +49,6 @@ namespace HVTApp.Services.GetProductService
         {
             try
             {
-                //предварительно выбранный продукт
-                var selectedProduct = originProduct?.ChangeUnitOfWork(_unitOfWork);
-
                 var owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
                 var window = new SelectProductWindow { DataContext = productSelector, Owner = owner };
                 window.ShowDialog();

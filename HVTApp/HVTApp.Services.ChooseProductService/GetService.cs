@@ -4,6 +4,7 @@ using System.Linq;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Services;
+using HVTApp.Model;
 using HVTApp.Model.Events;
 using HVTApp.Model.POCOs;
 using Prism.Events;
@@ -39,14 +40,22 @@ namespace HVTApp.Services.GetProductService
                    (_productRelations = this._unitOfWork.Repository<ProductRelation>().GetAll());
         }
 
-        private IEnumerable<Parameter> GetParameters()
+        private IEnumerable<Parameter> GetParameters(ProductBlock productBlock)
         {
             if (_parametersAll is null ||
                 _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
             {
-                _parametersAll = _unitOfWork.Repository<Parameter>().GetAll();
+                _parametersAll = _unitOfWork.Repository<Parameter>()
+                    .GetAll()
+                    .Where(x => x.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectsGroup.Id)
+                    .Where(x => x.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectDesignationGroup.Id)
+                    .Where(x => x.Id != GlobalAppProperties.Actual.ComplectsParameter.Id)
+                    .ToList();
                 _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
             }
+
+            if (productBlock != null && productBlock.IsKit)
+                return _parametersAll.Union(productBlock.Parameters);
             return _parametersAll;
         }
 
@@ -101,13 +110,13 @@ namespace HVTApp.Services.GetProductService
                 if (_productBlockSelector == null ||
                     _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
                 {
-                    result = _productBlockSelector = new ProductBlockSelector(GetParameters(), this);
+                    result = _productBlockSelector = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
                     _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
                 }
             }
             else
             {
-                result = new ProductBlockSelector(GetParameters(), this);
+                result = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
             }
 
             if (required != null)
