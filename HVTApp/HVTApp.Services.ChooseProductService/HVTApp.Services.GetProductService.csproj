@@ -85,7 +85,7 @@
   <ItemGroup>
     <Compile Include="Bank.cs" />
     <Compile Include="BankFactory.cs" />
-    <Compile Include="IProductBlocksContainer.cs" />
+    <Compile Include="IGetService.cs" />
     <Compile Include="Kits\Kit.cs" />
     <Compile Include="Kits\KitsViewModel.cs" />
     <Compile Include="Kits\KitTypesViewModel.cs" />

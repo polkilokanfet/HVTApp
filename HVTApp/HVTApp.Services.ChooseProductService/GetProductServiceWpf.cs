@@ -213,7 +213,7 @@ namespace HVTApp.Services.GetProductService
             ProductBlock originProductBlock = null, 
             IEnumerable<Parameter> requiredParameters = null)
         {
-            var selector = this._getService.GetProductBlockSelector(true, originProductBlock, requiredParameters);
+            var selector = new ProductBlockSelector(_getService, requiredParameters.ToList(), originProductBlock);
             return this.GetProductBlockBase(selector, originProductBlock);
         }
 
@@ -221,8 +221,9 @@ namespace HVTApp.Services.GetProductService
             IEnumerable<IParametersContainer> parametersContainers, 
             ProductBlock originProductBlock = null)
         {
-            var selector = this._getService.GetProductBlockSelector(true, originProductBlock, containers: parametersContainers);
-            return this.GetProductBlockBase(selector, originProductBlock);
+            throw new NotImplementedException();
+            //var selector = this._getService.GetProductBlockSelector(true, originProductBlock, containers: parametersContainers);
+            //return this.GetProductBlockBase(selector, originProductBlock);
         }
 
         #endregion

@@ -55,7 +55,7 @@ namespace HVTApp.Services.GetProductService
             Amount = amount;
 
             //создаем селектор блока
-            BlockSelector = _getService.GetProductBlockSelector(false, selectedProduct?.ProductBlock, requiredParameters);
+            BlockSelector = new ProductBlockSelector(_getService, requiredParameters.ToList(), selectedProduct.ProductBlock);
 
             //подписываемся на событие его изменения
             BlockSelector.SelectedBlockChanged += selector =>
@@ -72,24 +72,24 @@ namespace HVTApp.Services.GetProductService
                 args.OldItems?.Cast<ProductSelector>().ForEach(selector => selector.SelectedProductChanged -= OnChildProductChanged);
             };
 
-            if (selectedProduct == null)
-            {
-                BlockSelector.SelectFirstParameter();
-            }
-            else
-            {
-                foreach (var kvp in GetDictionaryOfMatching(selectedProduct))
-                {
-                    if (Equals(kvp.Value, default(IEnumerable<Product>))) continue;
+            //if (selectedProduct == null)
+            //{
+            //    BlockSelector.SelectFirstParameter();
+            //}
+            //else
+            //{
+            //    foreach (var kvp in GetDictionaryOfMatching(selectedProduct))
+            //    {
+            //        if (Equals(kvp.Value, default(IEnumerable<Product>))) continue;
 
-                    foreach (var product in kvp.Value)
-                    {
-                        //редактируем список параметров
-                        var productSelector = new ProductSelector(_getService, kvp.Key.ChildProductParameters, product);
-                        ProductSelectors.Add(productSelector);
-                    }
-                }
-            }
+            //        foreach (var product in kvp.Value)
+            //        {
+            //            //редактируем список параметров
+            //            var productSelector = new ProductSelector(_getService, kvp.Key.ChildProductParameters, product);
+            //            ProductSelectors.Add(productSelector);
+            //        }
+            //    }
+            //}
         }
 
         private void RefreshProductSelectors()

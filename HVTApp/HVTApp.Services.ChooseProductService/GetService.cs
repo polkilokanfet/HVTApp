@@ -11,7 +11,7 @@ using Prism.Events;
 
 namespace HVTApp.Services.GetProductService
 {
-    public class GetService : IProductBlocksContainer
+    public class GetService : IGetService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILastUpdateMomentService _lastUpdateMomentService;
@@ -40,22 +40,23 @@ namespace HVTApp.Services.GetProductService
                    (_productRelations = this._unitOfWork.Repository<ProductRelation>().GetAll());
         }
 
-        private IEnumerable<Parameter> GetParameters(ProductBlock productBlock)
+        public IEnumerable<Parameter> GetParameters(ProductBlock productBlock)
         {
             if (_parametersAll is null ||
                 _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
             {
                 _parametersAll = _unitOfWork.Repository<Parameter>()
                     .GetAll()
-                    .Where(x => x.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectsGroup.Id)
-                    .Where(x => x.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectDesignationGroup.Id)
-                    .Where(x => x.Id != GlobalAppProperties.Actual.ComplectsParameter.Id)
+                    .Where(parameter => parameter.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectsGroup.Id)
+                    .Where(parameter => parameter.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectDesignationGroup.Id)
+                    .Where(parameter => parameter.Id != GlobalAppProperties.Actual.ComplectsParameter.Id)
                     .ToList();
                 _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
             }
 
             if (productBlock != null && productBlock.IsKit)
                 return _parametersAll.Union(productBlock.Parameters);
+
             return _parametersAll;
         }
 
@@ -83,6 +84,10 @@ namespace HVTApp.Services.GetProductService
             //если выбранного блока продукта нет в базе
             if (ProductBlocks.Contains(productBlock) == false)
             {
+                productBlock = new ProductBlock
+                {
+                    Parameters = productBlock.Parameters.Select(x => _unitOfWork.Repository<Parameter>().GetById(x.Id)).ToList()
+                };
                 if (_unitOfWork.SaveEntity(productBlock).OperationCompletedSuccessfully)
                 {
                     ProductBlocks.Add(productBlock);
@@ -97,50 +102,50 @@ namespace HVTApp.Services.GetProductService
             return productBlock;
         }
 
-        private ProductBlockSelector _productBlockSelector;
-        public ProductBlockSelector GetProductBlockSelector(bool useSingleSelector,
-            ProductBlock selectedProductBlock = null,
-            IEnumerable<Parameter> required = null,
-            IEnumerable<IParametersContainer> containers = null)
-        {
-            ProductBlockSelector result = _productBlockSelector;
+        //private ProductBlockSelector _productBlockSelector;
+        //public ProductBlockSelector GetProductBlockSelector(bool useSingleSelector,
+        //    ProductBlock selectedProductBlock = null,
+        //    IEnumerable<Parameter> required = null,
+        //    IEnumerable<IParametersContainer> containers = null)
+        //{
+        //    ProductBlockSelector result = _productBlockSelector;
 
-            if (useSingleSelector)
-            {
-                if (_productBlockSelector == null ||
-                    _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
-                {
-                    result = _productBlockSelector = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
-                    _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
-                }
-            }
-            else
-            {
-                result = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
-            }
+        //    if (useSingleSelector)
+        //    {
+        //        if (_productBlockSelector == null ||
+        //            _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
+        //        {
+        //            result = _productBlockSelector = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
+        //            _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        result = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
+        //    }
 
-            if (required != null)
-                result.SetRequiredParameters(required);
+        //    if (required != null)
+        //        result.SetRequiredParameters(required);
 
-            if (containers != null)
-                result.SetRequiredParameters(containers);
+        //    if (containers != null)
+        //        result.SetRequiredParameters(containers);
 
-            if (selectedProductBlock != null)
-            {
-                //ранее выбранный блок
-                result.SelectedBlock = selectedProductBlock;
-            }
-            else
-            {
-                //первый выбранный параметр
-                var originParameterSelector = result
-                    .ParameterSelectors
-                    .Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
-                originParameterSelector.SelectedParameterFlaged = originParameterSelector.ParametersFlaged.First(x => x.IsActual);
-            }
+        //    if (selectedProductBlock != null)
+        //    {
+        //        //ранее выбранный блок
+        //        result.SelectedBlock = selectedProductBlock;
+        //    }
+        //    else
+        //    {
+        //        //первый выбранный параметр
+        //        var originParameterSelector = result
+        //            .ParameterSelectors
+        //            .Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
+        //        originParameterSelector.SelectedParameterFlaged = originParameterSelector.ParametersFlaged.First(x => x.IsActual);
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
 
         /// <summary>

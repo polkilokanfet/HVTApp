@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -71,7 +72,7 @@ namespace HVTApp.Infrastructure.Extensions
         /// Последовательность полностью содержит другую последовательность (по Id).
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="first"> Последовательновсть, которая содержится в другой </param>
+        /// <param name="first"> Последовательность, которая содержится в другой </param>
         /// <param name="second"> Последовательность в которой содержится другая </param>
         /// <returns></returns>
         public static bool AllContainsInById<T>(this IEnumerable<T> first, IEnumerable<T> second)
@@ -197,6 +198,11 @@ namespace HVTApp.Infrastructure.Extensions
                 : string.Join(separator, enumerable1.Where(x => x != null).Select(x => x.ToString()).Distinct());
         }
 
+        public static IReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> enumerable)
+        {
+            return new ReadOnlyCollection<T>(enumerable.ToList());
+        }
+
         public static IEnumerable<T> Intersect<T>(this IEnumerable<IEnumerable<T>> enumerables)
         {
             //if (enumerables.Count() == 1)
@@ -208,7 +214,17 @@ namespace HVTApp.Infrastructure.Extensions
             {
                 result = result.Intersect(enumerable);
             }
+            return result;
+        }
 
+        public static IEnumerable<T> Union<T>(this IEnumerable<IEnumerable<T>> enumerables)
+        {
+            var enumerables1 = enumerables as IEnumerable<T>[] ?? enumerables.ToArray();
+            var result = enumerables1.First();
+            foreach (var enumerable in enumerables1.Skip(1))
+            {
+                result = result.Union(enumerable);
+            }
             return result;
         }
     }

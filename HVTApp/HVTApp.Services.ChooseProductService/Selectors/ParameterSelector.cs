@@ -41,11 +41,10 @@ namespace HVTApp.Services.GetProductService
             if (parametersArray.GroupBy(parameter => parameter.ParameterGroup.Id).Count() > 1) throw new ArgumentException("В селектор пришли параметры из разных групп", nameof(parameters));
 
             //упорядочивание параметров
-            var parametersFlaged = parametersArray
+            ParametersFlaged = parametersArray
                 .Select(parameter => new ParameterFlaged(parameter))
                 .OrderBy(parameterFlaged => parameterFlaged)
-                .ToList();
-            ParametersFlaged = new ReadOnlyCollection<ParameterFlaged>(parametersFlaged);
+                .ToReadOnlyCollection();
 
             //реакция на изменение актуальности параметра
             ParametersFlaged.ForEach(parameter => parameter.IsActualChanged += ParameterOnActualChanged);
@@ -62,7 +61,7 @@ namespace HVTApp.Services.GetProductService
                 SelectedParameterFlaged.IsActual == false)
             {
                 //если выбранный параметр стал не актуальным, выбираем первый актуальный
-                SelectedParameterFlaged = ParametersFlaged.FirstOrDefault(p => p.IsActual);
+                SelectedParameterFlaged = ParametersFlaged.FirstOrDefault(parameterFlaged => parameterFlaged.IsActual);
             }
 
             //проверка актуальности селектора
@@ -70,26 +69,6 @@ namespace HVTApp.Services.GetProductService
         }
 
         #endregion
-
-        /// <summary>
-        /// Сделать параметры недостижимыми
-        /// </summary>
-        /// <param name="parameters"></param>
-        public void SetParametersAsUnreachable(IEnumerable<Parameter> parameters)
-        {
-            parameters
-                .Select(parameter => this.ParametersFlaged.Single(pf => pf.Parameter.Id == parameter.Id))
-                .ForEach(parameterFlaged => parameterFlaged.SetAsUnreachable());
-        }
-
-        /// <summary>
-        /// Сделать все параметры достижимыми
-        /// </summary>
-        public void SetAllParametersAsReachable()
-        {
-            this.ParametersFlaged.ForEach(parameterFlaged => parameterFlaged.SetAsReachable());
-        }
-
 
         #region events
 

@@ -8,14 +8,14 @@ namespace HVTApp.Services.GetProductService
     {
         #region props
 
-        private bool _isActual = false;
+        private bool _isActual;
 
         /// <summary>
-        /// Актуальность параметра (с учётом обязательных и выбранных параметров).
+        /// Актуальность параметра при выбранных.
         /// </summary>
         public bool IsActual
         {
-            get => _isUnreachable != true && _isActual;
+            get => _isActual;
             set => this.SetProperty(ref _isActual, value, () => { IsActualChanged?.Invoke(this); });
         }
 
@@ -41,39 +41,6 @@ namespace HVTApp.Services.GetProductService
         public event Action<ParameterFlaged> IsActualChanged;
 
         #endregion
-
-        #region Reachable
-
-         // Данный параметр недостижим (из-за обязательных к выбору параметров в блоке)
-        private bool _isUnreachable = false;
-        public bool IsUnreachable => _isUnreachable;
-
-        public void SetAsUnreachable()
-        {
-            if (_isUnreachable == true)
-                return;
-
-            _isUnreachable = true;
-            IsActual = false;
-        }
-
-        public void SetAsReachable()
-        {
-            if (_isUnreachable == false)
-                return;
-
-            _isUnreachable = false;
-            RaisePropertyChanged(nameof(IsActual));
-        }
-
-        public override string ToString()
-        {
-            return this.IsActual 
-                ? $"{this.Parameter} - актуален" 
-                : $"{this.Parameter} - не актуален";
-        }
-
-       #endregion
 
         public int CompareTo(ParameterFlaged other)
         {
