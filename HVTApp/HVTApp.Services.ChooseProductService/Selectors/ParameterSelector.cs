@@ -22,7 +22,7 @@ namespace HVTApp.Services.GetProductService
             set => this.SetProperty(ref _selectedParameterFlaged, value,
                 () =>
                 {
-                    SelectedParameterFlagedChanged?.Invoke(this);
+                    SelectedParameterChanged?.Invoke(this);
                 });
         }
 
@@ -32,7 +32,7 @@ namespace HVTApp.Services.GetProductService
 
         #region ctor
 
-        public ParameterSelector(IEnumerable<Parameter> parameters)
+        public ParameterSelector(IEnumerable<Parameter> parameters, Parameter selectedParameter)
         {
             var parametersArray = parameters as Parameter[] ?? parameters.ToArray();
 
@@ -42,9 +42,12 @@ namespace HVTApp.Services.GetProductService
 
             //упорядочивание параметров
             ParametersFlaged = parametersArray
-                .Select(parameter => new ParameterFlaged(parameter))
+                .Select(parameter => new ParameterFlaged(parameter, parameter.Id == selectedParameter?.Id))
                 .OrderBy(parameterFlaged => parameterFlaged)
                 .ToReadOnlyCollection();
+
+            if (selectedParameter != null) 
+                _selectedParameterFlaged = ParametersFlaged.Single(x => x.Parameter.Id == selectedParameter.Id);
 
             //реакция на изменение актуальности параметра
             ParametersFlaged.ForEach(parameter => parameter.IsActualChanged += ParameterOnActualChanged);
@@ -75,13 +78,13 @@ namespace HVTApp.Services.GetProductService
         /// <summary>
         /// Событие изменения выбранного параметра
         /// </summary>
-        public event Action<ParameterSelector> SelectedParameterFlagedChanged;
+        public event Action<ParameterSelector> SelectedParameterChanged;
 
         #endregion
 
         public override string ToString()
         {
-            return $"{ParametersFlaged.First().Parameter.ParameterGroup.Name} ({this.ParametersFlaged.ToStringEnum()})";
+            return $"<{ParametersFlaged.First().Parameter.ParameterGroup.Name}> <{SelectedParameterFlaged?.Parameter.Value}>    ({this.ParametersFlaged.Select(x => x.Parameter.Value).ToStringEnum()})";
         }
 
         public int CompareTo(ParameterSelector other)

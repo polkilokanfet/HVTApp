@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using HVTApp.Infrastructure.Extensions;
-using HVTApp.Model;
 using HVTApp.Model.POCOs;
 using Prism.Mvvm;
 
@@ -21,8 +19,8 @@ namespace HVTApp.Services.GetProductService
 
         private List<Parameter> SelectedParameters => ParameterSelectors
             .Select(selector => selector.SelectedParameterFlaged)
-            .Where(x => x != null && x.IsActual)
-            .Select(x => x.Parameter)
+            .Where(parameterFlaged => parameterFlaged != null && parameterFlaged.IsActual)
+            .Select(parameterFlaged => parameterFlaged.Parameter)
             .ToList();
 
         #endregion
@@ -34,55 +32,9 @@ namespace HVTApp.Services.GetProductService
         /// <summary>
         /// Выбранный блок
         /// </summary>
-        public ProductBlock SelectedBlock
-        {
-            get => _getService.GetProductBlock(SelectedParameters) 
-                   ?? new ProductBlock { Parameters = SelectedParameters };
-            set
-            {
-                var blockToSet = value;
-
-                if (blockToSet == null)
-                {
-                    var parameterSelector = this.ParameterSelectors.Single(x => x.ParametersFlaged.Any(xx => xx.Parameter.IsOrigin));
-                    parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
-                    return;
-                }
-
-                var parameters = this.ParameterSelectors
-                    .SelectMany(x => x.ParametersFlaged)
-                    .Select(x => x.Parameter);
-                if (blockToSet.Parameters.AllContainsInById(parameters) == false)
-                        throw new ArgumentException("Параметры блока не соответствуют возможным параметрам.");
-
-                //если совпадают выбранные параметры и параметры нового блока
-                if (SelectedParameters.MembersAreSame(blockToSet.Parameters)) return;
-
-                var parameterSelectors = ParameterSelectors.ToList();
-                //отписываемся от событий выбора нового параметра
-                parameterSelectors.ForEach(ps => ps.SelectedParameterFlagedChanged -= OnSelectedParameterChanged);
-                //обнуляем выбранные параметры
-                parameterSelectors.ForEach(ps => ps.SelectedParameterFlaged = null);
-
-                //назначение в каждый селектор необходимого параметра
-                foreach (var parameter in blockToSet.Parameters)
-                {
-                    //поиск селектора
-                    var selector = ParameterSelectors.Single(ps => ps.ParametersFlaged.Select(x => x.Parameter).Contains(parameter));
-                    //выбор параметра
-                    selector.SelectedParameterFlaged = selector.ParametersFlaged.Single(p => p.Parameter.Equals(parameter));
-                    selector.SelectedParameterFlaged.IsActual = true;
-                }
-
-                //подписываемся на события выбора нового параметра в каждом селекторе
-                parameterSelectors.ForEach(ps => ps.SelectedParameterFlagedChanged += OnSelectedParameterChanged);
-
-                OnSelectedParameterChanged(null);
-
-                RaisePropertyChanged();
-                SelectedBlockChanged?.Invoke(this);
-            }
-        }
+        public ProductBlock SelectedBlock =>
+            _getService.GetProductBlock(SelectedParameters) ?? 
+            new ProductBlock { Parameters = SelectedParameters };
 
         #endregion
 
@@ -121,14 +73,14 @@ namespace HVTApp.Services.GetProductService
             //создаем селекторы параметров
             ParameterSelectors = parameters
                 .GroupBy(parameter => parameter.ParameterGroup.Id)
-                .Select(x => new ParameterSelector(x))
+                .Select(x => new ParameterSelector(x, originProductBlock.Parameters.SingleOrDefault(x.ContainsById)))
                 .OrderBy(parameterSelector => parameterSelector)
                 .ToReadOnlyCollection();
 
             //подписка на смену параметра в селекторе
-            ParameterSelectors.ForEach(selector => selector.SelectedParameterFlagedChanged += OnSelectedParameterChanged);
+            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
 
-            this.SelectedBlock = originProductBlock;
+            OnSelectedParameterChanged(null);
         }
 
         #endregion
@@ -164,7 +116,7 @@ namespace HVTApp.Services.GetProductService
         public void Dispose()
         {
             //отмена подписки на смену параметра в селекторе
-            ParameterSelectors.ForEach(selector => selector.SelectedParameterFlagedChanged -= OnSelectedParameterChanged);
+            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged -= OnSelectedParameterChanged);
             ParameterSelectors.ForEach(selector => selector.Dispose());
         }
     }

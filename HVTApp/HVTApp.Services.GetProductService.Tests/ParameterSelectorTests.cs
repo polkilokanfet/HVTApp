@@ -39,7 +39,7 @@ namespace HVTApp.Services.GetProductService.Tests
                 AddRequiredPreviousParameters(new[] { _parameterBreaker, _parameterV220 }).
                 AddRequiredPreviousParameters(new[] { _parameterBreaker, _parameterV500 });
 
-            _parameterSelectorEqType = new ParameterSelector(new []{_parameterBreaker, _parameterTransformator});
+            _parameterSelectorEqType = new ParameterSelector(new []{_parameterBreaker, _parameterTransformator}, _parameterBreaker);
         }
 
         [TestMethod]

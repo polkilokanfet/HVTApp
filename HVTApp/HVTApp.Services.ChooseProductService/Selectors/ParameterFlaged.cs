@@ -25,10 +25,10 @@ namespace HVTApp.Services.GetProductService
 
         #region ctor
 
-        public ParameterFlaged(Parameter parameter)
+        public ParameterFlaged(Parameter parameter, bool isSelected)
         {
             Parameter = parameter ?? throw new ArgumentNullException(nameof(parameter));
-            _isActual = Parameter.IsOrigin;
+            _isActual = isSelected || Parameter.IsOrigin;
         }
 
         #endregion
