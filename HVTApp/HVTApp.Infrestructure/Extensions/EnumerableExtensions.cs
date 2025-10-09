@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HVTApp.Infrastructure.Extensions
 {
-    public static class EnumerableExtansions
+    public static class EnumerableExtensions
     {
         public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
         {
@@ -195,6 +195,21 @@ namespace HVTApp.Infrastructure.Extensions
             return enumerable1.Any() == false || enumerable1.All(x => x == null)
                 ? string.Empty 
                 : string.Join(separator, enumerable1.Where(x => x != null).Select(x => x.ToString()).Distinct());
+        }
+
+        public static IEnumerable<T> Intersect<T>(this IEnumerable<IEnumerable<T>> enumerables)
+        {
+            //if (enumerables.Count() == 1)
+            //    return enumerables.First();
+
+            var enumerables1 = enumerables as IEnumerable<T>[] ?? enumerables.ToArray();
+            var result = enumerables1.First();
+            foreach (var enumerable in enumerables1.Skip(1))
+            {
+                result = result.Intersect(enumerable);
+            }
+
+            return result;
         }
     }
 }

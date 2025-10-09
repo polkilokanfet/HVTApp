@@ -7,6 +7,7 @@ using HVTApp.Infrastructure.Extensions;
 using HVTApp.Model.POCOs;
 using Microsoft.Practices.ObjectBuilder2;
 using Microsoft.Practices.Unity;
+using EnumerableExtensions = Microsoft.Practices.ObjectBuilder2.EnumerableExtensions;
 
 namespace HVTApp.UI.PriceEngineering.DoStepCommand
 {

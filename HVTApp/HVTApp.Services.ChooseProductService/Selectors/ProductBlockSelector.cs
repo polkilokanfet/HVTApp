@@ -120,7 +120,9 @@ namespace HVTApp.Services.GetProductService
         private void OnSelectedParameterChanged(ParameterSelector parameterSelector)
         {
             //перепроверка актуальности параметров
-            var parametersAll = ParameterSelectors.SelectMany(selector => selector.ParametersFlaged);
+            var parametersAll = ParameterSelectors
+                .SelectMany(selector => selector.ParametersFlaged)
+                .Where(x => x.IsUnreachable == false);
             foreach (var parameter in parametersAll)
             {
                 parameter.IsActual = parameter.Parameter.IsOrigin ||
@@ -163,23 +165,30 @@ namespace HVTApp.Services.GetProductService
             this.ParameterSelectors.ForEach(selector => selector.SetAllParametersAsReachable());
             if (containers == null) return;
 
-            var requiredParameters = containers
-                .SelectMany(container => this.GetRequiredParametersWithPath(container.Parameters))
+            var dictionary = this.ParameterSelectors
+                .SelectMany(parameterSelector => parameterSelector.ParametersFlaged)
+                .ToDictionary(parameterFlaged => parameterFlaged.Parameter, parameterFlaged => parameterFlaged);
+
+            var parametersAll = dictionary.Select(x => x.Key).ToList();
+
+            var requiredPaths = containers
+                .SelectMany(container => this.GetRequiredParametersWithPath(container.Parameters).ToList())
+                .ToList();
+
+            var requiredParameters = requiredPaths.SelectMany(x => x).Distinct().ToList();
+            var requiredParameterGroups = requiredParameters.Select(x => x.ParameterGroup).Distinct().ToList();
+
+            var unreachable = requiredPaths
+                .Select(path =>  parametersAll.GetUnreachable(path.ToList()))
+                .Intersect()
+                .Union(parametersAll.Where(x => requiredParameterGroups.ContainsById(x.ParameterGroup)))
+                .Except(requiredParameters)
                 .Distinct()
                 .ToList();
 
-            var parametersGrouped = requiredParameters
-                .GroupBy(parameter => parameter.ParameterGroup);
+            var rrr = parametersAll.Except(unreachable).ToList();
 
-            foreach (var parameters in parametersGrouped)
-            {
-                var parameterSelector = ParameterSelectors
-                    .Single(selector => selector.ParametersFlaged.First().Parameter.ParameterGroup.Id == parameters.Key.Id);
-                var unreachable = parameterSelector.ParametersFlaged
-                    .Select(x => x.Parameter)
-                    .Except(parameters);
-                parameterSelector.SetParametersAsUnreachable(unreachable);
-            }
+            unreachable.ForEach(parameter => dictionary[parameter].SetAsUnreachable());
         }
 
         /// <summary>
@@ -188,31 +197,24 @@ namespace HVTApp.Services.GetProductService
         /// <param name="requiredParameters"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        private IEnumerable<Parameter> GetRequiredParametersWithPath (ICollection<Parameter> requiredParameters)
+        private IEnumerable<IEnumerable<Parameter>> GetRequiredParametersWithPath (ICollection<Parameter> requiredParameters)
         {
             if (requiredParameters == null)
                 throw new ArgumentException("В GetUnreachableParameters недопустим null", nameof(requiredParameters));
 
             if (requiredParameters.Any() == false)
-                return requiredParameters;
+                yield break;
 
             //находим максимальное количество пересечений путей параметров
-            List<Parameter> requiredParametersInPaths = null;
-            foreach (var requiredParameter in requiredParameters)
+            var requiredParametersInPaths = requiredParameters
+                .SelectMany(parameter => parameter.Paths().Select(pathToOrigin => pathToOrigin.Parameters))
+                .Intersect()
+                .ToList();
+
+            foreach (var parameter in requiredParameters)
             {
-                var parametersInPaths = requiredParameter.Paths()
-                    .SelectMany(path => path.Parameters)
-                    .Distinct()
-                    .ToList();
-
-                requiredParametersInPaths = requiredParametersInPaths == null
-                    ? parametersInPaths
-                    : parametersInPaths
-                        .Intersect(requiredParametersInPaths)
-                        .ToList();
+                yield return requiredParametersInPaths.Union(new []{parameter}).Distinct();
             }
-
-            return requiredParametersInPaths.Union(requiredParameters).Distinct();
         }
 
         public void SelectFirstParameter()

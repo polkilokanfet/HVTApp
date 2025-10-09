@@ -233,19 +233,44 @@ namespace HVTApp.Model
             }
         }
 
-        public static IEnumerable<Parameter> RemoveUnreachable(this IEnumerable<Parameter> parameters)
+        /// <summary>
+        /// Вернуть недостижимые параметры из списка
+        /// </summary>
+        /// <param name="parameters">список</param>
+        /// <param name="requiredParametersPath">обязательные параметры в пути</param>
+        /// <returns></returns>
+        public static IEnumerable<Parameter> GetUnreachable(
+            this ICollection<Parameter> parameters,
+            ICollection<Parameter> requiredParametersPath)
         {
-            var parametersAll = parameters as Parameter[] ?? parameters.ToArray();
-
-            foreach (var parameter in parametersAll)
+            foreach (var parameter in parameters)
             {
-                if (parameter.IsOrigin)
-                    yield return parameter;
+                if (requiredParametersPath.ContainsById(parameter))
+                    continue;
 
-                if (parameter.Paths().Any(x => x.Parameters.AllContainsInById(parametersAll)))
-                    yield return parameter;
+                if (parameter.Paths().Any(pathToOrigin => requiredParametersPath.AllContainsInById(pathToOrigin.Parameters)))
+                    continue;
+
+                yield return parameter;
             }
         }
+
+        //public static IEnumerable<Parameter> GetUnreachable(
+        //    this IEnumerable<Parameter> parameters)
+        //{
+        //    var parametersAll = parameters as Parameter[] ?? parameters.ToArray();
+
+        //    foreach (var parameter in parametersAll)
+        //    {
+        //        if (parameter.IsOrigin &&
+        //            parametersAll.ContainsById(parameter) == false)
+        //            yield return parameter;
+
+        //        if (parameter.Paths().Any(pathToOrigin => pathToOrigin.Parameters.AllContainsInById(parametersAll)))
+        //            yield return parameter;
+        //    }
+        //}
+
 
         /// <summary>
         /// Вернуть головную сборку задач ТСП

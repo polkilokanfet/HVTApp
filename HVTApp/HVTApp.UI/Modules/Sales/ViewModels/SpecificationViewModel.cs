@@ -21,6 +21,7 @@ using HVTApp.UI.Commands;
 using HVTApp.UI.TaskInvoiceForPayment1.ForManager;
 using Prism.Commands;
 using Prism.Regions;
+using EnumerableExtensions = Microsoft.Practices.ObjectBuilder2.EnumerableExtensions;
 
 namespace HVTApp.UI.Modules.Sales.ViewModels
 {

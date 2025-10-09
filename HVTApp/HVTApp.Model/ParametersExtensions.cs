@@ -93,7 +93,7 @@ namespace HVTApp.Model
         {
             if (parameter.IsOrigin) return 0;
 
-            var relations = parameter.ParameterRelations.Where(x => EnumerableExtansions.AllContainsIn(x.RequiredParameters, block.Parameters)).ToList();
+            var relations = parameter.ParameterRelations.Where(x => EnumerableExtensions.AllContainsIn(x.RequiredParameters, block.Parameters)).ToList();
             if (!relations.Any()) throw new ArgumentException("Передан параметр, который не должен быть в блоке.");
 
             var relation = relations.OrderBy(x => x.RequiredParameters.Count).Last();

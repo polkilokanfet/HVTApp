@@ -150,7 +150,7 @@
     <Compile Include="Enums\NotificationActionType.cs" />
     <Compile Include="Extensions\DigitalExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
-    <Compile Include="Extensions\EnumerableExtansions.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\DateExtensions.cs" />
     <Compile Include="Extensions\ExceptionExt.cs" />
     <Compile Include="Extensions\IsTypeExtansions.cs" />

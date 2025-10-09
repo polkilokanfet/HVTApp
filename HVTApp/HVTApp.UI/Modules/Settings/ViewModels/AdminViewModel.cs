@@ -127,6 +127,13 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
             {
                 var getProductService = container.Resolve<IGetProductService>();
 
+                Product product = null;
+
+                while (true)
+                {
+                    product = getProductService.GetProduct(product);
+                }
+
                 ProductBlock productBlock = null;
 
                 while (true)

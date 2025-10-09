@@ -46,6 +46,7 @@ namespace HVTApp.Services.GetProductService
 
          // Данный параметр недостижим (из-за обязательных к выбору параметров в блоке)
         private bool _isUnreachable = false;
+        public bool IsUnreachable => _isUnreachable;
 
         public void SetAsUnreachable()
         {

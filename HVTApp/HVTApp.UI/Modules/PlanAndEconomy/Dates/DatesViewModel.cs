@@ -13,6 +13,7 @@ using HVTApp.Model.Wrapper.Base.TrackingCollections;
 using HVTApp.UI.Commands;
 using Microsoft.Practices.ObjectBuilder2;
 using Microsoft.Practices.Unity;
+using EnumerableExtensions = HVTApp.Infrastructure.Extensions.EnumerableExtensions;
 
 namespace HVTApp.UI.Modules.PlanAndEconomy.Dates
 {
@@ -91,7 +92,7 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.Dates
 
                         var dr = container.Resolve<IMessageService>().ConfirmationDialog("Применить изменения?", sb.ToString(), defaultYes:true);
                         if (dr == false)
-                            EnumerableExtansions.ForEach(this.Groups.SelectMany(x => x.Units).Where(x => x.IsChanged), x => x.RejectChanges());
+                            EnumerableExtensions.ForEach(this.Groups.SelectMany(x => x.Units).Where(x => x.IsChanged), x => x.RejectChanges());
                     }
                     catch (Exception e)
                     {
@@ -137,10 +138,10 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.Dates
 
         protected override void AfterGetData()
         {
-            EnumerableExtensions.ForEach(Groups.SelectMany(x => x.Units), x => x.PropertyChanged -= UnitOnPropertyChanged);
+            Microsoft.Practices.ObjectBuilder2.EnumerableExtensions.ForEach(Groups.SelectMany(x => x.Units), x => x.PropertyChanged -= UnitOnPropertyChanged);
             Groups.Clear();
             Groups.AddRange(_groups);
-            EnumerableExtensions.ForEach(Groups.SelectMany(x => x.Units), x => x.PropertyChanged += UnitOnPropertyChanged);
+            Microsoft.Practices.ObjectBuilder2.EnumerableExtensions.ForEach(Groups.SelectMany(x => x.Units), x => x.PropertyChanged += UnitOnPropertyChanged);
         }
 
         private void UnitOnPropertyChanged(object sender, PropertyChangedEventArgs args)

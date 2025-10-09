@@ -86,8 +86,8 @@ namespace HVTApp.Services.GetProductService
 
                 parameters = parameters.Union(requiredParametersArray).ToList();
             }
-
-            return this.GetBank(parameters.RemoveUnreachable());
+            throw new NotImplementedException();
+            //return this.GetBank(parameters.RemoveUnreachable());
         }
 
 
