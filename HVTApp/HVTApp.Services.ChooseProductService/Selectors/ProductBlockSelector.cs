@@ -47,6 +47,40 @@ namespace HVTApp.Services.GetProductService
         {
             _getService = getService;
 
+            //создаем селекторы параметров
+            ParameterSelectors = this.GetSelectors(this.GetParameters(requiredParameters, originProductBlock), originProductBlock);
+
+            //подписка на смену параметра в селекторе
+            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
+
+            OnSelectedParameterChanged(null);
+        }
+
+        public ProductBlockSelector(
+            IGetService getService,
+            IEnumerable<IParametersContainer> containers,
+            ProductBlock originProductBlock)
+        {
+            _getService = getService;
+
+            //создаем селекторы параметров
+            var parameters = containers
+                .Select(x => this.GetParameters(x.Parameters, originProductBlock))
+                .Union()
+                .Distinct();
+            ParameterSelectors = this.GetSelectors(parameters, originProductBlock);
+
+            //подписка на смену параметра в селекторе
+            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
+
+            var parameterSelector = ParameterSelectors.Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
+            parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
+        }
+
+        private IEnumerable<Parameter> GetParameters(
+            ICollection<Parameter> requiredParameters,
+            ProductBlock originProductBlock)
+        {
             //общий путь до обязательных параметров
             var path = requiredParameters
                 .Select(parameter => parameter.Paths().Select(pathToOrigin => pathToOrigin.Parameters).Union())
@@ -61,7 +95,7 @@ namespace HVTApp.Services.GetProductService
                 .Distinct()
                 .ToList();
 
-            var parameters = getService
+            return _getService
                 .GetParameters(originProductBlock)
                 .Except(path)
                 .Except(requiredParameters)
@@ -69,18 +103,18 @@ namespace HVTApp.Services.GetProductService
                 .Where(parameter => parameter.Paths().Any(dd => path.AllContainsInById(dd.Parameters)))
                 .Union(path)
                 .Union(requiredParameters);
+        }
 
+        private IReadOnlyCollection<ParameterSelector> GetSelectors(
+            IEnumerable<Parameter> parameters,
+            ProductBlock originProductBlock)
+        {
             //создаем селекторы параметров
-            ParameterSelectors = parameters
+            return parameters
                 .GroupBy(parameter => parameter.ParameterGroup.Id)
-                .Select(x => new ParameterSelector(x, originProductBlock.Parameters.SingleOrDefault(x.ContainsById)))
+                .Select(x => new ParameterSelector(x, originProductBlock?.Parameters.SingleOrDefault(x.ContainsById)))
                 .OrderBy(parameterSelector => parameterSelector)
                 .ToReadOnlyCollection();
-
-            //подписка на смену параметра в селекторе
-            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
-
-            OnSelectedParameterChanged(null);
         }
 
         #endregion
