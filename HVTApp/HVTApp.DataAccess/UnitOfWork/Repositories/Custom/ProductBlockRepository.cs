@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using HVTApp.Infrastructure;
+using HVTApp.Infrastructure.Extensions;
 using HVTApp.Model.POCOs;
 
 namespace HVTApp.DataAccess
@@ -42,6 +44,20 @@ namespace HVTApp.DataAccess
             }
 
             return new UnitOfWorkOperationResult(new Exception("Ќе все продукты удалось добавить в репозиторий"));
+        }
+
+        public ProductBlock GetByParameters(IEnumerable<Parameter> parameters)
+        {
+            var ids = parameters.Select(parameter => parameter.Id).ToList();
+            var result = Context.Set<ProductBlock>().AsQueryable()
+                .Include(productBlock => productBlock.Parameters)
+                .SingleOrDefault(productBlock =>
+                    productBlock.Parameters.Count == ids.Count &&
+                    productBlock.Parameters
+                        .Select(parameter => parameter.Id)
+                        .Except(ids)
+                        .Any() == false);
+            return result;
         }
 
 

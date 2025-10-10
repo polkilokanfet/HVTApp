@@ -600,12 +600,14 @@
     <Compile Include="UnitOfWork\Repositories\Custom\SalesUnitRepository.cs" />
     <Compile Include="UnitOfWork\Repositories\Custom\TechnicalRequrementsTaskRepository.cs" />
     <Compile Include="UnitOfWork\Repositories\Custom\TenderRepository.cs" />
+    <Compile Include="UnitOfWork\Repositories\IProductBlockRepository.cs" />
     <Compile Include="UnitOfWork\Repositories\IRepositories.g.cs" />
     <Compile Include="UnitOfWork\Repositories\Repositories.g.cs" />
     <Compile Include="UnitOfWork\TestBaseRepository.cs" />
     <Compile Include="UnitOfWork\Test\DirectumTaskRepositoryTest.cs" />
     <Compile Include="UnitOfWork\Test\OfferRepositoryTest.cs" />
     <Compile Include="UnitOfWork\Test\OfferUnitRepositoryTest.cs" />
+    <Compile Include="UnitOfWork\Test\ProductBlockRepositoryTest.cs" />
     <Compile Include="UnitOfWork\Test\ProductRepositoryTest.cs" />
     <Compile Include="UnitOfWork\Test\ProjectRepositoryTest.cs" />
     <Compile Include="UnitOfWork\Test\Repositories.g.cs" />

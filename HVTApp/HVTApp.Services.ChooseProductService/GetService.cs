@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using HVTApp.DataAccess;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Services;
@@ -49,7 +51,9 @@ namespace HVTApp.Services.GetProductService
                     .GetAll()
                     .Where(parameter => parameter.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectsGroup.Id)
                     .Where(parameter => parameter.ParameterGroup.Id != GlobalAppProperties.Actual.ComplectDesignationGroup.Id)
+                    .Where(parameter => parameter.ParameterGroup.Id != GlobalAppProperties.Actual.NewProductParameterGroup.Id)
                     .Where(parameter => parameter.Id != GlobalAppProperties.Actual.ComplectsParameter.Id)
+                    .Where(parameter => parameter.Id != GlobalAppProperties.Actual.NewProductParameter.Id)
                     .ToList();
                 _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
             }
@@ -74,79 +78,37 @@ namespace HVTApp.Services.GetProductService
 
         public ProductBlock SaveProductBlock(ProductBlock productBlock)
         {
+            //пойск в кэше
             var result = this.ProductBlocks.SingleOrDefault(block => block.Equals(productBlock));
             if (result != null)
                 return result;
 
-            //загрузка актуальных блоков продуктов
-            this.ReloadProductBlocks();
-
-            //если выбранного блока продукта нет в базе
-            if (ProductBlocks.Contains(productBlock) == false)
+            //поиск в базе данных
+            result = ((IProductBlockRepository)_unitOfWork.Repository<ProductBlock>()).GetByParameters(productBlock.Parameters);
+            if (result != null)
             {
-                productBlock = new ProductBlock
-                {
-                    Parameters = productBlock.Parameters.Select(x => _unitOfWork.Repository<Parameter>().GetById(x.Id)).ToList()
-                };
-                if (_unitOfWork.SaveEntity(productBlock).OperationCompletedSuccessfully)
-                {
-                    ProductBlocks.Add(productBlock);
-                    _eventAggregator.GetEvent<AfterSaveProductBlockEvent>().Publish(productBlock);
-                }
-                else
-                {
-                    throw new Exception("Ошибка при сохранении нового блока продукта в базу данных.");
-                }
+                ProductBlocks.Add(result);
+                return result;
+            }
+
+            //если выбранного блока продукта нет в базе данных
+            productBlock = new ProductBlock
+            {
+                Parameters = productBlock.Parameters
+                    .Select(parameter => _unitOfWork.Repository<Parameter>().GetById(parameter.Id)).ToList()
+            };
+            if (_unitOfWork.SaveEntity(productBlock).OperationCompletedSuccessfully)
+            {
+                ProductBlocks.Add(productBlock);
+                _eventAggregator.GetEvent<AfterSaveProductBlockEvent>().Publish(productBlock);
+            }
+            else
+            {
+                throw new Exception("Ошибка при сохранении нового блока продукта в базу данных.");
             }
 
             return productBlock;
         }
-
-        //private ProductBlockSelector _productBlockSelector;
-        //public ProductBlockSelector GetProductBlockSelector(bool useSingleSelector,
-        //    ProductBlock selectedProductBlock = null,
-        //    IEnumerable<Parameter> required = null,
-        //    IEnumerable<IParametersContainer> containers = null)
-        //{
-        //    ProductBlockSelector result = _productBlockSelector;
-
-        //    if (useSingleSelector)
-        //    {
-        //        if (_productBlockSelector == null ||
-        //            _lastUpdateMomentService.GetLastUpdateMomentOfParameters() > _lastUpdateMomentOfParameters)
-        //        {
-        //            result = _productBlockSelector = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
-        //            _lastUpdateMomentOfParameters = _lastUpdateMomentService.GetLastUpdateMomentOfParameters();
-        //        }
-        //    }
-        //    else
-        //    {
-        //        result = new ProductBlockSelector(GetParameters(selectedProductBlock), this);
-        //    }
-
-        //    if (required != null)
-        //        result.SetRequiredParameters(required);
-
-        //    if (containers != null)
-        //        result.SetRequiredParameters(containers);
-
-        //    if (selectedProductBlock != null)
-        //    {
-        //        //ранее выбранный блок
-        //        result.SelectedBlock = selectedProductBlock;
-        //    }
-        //    else
-        //    {
-        //        //первый выбранный параметр
-        //        var originParameterSelector = result
-        //            .ParameterSelectors
-        //            .Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
-        //        originParameterSelector.SelectedParameterFlaged = originParameterSelector.ParametersFlaged.First(x => x.IsActual);
-        //    }
-
-        //    return result;
-        //}
-
 
         /// <summary>
         /// Актуальные связи с дочерними продуктами.

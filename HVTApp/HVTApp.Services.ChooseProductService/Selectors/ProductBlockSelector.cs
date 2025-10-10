@@ -53,10 +53,13 @@ namespace HVTApp.Services.GetProductService
             //подписка на смену параметра в селекторе
             ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
 
-            OnSelectedParameterChanged(null);
+            if (originProductBlock is null)
+                this.SelectFirstParameter();
+            else
+                OnSelectedParameterChanged(null);
         }
 
-        public ProductBlockSelector(
+        internal ProductBlockSelector(
             IGetService getService,
             IEnumerable<IParametersContainer> containers,
             ProductBlock originProductBlock)
@@ -73,8 +76,26 @@ namespace HVTApp.Services.GetProductService
             //подписка на смену параметра в селекторе
             ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
 
-            var parameterSelector = ParameterSelectors.Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
-            parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
+            this.SelectFirstParameter();
+        }
+
+        internal ProductBlockSelector(
+            IGetService getService,
+            ProductBlock originProductBlock)
+        {
+            _getService = getService;
+
+            //создаем селекторы параметров
+            var parameters = getService.GetParameters(originProductBlock);
+            ParameterSelectors = this.GetSelectors(parameters, originProductBlock);
+
+            //подписка на смену параметра в селекторе
+            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
+
+            if (originProductBlock is null)
+                this.SelectFirstParameter();
+            else
+                OnSelectedParameterChanged(null);
         }
 
         private IEnumerable<Parameter> GetParameters(
@@ -95,12 +116,22 @@ namespace HVTApp.Services.GetProductService
                 .Distinct()
                 .ToList();
 
-            return _getService
-                .GetParameters(originProductBlock)
+            var allParameters = _getService.GetParameters(originProductBlock).ToList();
+
+            //исключаемые из групп обязательных
+            var exceptParameters = allParameters
+                .Where(parameter => parameterGroups.ContainsById(parameter.ParameterGroup))
                 .Except(path)
                 .Except(requiredParameters)
-                .Where(parameter => parameterGroups.ContainsById(parameter.ParameterGroup) == false)
-                .Where(parameter => parameter.Paths().Any(dd => path.AllContainsInById(dd.Parameters)))
+                .ToList();
+
+            return allParameters
+                .Except(path)
+                .Except(requiredParameters)
+                .Except(exceptParameters)
+                .Where(parameter => parameter.Paths()
+                    .Where(x => x.Parameters.Intersect(exceptParameters).Any() == false)
+                    .Any(dd => path.AllContainsInById(dd.Parameters)))
                 .Union(path)
                 .Union(requiredParameters);
         }
@@ -152,6 +183,12 @@ namespace HVTApp.Services.GetProductService
             //отмена подписки на смену параметра в селекторе
             ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged -= OnSelectedParameterChanged);
             ParameterSelectors.ForEach(selector => selector.Dispose());
+        }
+
+        public void SelectFirstParameter()
+        {
+            var parameterSelector = ParameterSelectors.Single(selector => selector.ParametersFlaged.Any(p => p.Parameter.IsOrigin));
+            parameterSelector.SelectedParameterFlaged = parameterSelector.ParametersFlaged.First();
         }
     }
 }

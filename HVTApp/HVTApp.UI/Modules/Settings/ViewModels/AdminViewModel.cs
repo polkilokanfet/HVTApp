@@ -9,6 +9,7 @@ using System.Xml.Serialization;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Interfaces.Services;
+using HVTApp.Infrastructure.Interfaces.Services.SelectService;
 using HVTApp.Infrastructure.Services;
 using HVTApp.Model.POCOs;
 using Microsoft.Practices.Unity;
@@ -28,6 +29,8 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
         public DelegateLogCommand Command1 { get; }
         public DelegateLogCommand Command2 { get; }
         public DelegateLogCommand Command3 { get; }
+        public DelegateLogCommand Command4 { get; }
+        public DelegateLogCommand Command5 { get; }
 
         public AdminViewModel(IUnityContainer container)
         {
@@ -133,13 +136,36 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
                 {
                     product = getProductService.GetProduct(product);
                 }
+            });
+
+            Command4 = new DelegateLogCommand(() =>
+            {
+                var designDepartments = container.Resolve<IUnitOfWork>().Repository<DesignDepartment>()
+                    .GetAll();
+                var department = container.Resolve<ISelectService>().SelectItem(designDepartments);
+
+                var getProductService = container.Resolve<IGetProductService>();
 
                 ProductBlock productBlock = null;
-
-                while (true)
+                do
                 {
-                    productBlock = getProductService.GetProductBlock(productBlock);
-                }
+                    productBlock = getProductService.GetProductBlock(productBlock, department.ParameterSets.First().Parameters);
+                } while (productBlock != null);
+            });
+
+            Command5 = new DelegateLogCommand(() =>
+            {
+                var designDepartments = container.Resolve<IUnitOfWork>().Repository<DesignDepartment>()
+                    .GetAll();
+                var department = container.Resolve<ISelectService>().SelectItem(designDepartments);
+
+                var getProductService = container.Resolve<IGetProductService>();
+
+                ProductBlock productBlock = null;
+                do
+                {
+                    productBlock = getProductService.GetProductBlock(department.ParameterSetsAddedBlocks, productBlock);
+                } while (productBlock != null);
             });
         }
     }
