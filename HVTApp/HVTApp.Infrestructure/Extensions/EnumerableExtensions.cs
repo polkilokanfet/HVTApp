@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using Infragistics.Windows.Editors;
 
 namespace HVTApp.Infrastructure.Extensions
 {
@@ -30,7 +31,7 @@ namespace HVTApp.Infrastructure.Extensions
         /// <typeparam name="T">Тип данных в перечислениях</typeparam>
         /// <param name="first">Первое перечисление</param>
         /// <param name="second">Второе перечисление</param>
-        /// <param name="comparer">Спопсоб сравнения</param>
+        /// <param name="comparer">Способ сравнения</param>
         /// <returns></returns>
         public static bool MembersAreSame<T>(this IEnumerable<T> first, IEnumerable<T> second, IEqualityComparer<T> comparer = null)
         {
@@ -43,6 +44,20 @@ namespace HVTApp.Infrastructure.Extensions
                 return !firstArray.Except(secondArray).Any() && !secondArray.Except(firstArray).Any();
 
             return !firstArray.Except(secondArray, comparer).Any() && !secondArray.Except(firstArray, comparer).Any();
+        }
+
+        /// <summary>
+        /// Члены коллекций совпадают.
+        /// </summary>
+        /// <typeparam name="T">Тип данных в перечислениях</typeparam>
+        /// <param name="first">Первое перечисление</param>
+        /// <param name="second">Второе перечисление</param>
+        /// <param name="comparer">Способ сравнения</param>
+        /// <returns></returns>
+        public static bool MembersAreSameById<T>(this IEnumerable<T> first, IEnumerable<T> second)
+            where T : IId
+        {
+            return first.Select(x => x.Id).MembersAreSame(second.Select(x => x.Id));
         }
 
         /// <summary>

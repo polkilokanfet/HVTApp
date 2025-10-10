@@ -106,6 +106,7 @@
     <Compile Include="PathNodesGenerator.cs" />
     <Compile Include="ProductGeneration\BlockGeneration.cs" />
     <Compile Include="GetService.cs" />
+    <Compile Include="Selectors\DependencyParameterException.cs" />
     <Compile Include="Selectors\ParameterFlaged.cs" />
     <Compile Include="Selectors\ParameterSelector.cs" />
     <Compile Include="Selectors\ProductBlockSelector.cs" />
