@@ -122,7 +122,7 @@ namespace HVTApp.Model.POCOs
             if (this.GetHashCode() != other.GetHashCode()) 
                 return false;
 
-            return this.Parameters.MembersAreSame(other.Parameters, new ParameterComparer());
+            return this.Parameters.MembersAreSameById(other.Parameters);
         }
 
         ///// <summary>

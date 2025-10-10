@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using HVTApp.DataAccess;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Services;
@@ -66,11 +67,6 @@ namespace HVTApp.Services.GetProductService
 
                 return this.GetSavedOrSaveProduct(result);
             }
-            catch (DependencyParameterException e)
-            {
-                Container.Resolve<IMessageService>().Message("Exception", e.Message);
-                return this.GetProduct(originProduct: null);
-            }
             catch (Exception e)
             {
                 Container.Resolve<IMessageService>().Message("Exception", e.Message);
@@ -80,9 +76,13 @@ namespace HVTApp.Services.GetProductService
 
         public Product GetSavedOrSaveProduct(Product product)
         {
-            var result = this.CheckReloadCheckAgain(product);
-            if (result != null)
-                return result;
+            if (_products.Any() == false)
+                this._products = _unitOfWork.Repository<Product>().GetAll();
+
+            var existsProduct = _products.SingleOrDefault(p => p.Id == product.Id) ??
+                                _products.SingleOrDefault(p => p.Equals(product));
+            if (existsProduct != null)
+                return existsProduct;
 
             this.SubstitutionBlocksAndProducts(
                 product, 
@@ -93,34 +93,29 @@ namespace HVTApp.Services.GetProductService
             return this.SaveProduct(product);
         }
 
-        private Product CheckReloadCheckAgain(Product product)
+        private Product SaveProduct(Product product)
         {
-            var existsProduct = _products.SingleOrDefault(p => p.Equals(product));
-            if (existsProduct != null)
-                return existsProduct;
+            var isOk = ((IProductRepository)_unitOfWork.Repository<Product>()).CanAdd(product);
+            if (isOk.OperationCompletedSuccessfully)
+            {
+                //если выбранного продукта нет в базе
+                var operationResult = _unitOfWork.SaveEntity(product);
 
-            //загрузка актуальных продуктов
-            this._products = _unitOfWork.Repository<Product>().GetAll();
+                if (operationResult.OperationCompletedSuccessfully == false)
+                    throw new Exception("Ошибка при сохранении нового продукта в базу данных.", operationResult.Exception);
 
-            return _products.SingleOrDefault(p => p.Equals(product));
+                Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductEvent>().Publish(product);
+
+                _products.Add(product);
+                return product;
+            }
+
+            Product result = ((IProductRepository)_unitOfWork.Repository<Product>()).Get(product);
+            _products.Add(result);
+            return result;
         }
 
         #endregion
-
-        private Product SaveProduct(Product product)
-        {
-            //если выбранного продукта нет в базе
-            var operationResult = _unitOfWork.SaveEntity(product);
-
-            if (operationResult.OperationCompletedSuccessfully == false)
-                throw new Exception("Ошибка при сохранении нового продукта в базу данных.", operationResult.Exception);
-
-            Container.Resolve<IEventAggregator>().GetEvent<AfterSaveProductEvent>().Publish(product);
-
-            _products.Add(product);
-
-            return product;
-        }
 
 
         #region GetKit

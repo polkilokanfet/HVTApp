@@ -55,6 +55,12 @@ namespace HVTApp.DataAccess
             return new UnitOfWorkOperationResult();
         }
 
+        public Product Get(Product product)
+        {
+            var result = this.GetById(product.Id);
+            return result ?? this.Find(x => x.Equals(product)).SingleOrDefault();
+        }
+
         private void SubstitutionProducts(Product product, ICollection<Product> uniqProducts)
         {
             foreach (var dependentProduct in product.DependentProducts)

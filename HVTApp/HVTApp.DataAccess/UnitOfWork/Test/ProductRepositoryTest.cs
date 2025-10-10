@@ -9,5 +9,10 @@ namespace HVTApp.DataAccess
         {
             throw new System.NotImplementedException();
         }
+
+        public Product Get(Product product)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
