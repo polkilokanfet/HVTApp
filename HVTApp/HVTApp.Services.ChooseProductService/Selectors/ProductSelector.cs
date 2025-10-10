@@ -56,8 +56,8 @@ namespace HVTApp.Services.GetProductService
 
             //создаем селектор блока
             BlockSelector = requiredParameters is null
-                ? new ProductBlockSelector(_getService, selectedProduct?.ProductBlock)
-                : new ProductBlockSelector(_getService, requiredParameters.ToList(), selectedProduct?.ProductBlock);
+                ? ProductBlockSelector.GetSelector(_getService, selectedProduct?.ProductBlock)
+                : ProductBlockSelector.GetSelector(_getService, requiredParameters.ToList(), selectedProduct?.ProductBlock);
 
             //подписываемся на событие его изменения
             BlockSelector.SelectedBlockChanged += selector =>

@@ -83,8 +83,6 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bank.cs" />
-    <Compile Include="BankFactory.cs" />
     <Compile Include="IGetService.cs" />
     <Compile Include="Kits\Kit.cs" />
     <Compile Include="Kits\KitsViewModel.cs" />
@@ -104,7 +102,6 @@
     <Compile Include="Kits\KitViewModel.cs" />
     <Compile Include="Converter\ParameterSelectorToParameterGroupNameConverter.cs" />
     <Compile Include="GetProductServiceWpf.cs" />
-    <Compile Include="Ext.cs" />
     <Compile Include="PathNode.cs" />
     <Compile Include="PathNodesGenerator.cs" />
     <Compile Include="ProductGeneration\BlockGeneration.cs" />

@@ -5,7 +5,6 @@ using System.Windows;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Services;
-using HVTApp.Model;
 using HVTApp.Model.Events;
 using HVTApp.Model.POCOs;
 using HVTApp.Model.Services;
@@ -108,16 +107,6 @@ namespace HVTApp.Services.GetProductService
 
         #endregion
 
-        //private Product GetOrSaveProduct(Product product)
-        //{
-        //    var result = this.CheckReloadCheckAgain(product);
-        //    if (result != null)
-        //        return result;
-
-        //    //если выбранного продукта нет в базе
-        //    return this.SaveProduct(product);
-        //}
-
         private Product SaveProduct(Product product)
         {
             //если выбранного продукта нет в базе
@@ -213,7 +202,7 @@ namespace HVTApp.Services.GetProductService
             ProductBlock originProductBlock = null, 
             IEnumerable<Parameter> requiredParameters = null)
         {
-            var selector = new ProductBlockSelector(_getService, requiredParameters.ToList(), originProductBlock);
+            var selector = ProductBlockSelector.GetSelector(_getService, requiredParameters, originProductBlock);
             return this.GetProductBlockBase(selector, originProductBlock);
         }
 
@@ -221,12 +210,11 @@ namespace HVTApp.Services.GetProductService
             IEnumerable<IParametersContainer> parametersContainers, 
             ProductBlock originProductBlock = null)
         {
-            var selector = new ProductBlockSelector(_getService, parametersContainers, originProductBlock);
+            var selector = ProductBlockSelector.GetSelector(_getService, parametersContainers, originProductBlock);
             return this.GetProductBlockBase(selector, originProductBlock);
         }
 
         #endregion
-
 
         public IEnumerable<ProductBlock> GenerateBlocks()
         {

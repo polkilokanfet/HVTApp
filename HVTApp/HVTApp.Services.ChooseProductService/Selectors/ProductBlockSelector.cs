@@ -9,23 +9,13 @@ namespace HVTApp.Services.GetProductService
 {
     public class ProductBlockSelector : BindableBase, IDisposable
     {
-        #region fields
-
-        private readonly IGetService _getService;
-
-        #endregion
-
-        #region private props
+        private static IGetService _getService;
 
         private List<Parameter> SelectedParameters => ParameterSelectors
             .Select(selector => selector.SelectedParameterFlaged)
             .Where(parameterFlaged => parameterFlaged != null && parameterFlaged.IsActual)
             .Select(parameterFlaged => parameterFlaged.Parameter)
             .ToList();
-
-        #endregion
-
-        #region props
 
         public IReadOnlyCollection<ParameterSelector> ParameterSelectors { get; }
 
@@ -36,74 +26,78 @@ namespace HVTApp.Services.GetProductService
             _getService.GetProductBlock(SelectedParameters) ?? 
             new ProductBlock { Parameters = SelectedParameters };
 
-        #endregion
-
         #region ctor
 
-        internal ProductBlockSelector(
+        public static ProductBlockSelector GetSelector(
             IGetService getService,
-            ICollection<Parameter> requiredParameters, 
+            IEnumerable<Parameter> requiredParameters,
             ProductBlock originProductBlock)
         {
-            _getService = getService;
-
-            //создаем селекторы параметров
-            ParameterSelectors = this.GetSelectors(this.GetParameters(requiredParameters, originProductBlock), originProductBlock);
-
-            //подписка на смену параметра в селекторе
-            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
-
-            if (originProductBlock is null)
-                this.SelectFirstParameter();
-            else
-                OnSelectedParameterChanged(null);
+            var selectors = GetSelectors(GetParameters(getService, requiredParameters, originProductBlock), originProductBlock);
+            return GetSelector(getService, selectors, originProductBlock);
         }
 
-        internal ProductBlockSelector(
+        public static ProductBlockSelector GetSelector(
             IGetService getService,
             IEnumerable<IParametersContainer> containers,
             ProductBlock originProductBlock)
         {
-            _getService = getService;
-
             //создаем селекторы параметров
             var parameters = containers
-                .Select(x => this.GetParameters(x.Parameters, originProductBlock))
+                .Select(x => GetParameters(getService, x.Parameters, originProductBlock))
                 .Union()
                 .Distinct();
-            ParameterSelectors = this.GetSelectors(parameters, originProductBlock);
+            var selectors = GetSelectors(parameters, originProductBlock);
 
-            //подписка на смену параметра в селекторе
-            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
-
-            this.SelectFirstParameter();
+            return GetSelector(getService, selectors, originProductBlock);
         }
 
-        internal ProductBlockSelector(
+        public static ProductBlockSelector GetSelector(
             IGetService getService,
             ProductBlock originProductBlock)
         {
-            _getService = getService;
-
-            //создаем селекторы параметров
             var parameters = getService.GetParameters(originProductBlock);
-            ParameterSelectors = this.GetSelectors(parameters, originProductBlock);
+            var selectors = GetSelectors(parameters, originProductBlock);
+            return GetSelector(getService, selectors, originProductBlock);
+        }
 
+        private static ProductBlockSelector GetSelector(
+            IGetService getService,
+            IEnumerable<ParameterSelector> parameterSelectors,
+            ProductBlock originProductBlock)
+        {
+            _getService = getService;
+            var productBlockSelector = new ProductBlockSelector(parameterSelectors);
+            productBlockSelector.Subscribe(originProductBlock);
+            return productBlockSelector;
+        }
+
+        private ProductBlockSelector(IEnumerable<ParameterSelector> selectors)
+        {
+            this.ParameterSelectors = selectors.ToReadOnlyCollection();
+        }
+
+
+        private void Subscribe(ProductBlock originProductBlock)
+        {
             //подписка на смену параметра в селекторе
-            ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
-
+            this.ParameterSelectors.ForEach(selector => selector.SelectedParameterChanged += OnSelectedParameterChanged);
+            
             if (originProductBlock is null)
                 this.SelectFirstParameter();
             else
                 OnSelectedParameterChanged(null);
         }
 
-        private IEnumerable<Parameter> GetParameters(
-            ICollection<Parameter> requiredParameters,
+        private static IEnumerable<Parameter> GetParameters(
+            IGetService getService,
+            IEnumerable<Parameter> requiredParameters,
             ProductBlock originProductBlock)
         {
+            var parameters = requiredParameters as Parameter[] ?? requiredParameters.ToArray();
+
             //общий путь до обязательных параметров
-            var path = requiredParameters
+            var path = parameters
                 .Select(parameter => parameter.Paths().Select(pathToOrigin => pathToOrigin.Parameters).Union())
                 .Intersect()
                 .Distinct()
@@ -111,32 +105,32 @@ namespace HVTApp.Services.GetProductService
 
             //группы обязательных параметров
             var parameterGroups = path
-                .Union(requiredParameters)
+                .Union(parameters)
                 .Select(parameter => parameter.ParameterGroup)
                 .Distinct()
                 .ToList();
 
-            var allParameters = _getService.GetParameters(originProductBlock).ToList();
+            var allParameters = getService.GetParameters(originProductBlock).ToList();
 
             //исключаемые из групп обязательных
             var exceptParameters = allParameters
                 .Where(parameter => parameterGroups.ContainsById(parameter.ParameterGroup))
                 .Except(path)
-                .Except(requiredParameters)
+                .Except(parameters)
                 .ToList();
 
             return allParameters
                 .Except(path)
-                .Except(requiredParameters)
+                .Except(parameters)
                 .Except(exceptParameters)
                 .Where(parameter => parameter.Paths()
                     .Where(x => x.Parameters.Intersect(exceptParameters).Any() == false)
                     .Any(dd => path.AllContainsInById(dd.Parameters)))
                 .Union(path)
-                .Union(requiredParameters);
+                .Union(parameters);
         }
 
-        private IReadOnlyCollection<ParameterSelector> GetSelectors(
+        private static IReadOnlyCollection<ParameterSelector> GetSelectors(
             IEnumerable<Parameter> parameters,
             ProductBlock originProductBlock)
         {
