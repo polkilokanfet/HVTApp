@@ -35,8 +35,17 @@ namespace HVTApp.Services.GetProductService
 
         public Product GetProduct(Product originProduct = null)
         {
-            var selector = new ProductSelector(_getService, selectedProduct: originProduct);
-            return this.GetProduct(selector, originProduct);
+            ProductSelector selector;
+            try
+            {
+                selector = new ProductSelector(_getService, selectedProduct: originProduct);
+            }
+            catch (Exception e)
+            {
+                Container.Resolve<IMessageService>().Message("Exception", e.Message);
+                selector = new ProductSelector(_getService, selectedProduct: null);
+            }
+            return this.GetProduct(selector, null);
         }
 
         public Product GetProduct(IEnumerable<Parameter> requiredParameters)
