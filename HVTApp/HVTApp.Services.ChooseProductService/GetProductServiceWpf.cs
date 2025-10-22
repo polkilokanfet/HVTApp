@@ -206,7 +206,9 @@ namespace HVTApp.Services.GetProductService
             ProductBlock originProductBlock = null, 
             IEnumerable<Parameter> requiredParameters = null)
         {
-            var selector = ProductBlockSelector.GetSelector(_getService, requiredParameters, originProductBlock);
+            var selector = requiredParameters == null
+                ? ProductBlockSelector.GetSelector(_getService, originProductBlock)
+                : ProductBlockSelector.GetSelector(_getService, requiredParameters, originProductBlock);
             return this.GetProductBlockBase(selector, originProductBlock);
         }
 
