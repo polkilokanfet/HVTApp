@@ -104,6 +104,7 @@ namespace HVTApp.Services.GetProductService
             foreach (var productSelector in this.ProductSelectors.ToList())
             {
                 var relation = relations.FirstOrDefault(productRelation => 
+                    productRelation.ChildProductsAmount == productSelector.Amount && 
                     productRelation.ChildProductParameters.MembersAreSameById(productSelector.RequiredParameters));
                 if (relation == null)
                 {
