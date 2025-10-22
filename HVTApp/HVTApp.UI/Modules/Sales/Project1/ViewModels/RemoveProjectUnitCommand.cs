@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Services;
 using HVTApp.Model.POCOs;
+using HVTApp.Model.Services;
 using HVTApp.UI.Modules.Sales.Project1.Commands;
 using HVTApp.UI.Modules.Sales.Project1.Wrappers;
-using Microsoft.Practices.ObjectBuilder2;
 
 namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
 {
@@ -13,16 +12,20 @@ namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
     {
         private readonly ProjectViewModel _viewModel;
         private readonly IMessageService _messageService;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IRemoveService _removeService;
 
 
-        public RemoveProjectUnitCommand(ProjectViewModel viewModel, IMessageService messageService, IUnitOfWork unitOfWork)
+        public RemoveProjectUnitCommand(
+            ProjectViewModel viewModel, 
+            IMessageService messageService, 
+            IRemoveService removeService)
         {
             _viewModel = viewModel;
             _messageService = messageService;
-            _unitOfWork = unitOfWork;
+            _removeService = removeService;
             _viewModel.SelectedUnitChanged += RaiseCanExecuteChanged;
         }
+
         public override bool CanExecute(object parameter)
         {
             return _viewModel.SelectedUnit != null;
@@ -32,18 +35,10 @@ namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
         {
             var dr1 = _messageService.ConfirmationDialog("Вы уверены в удалении?");
             if (dr1 != true) return;
-
-
+            
             var salesUnits = _viewModel.SelectedUnit is ProjectUnitGroup projectUnitGroup
                 ? projectUnitGroup.Units.Select(projectUnit => projectUnit.Model).ToList()
                 : new List<SalesUnit> { ((ProjectUnit)_viewModel.SelectedUnit).Model };
-
-            //если ни один юнит ещё не сохранен в БД
-            if (salesUnits.All(salesUnit => _unitOfWork.Repository<SalesUnit>().GetById(salesUnit.Id) == null))
-            {
-                salesUnits.ForEach(this.Remove);
-                return;
-            }
 
             if (salesUnits.Any(salesUnit => salesUnit.Order != null))
             {
@@ -51,66 +46,12 @@ namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
                 return;
             }
 
-            //проверяем не включено ли оборудование в какой-либо бюджет
-            var budgetUnits = _unitOfWork.Repository<BudgetUnit>().Find(budgetUnit => budgetUnit.IsRemoved == false);
-            var idIntersection = salesUnits
-                .Select(salesUnit => salesUnit.Id)
-                .Intersect(budgetUnits.Select(budgetUnit => budgetUnit.SalesUnit.Id))
-                .ToList();
-            if (idIntersection.Any())
+            foreach (var salesUnit in salesUnits)
             {
-                var dr = _messageService.ConfirmationDialog("Это оборудование включено в бюджет. Вы уверены, что хотите удалить его?");
-
-                if (dr)
-                    salesUnits.Where(salesUnit => idIntersection.Contains(salesUnit.Id)).ForEach(salesUnit => salesUnit.IsRemoved = true);
-                else
-                    return;
+                var projectUnit = _viewModel.ProjectWrapper.Units.Single(unit => unit.Model.Id == salesUnit.Id);
+                projectUnit.IsRemoved = true;
+                _viewModel.ProjectWrapper.Units.Remove(projectUnit);
             }
-
-            //проверка на включение в задачи ТСП
-            var salesUnitsInTasks = _unitOfWork.Repository<PriceEngineeringTask>()
-                .Find(priceEngineeringTask => priceEngineeringTask.SalesUnits.Any())
-                .SelectMany(priceEngineeringTask => priceEngineeringTask.SalesUnits);
-            foreach (var salesUnit in salesUnits.Intersect(salesUnitsInTasks))
-            {
-                salesUnit.IsRemoved = true;
-            }
-
-            //проверка на включение в задачи TCE
-            var salesUnitsInTce = _unitOfWork.Repository<TechnicalRequrements>()
-                .Find(technicalRequrements => technicalRequrements.SalesUnits.Any())
-                .SelectMany(technicalRequrements => technicalRequrements.SalesUnits);
-            foreach (var salesUnit in salesUnits.Intersect(salesUnitsInTce))
-            {
-                salesUnit.IsRemoved = true;
-            }
-
-            //проверка на включение в задачи на формирование счетов
-            var salesUnitsInvoiceForPaymentItems = _unitOfWork.Repository<TaskInvoiceForPaymentItem>()
-                .GetAll()
-                .SelectMany(invoiceForPaymentItem => invoiceForPaymentItem.SalesUnits);
-            foreach (var salesUnit in salesUnits.Intersect(salesUnitsInvoiceForPaymentItems))
-            {
-                salesUnit.IsRemoved = true;
-            }
-
-            //проверка на включение в расчёты переменных затрат
-            var salesUnitsPriceCalculation = _unitOfWork.Repository<PriceCalculationItem>()
-                .GetAll()
-                .SelectMany(invoiceForPaymentItem => invoiceForPaymentItem.SalesUnits);
-            foreach (var salesUnit in salesUnits.Intersect(salesUnitsPriceCalculation))
-            {
-                salesUnit.IsRemoved = true;
-            }
-
-            _unitOfWork.Repository<SalesUnit>().DeleteRange(salesUnits.Where(salesUnit => salesUnit.IsRemoved == false));
-            salesUnits.ForEach(Remove);
-        }
-
-        private void Remove(SalesUnit salesUnit)
-        {
-            var projectUnit = _viewModel.ProjectWrapper.Units.Single(x => x.Model.Id == salesUnit.Id);
-            _viewModel.ProjectWrapper.Units.Remove(projectUnit);
         }
     }
 }

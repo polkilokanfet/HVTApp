@@ -44,7 +44,8 @@ namespace HVTApp.DataAccess
             {
 #endif
 #if DEBUG
-                var entries = _context.ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged).ToList();
+                var entries = _context.ChangeTracker.Entries()
+                    .Where(entry => entry.State != EntityState.Unchanged);
                 foreach (var entry in entries)
                 {
                     if (entry.State == EntityState.Unchanged) continue;

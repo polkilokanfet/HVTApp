@@ -177,6 +177,7 @@
     <Compile Include="ProductionViewModelEntities\ProductionGroup.cs" />
     <Compile Include="ProductionViewModelEntities\ProductionItem.cs" />
     <Compile Include="Services\IPrintNoticeOfCompletionOfProductionService.cs" />
+    <Compile Include="Services\IRemoveService.cs" />
     <Compile Include="Services\Storage\FileCopyInfoDesignDepartmentAnswer.cs" />
     <Compile Include="Services\Storage\FileCopyInfoTechnicalSpecification.cs" />
     <Compile Include="Services\FileNotSingleFoundException.cs" />

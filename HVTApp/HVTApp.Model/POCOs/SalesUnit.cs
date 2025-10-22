@@ -167,6 +167,12 @@ namespace HVTApp.Model.POCOs
         [NotForWrapper, NotForDetailsView]
         public virtual List<PriceCalculationItem> PriceCalculationItems { get; set; } = new List<PriceCalculationItem>();
 
+        [NotForWrapper, NotForDetailsView, NotForListView]
+        public virtual List<PriceEngineeringTask> PriceEngineeringTasks { get; set; } = new List<PriceEngineeringTask>();
+
+        [NotForWrapper, NotForDetailsView, NotForListView]
+        public virtual List<TechnicalRequrements> TechnicalRequirements { get; set; } = new List<TechnicalRequrements>();
+
 
         [NotMapped, Designation("–азрешение на редактирование стоимости")]
         public bool AllowEditCost => Specification == null;

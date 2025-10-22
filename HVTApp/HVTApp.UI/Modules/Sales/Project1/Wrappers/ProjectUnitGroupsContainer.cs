@@ -9,9 +9,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 {
     public class ProjectUnitGroupsContainer : ValidatableChangeTrackingCollection<ProjectUnit>
     {
-
         public IEnumerable<ProjectUnitGroup> Groups { get; }
-
 
         /// <summary>
         /// Стоимость всего проекта

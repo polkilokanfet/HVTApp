@@ -4,8 +4,8 @@ namespace HVTApp.DataAccess
     {
         public TechnicalRequrementsConfiguration()
         {
-            HasMany(x => x.SalesUnits).WithMany();
-            HasMany(x => x.Files).WithMany();
+            HasMany(technicalRequrements => technicalRequrements.SalesUnits).WithMany(x => x.TechnicalRequirements);
+            HasMany(technicalRequrements => technicalRequrements.Files).WithMany();
         }
     }
 }

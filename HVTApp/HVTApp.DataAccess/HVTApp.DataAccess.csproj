@@ -570,6 +570,7 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="RemoveService.cs" />
     <Compile Include="UnitOfWorkFactory.cs" />
     <Compile Include="UnitOfWork\BaseRepository.cs" />
     <Compile Include="HVTAppContext.cs" />

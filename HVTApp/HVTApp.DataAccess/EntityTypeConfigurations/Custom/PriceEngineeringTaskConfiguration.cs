@@ -22,7 +22,7 @@ namespace HVTApp.DataAccess
 
             HasMany(task => task.Statuses).WithRequired().HasForeignKey(task => task.PriceEngineeringTaskId).WillCascadeOnDelete(true);
 
-            HasMany(task => task.SalesUnits).WithMany();
+            HasMany(task => task.SalesUnits).WithMany(salesUnit => salesUnit.PriceEngineeringTasks);
 
             HasMany(task => task.StructureCostVersions).WithOptional().HasForeignKey(task => task.PriceEngineeringTaskId).WillCascadeOnDelete(true);
 
