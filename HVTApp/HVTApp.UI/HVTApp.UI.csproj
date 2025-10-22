@@ -406,7 +406,7 @@
     <Compile Include="Modules\Sales\Project1\ViewModels\ProductIncludedViewModel.cs" />
     <Compile Include="Modules\Sales\Project1\Commands\ProjectUnitEditBaseCommand.cs" />
     <Compile Include="Modules\Sales\Project1\Commands\RemoveProductsIncludedGroupCommand.cs" />
-    <Compile Include="Modules\Sales\Project1\ViewModels\RemoveProjectUnitCommand.cs" />
+    <Compile Include="Modules\Sales\Project1\Commands\RemoveProjectUnitCommand.cs" />
     <Compile Include="Modules\Sales\Project1\Views\ProjectUnitAddView.xaml.cs">
       <DependentUpon>ProjectUnitAddView.xaml</DependentUpon>
     </Compile>

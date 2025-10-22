@@ -14,7 +14,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 {
     public class ProjectUnitGroup : BindableBase, IProjectUnit
     {
-        public IValidatableChangeTrackingCollection<ProjectUnit> Units { get; }
+        public ICollection<ProjectUnit> Units { get; }
 
         public int Amount => Units.Count;
 
@@ -138,15 +138,15 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 
         public ProjectUnitGroup(IEnumerable<ProjectUnit> projectUnits)
         {
-            Units = new ValidatableChangeTrackingCollection<ProjectUnit>(projectUnits);
+            var units = new ValidatableChangeTrackingCollection<ProjectUnit>(projectUnits);
             CalculatedParts = new ProjectUnitCalculatedParts(this);
 
-            Units.CollectionChanged += (sender, args) =>
+            units.CollectionChanged += (sender, args) =>
             {
                 RaisePropertyChanged(nameof(Amount));
             };
 
-            foreach (var unit in Units)
+            foreach (var unit in units)
             {
                 unit.PropertyChanged += (sender, args) =>
                 {
@@ -195,6 +195,8 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
                     RaisePropertyChanged(nameof(ProductsIncludedGroups));
                 };
             }
+
+            Units = units;
         }
 
         public bool Add(ProjectUnit projectUnit)

@@ -16,14 +16,13 @@ namespace HVTApp.UI.Modules.Sales.Project1.Commands
         private readonly ProjectWrapper1 _projectWrapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEventAggregator _eventAggregator;
-        private readonly IRemoveService _removeService;
 
-        public SaveProjectCommand(ProjectWrapper1 projectWrapper, IUnitOfWork unitOfWork, IEventAggregator eventAggregator, IRemoveService removeService)
+        public SaveProjectCommand(ProjectWrapper1 projectWrapper, IUnitOfWork unitOfWork, IEventAggregator eventAggregator)
         {
             _projectWrapper = projectWrapper;
             _unitOfWork = unitOfWork;
             _eventAggregator = eventAggregator;
-            _removeService = removeService;
+            
             _projectWrapper.PropertyChanged += (sender, args) =>
             {
                 if (args.PropertyName == nameof(ProjectWrapper1.IsValid) ||
@@ -42,6 +41,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Commands
         {
             var changedSalesUnits = _projectWrapper.Units
                 .Where(projectUnit => projectUnit.IsChanged)
+                .Where(projectUnit => projectUnit.IsRemoved == false)
                 .Select(projectUnit => projectUnit.Model)
                 .ToList();
 
@@ -49,9 +49,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Commands
                 .Select(projectUnit => projectUnit.Model)
                 .ToList();
 
-            var removedProjectUnits = _projectWrapper.Units.RemovedItems
-                .ToList();
-            removedProjectUnits.ForEach(x => _unitOfWork.Repository<SalesUnit>().Delete(x.Model));
+            _projectWrapper.Units.RemovedItems.ForEach(salesUnit => _unitOfWork.Repository<SalesUnit>().Delete(salesUnit.Model));
 
             _projectWrapper.AcceptChanges();
             _unitOfWork.SaveEntity(_projectWrapper.Model);

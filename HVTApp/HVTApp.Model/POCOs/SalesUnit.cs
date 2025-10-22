@@ -255,6 +255,8 @@ namespace HVTApp.Model.POCOs
             get
             {
                 if (Order != null) return false;
+                if (PriceEngineeringTasks.Any()) return false;
+                if (TechnicalRequirements.Any()) return false;
                 return true;
             }
         }

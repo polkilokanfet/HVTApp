@@ -114,14 +114,14 @@ namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
 
             EditCommand = new EditProjectUnitCommand(UnitOfWork, selectService, dialogService, this, getProductService);
             AddCommand = new AddProjectUnitCommand(UnitOfWork, selectService, dialogService, this, getProductService);
-            RemoveCommand = new RemoveProjectUnitCommand(this, messageService, container.Resolve<IRemoveService>());
+            RemoveCommand = new RemoveProjectUnitCommand(this, messageService);
 
             MoveToExistsProjectCommand = new MoveToExistsProjectCommand(this, UnitOfWork, container);
             MoveToNewProjectCommand = new MoveToNewProjectCommand(this, container);
 
             IncludeServiceInSpecificationCommand = new IncludeServiceInSpecificationCommand(this, container);
 
-            SaveCommand = new SaveProjectCommand(this.ProjectWrapper, UnitOfWork, eventAggregator, container.Resolve<IRemoveService>());
+            SaveCommand = new SaveProjectCommand(this.ProjectWrapper, UnitOfWork, eventAggregator);
 
             RoundUpCommand = new DelegateCommand(() =>
             {

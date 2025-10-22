@@ -83,7 +83,10 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
                 ((ObservableCollection<ProjectUnitGroup>)Groups).Remove(projectUnitGroup);
             projectUnit.PropertyChanged -= PuOnPropertyChanged;
 
-            base.Remove(projectUnit);
+            if (projectUnit.Model.AllowTotalRemove)
+            {
+                base.Remove(projectUnit);
+            }
         }
     }
 }

@@ -2,27 +2,22 @@ using System.Collections.Generic;
 using System.Linq;
 using HVTApp.Infrastructure.Services;
 using HVTApp.Model.POCOs;
-using HVTApp.Model.Services;
-using HVTApp.UI.Modules.Sales.Project1.Commands;
+using HVTApp.UI.Modules.Sales.Project1.ViewModels;
 using HVTApp.UI.Modules.Sales.Project1.Wrappers;
 
-namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
+namespace HVTApp.UI.Modules.Sales.Project1.Commands
 {
     public class RemoveProjectUnitCommand : RaiseCanExecuteChangedCommand
     {
         private readonly ProjectViewModel _viewModel;
         private readonly IMessageService _messageService;
-        private readonly IRemoveService _removeService;
-
 
         public RemoveProjectUnitCommand(
-            ProjectViewModel viewModel, 
-            IMessageService messageService, 
-            IRemoveService removeService)
+            ProjectViewModel viewModel,
+            IMessageService messageService)
         {
             _viewModel = viewModel;
             _messageService = messageService;
-            _removeService = removeService;
             _viewModel.SelectedUnitChanged += RaiseCanExecuteChanged;
         }
 
@@ -44,6 +39,17 @@ namespace HVTApp.UI.Modules.Sales.Project1.ViewModels
             {
                 _messageService.Message("Удаление невозможно", "Оборудованию присвоен заводской заказ.");
                 return;
+            }
+
+            if (salesUnits.Any(salesUnit => salesUnit.PriceEngineeringTasks.Any()))
+            {
+                var dr = _messageService.ConfirmationDialog("С удаляемым связана задача ТСП. Вы всё ещё уверены в удалении?");
+                if (dr != true) return;
+            }
+            else if (salesUnits.Any(salesUnit => salesUnit.TechnicalRequirements.Any()))
+            {
+                var dr = _messageService.ConfirmationDialog("С удаляемым связана задача ТСЕ. Вы всё ещё уверены в удалении?");
+                if (dr != true) return;
             }
 
             foreach (var salesUnit in salesUnits)
