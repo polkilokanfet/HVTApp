@@ -27,6 +27,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Label Grid.Column="0" Grid.Row ="0" Content="Название"/>
@@ -77,6 +78,10 @@
             <Label Grid.Column="0" Grid.Row ="7" Content="КБ ремкомплектов"/>
             <CheckBox Grid.Column="1" Grid.Row="7" MinWidth="200" 
                       IsChecked="{Binding Item.IsKitDepartment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <Label Grid.Column="0" Grid.Row ="8" Content="С коэф.удорожания"/>
+            <CheckBox Grid.Column="1" Grid.Row="8"
+                      IsChecked="{Binding Item.IsPriceIncreaseFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
         </Grid>
 

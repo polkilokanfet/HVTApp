@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:view="clr-namespace:HVTApp.UI.PriceEngineering.View"
              xmlns:converters="clr-namespace:HVTApp.UI.PriceEngineering.Converters"
+             xmlns:igEditors="http://infragistics.com/Editors"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              x:Name="Root">
 
     <UserControl.Resources>
@@ -69,6 +71,8 @@
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
                                         <Label Grid.Column="0" Content="SCC:" Padding="2 0 0 0"/>
@@ -84,7 +88,8 @@
 
                                         <Label Grid.Column="2" Content=" Чертеж:" Padding="2 0 0 0"/>
                                         <TextBox Grid.Column="3" Width="150"
-                                                 BorderThickness="0" Background="AliceBlue"
+                                                 BorderThickness="0" 
+                                                 Background="AliceBlue"
                                                  IsReadOnly="True" 
                                                  MaxWidth="150"
                                                  Text="{Binding ProductBlockEngineer.Model.Design, Mode=OneTime}"/>
@@ -92,7 +97,23 @@
                                                  IsReadOnly="{Binding IsEditMode, Converter={StaticResource ReverseBoolConverter}, UpdateSourceTrigger=PropertyChanged}" 
                                                  Visibility="{Binding SccProductVisibility, ElementName=Root}"
                                                  Text="{Binding ProductBlockEngineer.Design, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                                        <Label Grid.Column="4" Content=" К уд.:" Padding="2 0 0 0"/>
+                                        <TextBox Grid.Column="5" Width="50"
+                                                 BorderThickness="0" 
+                                                 Background="AliceBlue"
+                                                 IsReadOnly="True" 
+                                                 MaxWidth="50"
+                                                 Text="{Binding Model.PriceIncreaseFactor, Mode=OneTime}"/>
+                                        <igEditors:XamNumericEditor 
+                                            ValueType="system:Double" 
+                                            Value="{Binding PriceIncreaseFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Grid.Column="5" Width="50" 
+                                            IsReadOnly="{Binding IsEditMode, Converter={StaticResource ReverseBoolConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                            Visibility="{Binding SccProductVisibility, ElementName=Root}"/>
+
                                     </Grid>
+
                                     <Label Grid.Column="2" Content="Не требует состава (стракчакоста)"
                                            Visibility="{Binding  ProductBlockEngineer.Model, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ProductBlockStructureCostNumberIsRequiredVisibilityReverseConverter}}"/>
 

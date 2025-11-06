@@ -42,6 +42,12 @@ namespace HVTApp.Model.POCOs
         public bool IsKitDepartment { get; set; }
 
         /// <summary>
+        /// КБ с коэффициентом удорожания
+        /// </summary>
+        [Designation("КБ с коэффициентом удорожания"), OrderStatus(10)]
+        public bool IsPriceIncreaseFactor { get; set; } = false;
+
+        /// <summary>
         /// Блок продукта подходит этому департаменту
         /// </summary>
         /// <param name="productBlock"></param>

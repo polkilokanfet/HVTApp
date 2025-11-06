@@ -12,11 +12,13 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
         public string Name { get; }
         public string Constructor { get; set; }
         public string Department { get; set; }
+        public double? PriceIncreaseFactor { get; }
 
-        public SccVersionWrapper(StructureCostVersion model, string name, bool isActual) : base(model)
+        public SccVersionWrapper(StructureCostVersion model, string name, bool isActual, double? priceIncreaseFactor) : base(model)
         {
             Name = name;
             IsActual = isActual;
+            PriceIncreaseFactor = priceIncreaseFactor;
             this.Validate();
         }
 

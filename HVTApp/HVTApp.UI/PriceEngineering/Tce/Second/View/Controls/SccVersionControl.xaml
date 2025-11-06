@@ -26,6 +26,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="30"/>
                         </Grid.ColumnDefinitions>
 
@@ -64,10 +65,27 @@
                          BorderThickness="0"
                          IsReadOnly="True"/>
 
-                <Label Grid.Column="3" Content=" V:"/>
+                <Border Grid.Column="3">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content=" К уд.:"/>
 
-                <editors:XamNumericEditor Grid.Column="4"
-                                          Value="{Binding ElementName=Root, Path=SccVersion.Version, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ValueType="system:Int32"/>
+                        <TextBox 
+                            Background="Transparent"
+                            Foreground="Red"
+                            FontStyle="Italic"
+                            Text="{Binding ElementName=Root, Path=SccVersion.PriceIncreaseFactor, Mode=OneWay}" 
+                            BorderThickness="0"
+                            IsReadOnly="True"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Label Grid.Column="4" Content=" V:"/>
+
+                <editors:XamNumericEditor Grid.Column="5"
+                                          Value="{Binding ElementName=Root, Path=SccVersion.Version, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                          ValueType="system:Int32"/>
                 <!--IsEnabled="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type view:TasksTceView}}, Path=DataContext.AllowEdit, UpdateSourceTrigger=PropertyChanged}"/>-->
 
 

@@ -139,6 +139,12 @@ namespace HVTApp.Model.POCOs
         [Designation("Документация загружена в TeamCenter")]
         public bool IsUploadedDocumentationToTeamCenter { get; set; }
 
+        /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        [Designation("Коэффициент удорожания")]
+        public double? PriceIncreaseFactor { get; set; }
+
         public virtual Specification Specification { get; set; }
     }
 
@@ -477,7 +483,9 @@ namespace HVTApp.Model.POCOs
             if (this.ProductBlock.StructureCostNumberIsRequired)
             {
                 var structureCostNumber = GetStructureCostNumber(this, tceNumber, priceService);
-                yield return GetNewStructureCost(ProductBlockEngineer, structureCostNumber, 1, 1);
+                var structureCost = GetNewStructureCost(ProductBlockEngineer, structureCostNumber, 1, 1);
+                structureCost.PriceIncreaseFactor = this.PriceIncreaseFactor;
+                yield return structureCost;
             }
 
             //стракчакосты добавленных блоков

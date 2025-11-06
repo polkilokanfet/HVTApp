@@ -82,7 +82,7 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
             {
                 if (this.StructureCostVersions.Any(sccVersion => sccVersion.OriginalStructureCostNumber == originalStructureCostNumber) == false)
                 {
-                    var scc = new SccVersionWrapper(new StructureCostVersion(), this.Model.ProductBlock.ToString(), true);
+                    var scc = new SccVersionWrapper(new StructureCostVersion(), this.Model.ProductBlock.ToString(), true, this.Model.PriceIncreaseFactor);
                     this.StructureCostVersions.Add(scc);
                     scc.OriginalStructureCostNumber = originalStructureCostNumber;
                     StructureCostVersions.AcceptChanges();
@@ -132,7 +132,7 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
 
             var originalStructureCostNumber = this.Model.ProductBlock.StructureCostNumber;
             var structureCostName = this.Model.ProductBlock.ToString();
-            StructureCostVersions = new ValidatableChangeTrackingCollection<SccVersionWrapper>(Model.StructureCostVersions.Select(x => new SccVersionWrapper(x, structureCostName, originalStructureCostNumber == x.OriginalStructureCostNumber)));
+            StructureCostVersions = new ValidatableChangeTrackingCollection<SccVersionWrapper>(Model.StructureCostVersions.Select(x => new SccVersionWrapper(x, structureCostName, originalStructureCostNumber == x.OriginalStructureCostNumber, this.Model.PriceIncreaseFactor)));
             RegisterCollection(StructureCostVersions, Model.StructureCostVersions);
         }
     }

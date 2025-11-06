@@ -568,6 +568,10 @@
     <Compile Include="Migrations\202508131018336_StructureCostNumberIsRequired3.Designer.cs">
       <DependentUpon>202508131018336_StructureCostNumberIsRequired3.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511061159532_PriceIncreaseFactor.cs" />
+    <Compile Include="Migrations\202511061159532_PriceIncreaseFactor.Designer.cs">
+      <DependentUpon>202511061159532_PriceIncreaseFactor.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="UnitOfWorkFactory.cs" />
@@ -946,6 +950,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202508131018336_StructureCostNumberIsRequired3.resx">
       <DependentUpon>202508131018336_StructureCostNumberIsRequired3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511061159532_PriceIncreaseFactor.resx">
+      <DependentUpon>202511061159532_PriceIncreaseFactor.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -84,7 +84,9 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.PriceCalculation1.Commands
                     var calculationItem = unitOfWork.Repository<PriceCalculationItem>()
                         .GetById(structureCost.PriceCalculationItemId);
 
-                    var sum = structureCost.UnitPrice.Value;
+                    var sum = structureCost.PriceIncreaseFactor.HasValue
+                        ? structureCost.UnitPrice.Value / structureCost.PriceIncreaseFactor.Value
+                        : structureCost.UnitPrice.Value;
                     var date = calculationItem.RealizationDate;
                     var sumOnDate = new SumOnDate { Sum = sum, Date = date };
 

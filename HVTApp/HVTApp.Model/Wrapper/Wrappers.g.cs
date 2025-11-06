@@ -712,11 +712,19 @@ namespace HVTApp.Model.Wrapper
         /// </summary>
         public System.Boolean IsKitDepartment
         {
-          get { return Model.IsKitDepartment; }
-          set { SetValue(value); }
+            get { return Model.IsKitDepartment; }
+            set { SetValue(value); }
         }
         public System.Boolean IsKitDepartmentOriginalValue => GetOriginalValue<System.Boolean>(nameof(IsKitDepartment));
         public bool IsKitDepartmentIsChanged => GetIsChanged(nameof(IsKitDepartment));
+
+        public System.Boolean IsPriceIncreaseFactor
+        {
+            get { return Model.IsPriceIncreaseFactor; }
+            set { SetValue(value); }
+        }
+        public System.Boolean IsPriceIncreaseFactorOriginalValue => GetOriginalValue<System.Boolean>(nameof(IsPriceIncreaseFactor));
+        public bool IsPriceIncreaseFactorIsChanged => GetIsChanged(nameof(IsPriceIncreaseFactor));
 
         /// <summary>
         /// Id

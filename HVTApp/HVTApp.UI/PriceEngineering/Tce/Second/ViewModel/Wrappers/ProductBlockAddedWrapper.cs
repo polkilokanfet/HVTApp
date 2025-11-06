@@ -22,7 +22,7 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
             if (model.IsRemoved == false &&
                 this.StructureCostVersions.Any(x => x.OriginalStructureCostNumber == originalStructureCostNumber) == false)
             {
-                var scc = new SccVersionWrapper(new StructureCostVersion(), this.Model.ProductBlock.ToString(), true);
+                var scc = new SccVersionWrapper(new StructureCostVersion(), this.Model.ProductBlock.ToString(), true, null);
                 this.StructureCostVersions.Add(scc);
                 scc.OriginalStructureCostNumber = originalStructureCostNumber;
                 StructureCostVersions.AcceptChanges();
@@ -40,7 +40,7 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
             if (Model.StructureCostVersions == null) throw new ArgumentException("StructureCostVersions cannot be null");
             var originalStructureCostNumber = this.Model.ProductBlock.StructureCostNumber;
             var structureCostName = this.Model.ProductBlock.ToString();
-            StructureCostVersions = new ValidatableChangeTrackingCollection<SccVersionWrapper>(Model.StructureCostVersions.Select(x => new SccVersionWrapper(x, structureCostName, originalStructureCostNumber == x.OriginalStructureCostNumber && Model.IsRemoved == false)));
+            StructureCostVersions = new ValidatableChangeTrackingCollection<SccVersionWrapper>(Model.StructureCostVersions.Select(x => new SccVersionWrapper(x, structureCostName, originalStructureCostNumber == x.OriginalStructureCostNumber && Model.IsRemoved == false, null)));
             RegisterCollection(StructureCostVersions, Model.StructureCostVersions);
         }
     }

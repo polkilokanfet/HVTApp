@@ -51,7 +51,6 @@ namespace HVTApp.UI.PriceEngineering.Wrapper
                 }
             }
         }
-
         public bool NeedDesignDocumentationDevelopmentOriginalValue => GetOriginalValue<bool>(nameof(NeedDesignDocumentationDevelopment));
         public bool NeedDesignDocumentationDevelopmentIsChanged => GetIsChanged(nameof(NeedDesignDocumentationDevelopment));
 
@@ -76,6 +75,17 @@ namespace HVTApp.UI.PriceEngineering.Wrapper
         }
         public string DesignDocumentationAvailabilityCommentOriginalValue => GetOriginalValue<string>(nameof(DesignDocumentationAvailabilityComment));
         public bool DesignDocumentationAvailabilityCommentIsChanged => GetIsChanged(nameof(DesignDocumentationAvailabilityComment));
+
+        /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        public double? PriceIncreaseFactor
+        {
+            get => Model.PriceIncreaseFactor;
+            set => SetValue(value);
+        }
+        public double? PriceIncreaseFactorOriginalValue => GetOriginalValue<double?>(nameof(PriceIncreaseFactor));
+        public bool PriceIncreaseFactorIsChanged => GetIsChanged(nameof(PriceIncreaseFactor));
 
         #endregion
 
@@ -139,10 +149,16 @@ namespace HVTApp.UI.PriceEngineering.Wrapper
 
         protected override IEnumerable<ValidationResult> ValidateOther()
         {
+            if (PriceIncreaseFactor.HasValue)
+            {
+                if (PriceIncreaseFactor.Value <= 0)
+                    yield return new ValidationResult("Коэффициент удорожания должен быть больше 0", new[] { nameof(DaysToDesignDocumentationDevelopment) });
+            }
+
             if (DaysToDesignDocumentationDevelopment.HasValue)
             {
                 if (DaysToDesignDocumentationDevelopment < 0)
-                    yield return new ValidationResult("Дней на разработку не должно быть меньше 0", new[] {nameof(DaysToDesignDocumentationDevelopment)});
+                    yield return new ValidationResult("Дней на разработку не должно быть меньше 0", new[] { nameof(DaysToDesignDocumentationDevelopment) });
                 else if (DaysToDesignDocumentationDevelopment > 1024)
                     yield return new ValidationResult("Дней на разработку не должно быть больше 1024", new[] { nameof(DaysToDesignDocumentationDevelopment) });
             }

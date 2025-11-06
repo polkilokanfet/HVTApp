@@ -51,6 +51,13 @@ namespace HVTApp.Model.POCOs
         [Designation("Комментарий"), MaxLength(200)]
         public string Comment { get; set; }
 
+        /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        [Designation("Коэффициент удорожания")]
+        public double? PriceIncreaseFactor { get; set; }
+
+
         public override string ToString()
         {
             return $"{Comment} = {Amount:N2} шт. = {Number}";
