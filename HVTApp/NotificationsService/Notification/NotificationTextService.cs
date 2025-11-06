@@ -344,6 +344,9 @@ namespace NotificationsService
 
         private string GetCommonInfo(PriceCalculation priceCalculation)
         {
+            if (priceCalculation == null)
+                return "Расчёт не найден в базе данных";
+
             var sb = new StringBuilder();
             sb.AppendLine("Расчёт переменных затрат");
             sb.AppendLine("Оборудование:");

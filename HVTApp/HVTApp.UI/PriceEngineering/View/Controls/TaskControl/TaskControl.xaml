@@ -13,6 +13,7 @@
         <converters:PriceEngineeringTaskViewModelToBoarderThicknessConverter x:Key="BoarderThicknessConverter" />
         <converters:ProductBlockStructureCostNumberIsRequiredVisibilityConverter x:Key="ProductBlockStructureCostNumberIsRequiredVisibilityConverter" />
         <converters:ProductBlockStructureCostNumberIsRequiredVisibilityReverseConverter x:Key="ProductBlockStructureCostNumberIsRequiredVisibilityReverseConverter" />
+        <converters:PriceEngineeringTaskPriceIncreaseFactorVisibilityConverter x:Key="PriceIncreaseFactorVisibilityConverter"/>
     </UserControl.Resources>
     
     <!--Задача на блок продукта-->
@@ -72,7 +73,6 @@
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
                                             <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
                                         <Label Grid.Column="0" Content="SCC:" Padding="2 0 0 0"/>
@@ -98,19 +98,32 @@
                                                  Visibility="{Binding SccProductVisibility, ElementName=Root}"
                                                  Text="{Binding ProductBlockEngineer.Design, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                                        <Label Grid.Column="4" Content=" К уд.:" Padding="2 0 0 0"/>
-                                        <TextBox Grid.Column="5" Width="50"
-                                                 BorderThickness="0" 
-                                                 Background="AliceBlue"
-                                                 IsReadOnly="True" 
-                                                 MaxWidth="50"
-                                                 Text="{Binding Model.PriceIncreaseFactor, Mode=OneTime}"/>
-                                        <igEditors:XamNumericEditor 
-                                            ValueType="system:Double" 
-                                            Value="{Binding PriceIncreaseFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                            Grid.Column="5" Width="50" 
-                                            IsReadOnly="{Binding IsEditMode, Converter={StaticResource ReverseBoolConverter}, UpdateSourceTrigger=PropertyChanged}" 
-                                            Visibility="{Binding SccProductVisibility, ElementName=Root}"/>
+                                        <Grid 
+                                            Grid.Column="4" 
+                                            Visibility="{Binding Converter={StaticResource PriceIncreaseFactorVisibilityConverter}}">
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Label Grid.Column="0" Content=" К уд.:" Padding="2 0 0 0"/>
+                                            <TextBox Grid.Column="1" 
+                                                     Width="40"
+                                                     BorderThickness="0" 
+                                                     Background="AliceBlue"
+                                                     IsReadOnly="True" 
+                                                     MaxWidth="40"
+                                                     Text="{Binding Model.PriceIncreaseFactor, Mode=OneTime}"/>
+                                            <igEditors:XamNumericEditor
+                                                Grid.Column="1" 
+                                                ValueType="system:Double" 
+                                                Value="{Binding PriceIncreaseFactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Width="40" 
+                                                IsReadOnly="{Binding IsEditMode, Converter={StaticResource ReverseBoolConverter}, UpdateSourceTrigger=PropertyChanged}" 
+                                                Visibility="{Binding SccProductVisibility, ElementName=Root}"/>
+
+                                        </Grid>
 
                                     </Grid>
 

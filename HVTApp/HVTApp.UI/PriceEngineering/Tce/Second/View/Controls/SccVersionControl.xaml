@@ -3,7 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:editors="http://infragistics.com/Editors"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:converters="clr-namespace:HVTApp.UI.PriceEngineering.Converters"
              x:Name="Root">
+
+    <UserControl.Resources>
+        <converters:PriceIncreaseFactorForBackManagerVisibilityConverter x:Key="PriceIncreaseFactorVisibilityConverter" />
+    </UserControl.Resources>
+
 
     <!--Версия SCC-->
     <Border BorderBrush="Black" BorderThickness="1" Padding="3" Background="Gainsboro" CornerRadius="5">
@@ -11,6 +17,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
@@ -65,21 +72,21 @@
                          BorderThickness="0"
                          IsReadOnly="True"/>
 
-                <Border Grid.Column="3">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content=" К уд.:"/>
+                <StackPanel 
+                    Grid.Column="3" 
+                    Visibility="{Binding ElementName=Root, Path=SccVersion, Mode=OneWay, Converter={StaticResource PriceIncreaseFactorVisibilityConverter}}"
+                    Orientation="Horizontal">
+                    <Label Content=" К уд.:" Foreground="Red"/>
 
-                        <TextBox 
-                            Background="Transparent"
-                            Foreground="Red"
-                            FontStyle="Italic"
-                            Text="{Binding ElementName=Root, Path=SccVersion.PriceIncreaseFactor, Mode=OneWay}" 
-                            BorderThickness="0"
-                            IsReadOnly="True"/>
+                    <TextBox 
+                        Background="Transparent"
+                        Foreground="Red"
+                        FontStyle="Italic"
+                        Text="{Binding ElementName=Root, Path=SccVersion.PriceIncreaseFactor, Mode=OneWay}" 
+                        BorderThickness="0"
+                        IsReadOnly="True"/>
 
-                    </StackPanel>
-
-                </Border>
+                </StackPanel>
 
                 <Label Grid.Column="4" Content=" V:"/>
 
@@ -90,7 +97,6 @@
 
 
             </Grid>
-
 
             <Separator Background="Black" Visibility="{Binding IsActual, Converter={StaticResource BooleanToVisibilityReverseConverter}}"/>
 

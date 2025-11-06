@@ -472,7 +472,9 @@ namespace HVTApp.Model.POCOs
             {
                 var first = grp.First();
                 var f = Fraction.Sum(grp.Select(x => new Fraction(int.Parse(x.AmountNumerator.ToString(CultureInfo.InvariantCulture)), int.Parse(x.AmountDenomerator.ToString(CultureInfo.InvariantCulture)))).ToArray());
-                yield return GetNewStructureCost(first.OriginalStructureCostProductBlock, first.Number, f.Numerator, f.Denominator);
+                var result = GetNewStructureCost(first.OriginalStructureCostProductBlock, first.Number, f.Numerator, f.Denominator);
+                result.PriceIncreaseFactor = first.PriceIncreaseFactor;
+                yield return result;
             }
         }
         private IEnumerable<StructureCost> GetStructureCosts0(string tceNumber = null, int? salesUnitsAmount = null, IPriceService priceService = null)
