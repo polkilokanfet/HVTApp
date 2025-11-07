@@ -572,6 +572,18 @@
     <Compile Include="Migrations\202511061159532_PriceIncreaseFactor.Designer.cs">
       <DependentUpon>202511061159532_PriceIncreaseFactor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511070319268_fix.cs" />
+    <Compile Include="Migrations\202511070319268_fix.Designer.cs">
+      <DependentUpon>202511070319268_fix.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511070351566_fix2.cs" />
+    <Compile Include="Migrations\202511070351566_fix2.Designer.cs">
+      <DependentUpon>202511070351566_fix2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511070412036_fix3.cs" />
+    <Compile Include="Migrations\202511070412036_fix3.Designer.cs">
+      <DependentUpon>202511070412036_fix3.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="UnitOfWorkFactory.cs" />
@@ -953,6 +965,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202511061159532_PriceIncreaseFactor.resx">
       <DependentUpon>202511061159532_PriceIncreaseFactor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511070319268_fix.resx">
+      <DependentUpon>202511070319268_fix.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511070351566_fix2.resx">
+      <DependentUpon>202511070351566_fix2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511070412036_fix3.resx">
+      <DependentUpon>202511070412036_fix3.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
