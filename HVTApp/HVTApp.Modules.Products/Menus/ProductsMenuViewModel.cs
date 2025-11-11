@@ -48,7 +48,7 @@ namespace HVTApp.Modules.Products.Menus
             //if (GlobalAppProperties.UserIsConstructor)
             //    Items.Add(new NavigationItem("Стракчакосты", typeof(StructureCostsView)));
 
-            if (GlobalAppProperties.UserIsConstructor == false)
+            //if (GlobalAppProperties.UserIsConstructor == false)
                 Items.Add(new NavigationItem("Референс", typeof(ReferenceView)));
         }
     }
