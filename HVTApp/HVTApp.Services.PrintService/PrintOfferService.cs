@@ -123,7 +123,7 @@ namespace HVTApp.Services.PrintService
 
             var conditions = new List<string>
             {
-                GetSupervisionConditions(unitsGroups),
+                GetSupervisionConditionsForOffer(unitsGroups),
                 GetShipmentConditions(unitsGroups),
                 PrintPaymentConditions("Условия оплаты:", unitsGroups.GroupBy(x => x.PaymentConditionSet), offer.ValidityDate),
                 PrintConditions("Срок производства (календарных дней, с правом досрочной поставки):", unitsGroups.GroupBy(offerUnitsGroup => offerUnitsGroup.ProductionTerm)),

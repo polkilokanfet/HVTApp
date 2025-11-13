@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows.Media;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Model.POCOs;
@@ -157,21 +158,36 @@ namespace HVTApp.Services.PrintService
             return $"В стоимости {s} учтены расходы, связанные с доставкой этого оборудования на объект, расположенный по адресу {shipmentPositions.First().Facility}.";
         }
 
-        protected string GetSupervisionConditions(List<UnitsGroup> unitsGroups)
+        protected string GetSupervisionConditionsForOffer(List<UnitsGroup> unitsGroups)
         {
             var supervisionPositions = unitsGroups
-                .Where(x => x.ProductsIncluded.Any(xx => xx.Product.ProductBlock.IsSupervision))
+                .Where(unitsGroup => unitsGroup.ProductsIncluded
+                    .Any(productIncluded => productIncluded.Product.ProductBlock.IsSupervision))
                 .ToList();
 
             if (supervisionPositions.Any() == false)
                 return "В стоимости оборудования не учтены расходы, связанные с его шеф-монтажом на объекте.";
 
+            var sb = new StringBuilder();
+
             if (unitsGroups.Count == supervisionPositions.Count)
                 return "В стоимости оборудования учтены расходы, связанные с его шеф-монтажом на объекте.";
-
+            
             var s = supervisionPositions.Select(x => $"{x.Product.Category.NameShort} (поз. {x.Position})").ToStringEnum(", ");
-
             return $"В стоимости {s} учтены расходы, связанные с шеф-монтажом этого оборудования на объекте.";
+        }
+
+        protected string GetSupervisionConditionsForSpecification(List<UnitsGroup> unitsGroups, bool addSupervisionAttachment)
+        {
+            var sb = new StringBuilder(this.GetSupervisionConditionsForOffer(unitsGroups));
+
+            sb.AppendLine("\nНачало: после уведомления Покупателя о направлении шеф-инженера, окончание: в течение 3 дней после прибытия шеф-инженера на объект. Стоимость шефмонтажа входит в цену товара. В случае, если после прибытия специалиста на объект оказание услуг или их завершение в указанный срок стало невозможным по причинам не зависящим от специалиста Поставщик отзывает его с объекта либо вправе дать согласие о продлении срока услуг. В случае согласия Поставщика продлить срок оказания услуг Покупатель осуществляет доплату за сверх установленное пребывание специалиста из расчета 15 000 рублей, за каждый день пребывания сверх указанного срока окончания услуг.");
+
+            sb.Append(addSupervisionAttachment
+                ? "Условия шефмонтажа согласно приложениям №2, 3 к настоящей спецификации."
+                : "Условия шефмонтажа согласно приложениям №1, 2 к договору поставки.");
+
+            return sb.ToString();
         }
 
         protected static string PrintPaymentConditions(string text, IEnumerable<IGrouping<PaymentConditionSet, UnitsGroup>> offerUnitsGroupsGrouped, DateTime date)
