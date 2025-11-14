@@ -306,6 +306,7 @@ namespace HVTApp.TestDataGenerator
         public DesignDepartment DesignDepartmentDrives;
         public DesignDepartment DesignDepartmentCurrentTransformers;
         public DesignDepartment DesignDepartmentVoltageTransformers;
+        public DesignDepartment DesignDepartmentVoltageTransformersCoil;
 
         private void GenerateDesignDepartments()
         {
@@ -418,7 +419,8 @@ namespace HVTApp.TestDataGenerator
                             ParameterDependentEquipmentTypeZip
                         }
                     }
-                }
+                },
+                IsPriceIncreaseFactor = true
             });
 
             DesignDepartmentVoltageTransformers.Clone(new DesignDepartment
@@ -449,6 +451,26 @@ namespace HVTApp.TestDataGenerator
                     }
                 }
             });
+
+            DesignDepartmentVoltageTransformersCoil.Clone(new DesignDepartment
+            {
+                Name = "ТН (катушка)",
+                Head = UserVedernikov,
+                Staff = new List<User> { UserSivkov, UserBaranova },
+                ParameterSets = new List<DesignDepartmentParameters>()
+                {
+                    new DesignDepartmentParameters
+                    {
+                        Name = "ЗНГ-110 (катушка)",
+                        Parameters = new List<Parameter>
+                        {
+                            ParameterTransformersVoltageBlockTypeStandart
+                        }
+                    }
+                }, 
+                IsPriceIncreaseFactor = true
+            });
+
 
         }
 

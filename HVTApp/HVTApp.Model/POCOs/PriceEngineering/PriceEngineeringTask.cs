@@ -300,7 +300,8 @@ namespace HVTApp.Model.POCOs
         private bool HasSccNumberInTce =>
             this.StructureCostVersions.Any(structureCostVersion =>
                 structureCostVersion.Version.HasValue &&
-                structureCostVersion.OriginalStructureCostNumber == this.ProductBlock.StructureCostNumber); 
+                structureCostVersion.OriginalStructureCostNumber == this.ProductBlock.StructureCostNumber &&
+                structureCostVersion.PriceIncreaseFactor.Equals(this.PriceIncreaseFactor)); 
 
 
         /// <summary>

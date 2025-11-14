@@ -712,16 +712,19 @@ namespace HVTApp.Model.Wrapper
         /// </summary>
         public System.Boolean IsKitDepartment
         {
-            get { return Model.IsKitDepartment; }
-            set { SetValue(value); }
+          get { return Model.IsKitDepartment; }
+          set { SetValue(value); }
         }
         public System.Boolean IsKitDepartmentOriginalValue => GetOriginalValue<System.Boolean>(nameof(IsKitDepartment));
         public bool IsKitDepartmentIsChanged => GetIsChanged(nameof(IsKitDepartment));
 
+        /// <summary>
+        /// КБ с коэффициентом удорожания
+        /// </summary>
         public System.Boolean IsPriceIncreaseFactor
         {
-            get { return Model.IsPriceIncreaseFactor; }
-            set { SetValue(value); }
+          get { return Model.IsPriceIncreaseFactor; }
+          set { SetValue(value); }
         }
         public System.Boolean IsPriceIncreaseFactorOriginalValue => GetOriginalValue<System.Boolean>(nameof(IsPriceIncreaseFactor));
         public bool IsPriceIncreaseFactorIsChanged => GetIsChanged(nameof(IsPriceIncreaseFactor));
@@ -2627,7 +2630,7 @@ namespace HVTApp.Model.Wrapper
 	    public NotificationsReportsSettingsEmptyWrapper(NotificationsReportsSettings model) : base(model) { }
     }
 
-
+		
     public partial class PriceEngineeringTaskWrapper : WrapperBase<PriceEngineeringTask>
 	{
 	    public PriceEngineeringTaskWrapper(PriceEngineeringTask model) : base(model) { }
@@ -2787,6 +2790,17 @@ namespace HVTApp.Model.Wrapper
         }
         public System.Boolean IsUploadedDocumentationToTeamCenterOriginalValue => GetOriginalValue<System.Boolean>(nameof(IsUploadedDocumentationToTeamCenter));
         public bool IsUploadedDocumentationToTeamCenterIsChanged => GetIsChanged(nameof(IsUploadedDocumentationToTeamCenter));
+
+        /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        public System.Nullable<System.Double> PriceIncreaseFactor
+        {
+          get { return Model.PriceIncreaseFactor; }
+          set { SetValue(value); }
+        }
+        public System.Nullable<System.Double> PriceIncreaseFactorOriginalValue => GetOriginalValue<System.Nullable<System.Double>>(nameof(PriceIncreaseFactor));
+        public bool PriceIncreaseFactorIsChanged => GetIsChanged(nameof(PriceIncreaseFactor));
 
         /// <summary>
         /// Id
@@ -3789,6 +3803,17 @@ namespace HVTApp.Model.Wrapper
         public bool VersionIsChanged => GetIsChanged(nameof(Version));
 
         /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        public System.Nullable<System.Double> PriceIncreaseFactor
+        {
+          get { return Model.PriceIncreaseFactor; }
+          set { SetValue(value); }
+        }
+        public System.Nullable<System.Double> PriceIncreaseFactorOriginalValue => GetOriginalValue<System.Nullable<System.Double>>(nameof(PriceIncreaseFactor));
+        public bool PriceIncreaseFactorIsChanged => GetIsChanged(nameof(PriceIncreaseFactor));
+
+        /// <summary>
         /// Id
         /// </summary>
         public System.Guid Id
@@ -4528,6 +4553,17 @@ namespace HVTApp.Model.Wrapper
         }
         public System.String CommentOriginalValue => GetOriginalValue<System.String>(nameof(Comment));
         public bool CommentIsChanged => GetIsChanged(nameof(Comment));
+
+        /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        public System.Nullable<System.Double> PriceIncreaseFactor
+        {
+          get { return Model.PriceIncreaseFactor; }
+          set { SetValue(value); }
+        }
+        public System.Nullable<System.Double> PriceIncreaseFactorOriginalValue => GetOriginalValue<System.Nullable<System.Double>>(nameof(PriceIncreaseFactor));
+        public bool PriceIncreaseFactorIsChanged => GetIsChanged(nameof(PriceIncreaseFactor));
 
         /// <summary>
         /// Id

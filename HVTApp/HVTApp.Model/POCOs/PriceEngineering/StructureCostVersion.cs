@@ -20,5 +20,11 @@ namespace HVTApp.Model.POCOs
 
         [Designation("Версия стракчакоста")]
         public int? Version { get; set; } = null;
+
+        /// <summary>
+        /// Коэффициент удорожания
+        /// </summary>
+        [Designation("Коэффициент удорожания")]
+        public double? PriceIncreaseFactor { get; set; }
     }
 }

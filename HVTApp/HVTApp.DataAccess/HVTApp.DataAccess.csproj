@@ -584,6 +584,10 @@
     <Compile Include="Migrations\202511070412036_fix3.Designer.cs">
       <DependentUpon>202511070412036_fix3.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511140417034_PriceIncreaseFactorInSccVersion.cs" />
+    <Compile Include="Migrations\202511140417034_PriceIncreaseFactorInSccVersion.Designer.cs">
+      <DependentUpon>202511140417034_PriceIncreaseFactorInSccVersion.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="UnitOfWorkFactory.cs" />
@@ -974,6 +978,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202511070412036_fix3.resx">
       <DependentUpon>202511070412036_fix3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511140417034_PriceIncreaseFactorInSccVersion.resx">
+      <DependentUpon>202511140417034_PriceIncreaseFactorInSccVersion.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

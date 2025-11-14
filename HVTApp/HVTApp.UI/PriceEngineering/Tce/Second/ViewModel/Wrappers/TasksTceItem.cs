@@ -64,8 +64,10 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
                 var sccChildTasks = this.ChildPriceEngineeringTasks.SelectMany(x => x.SccVersions);
                 var sccBlocksAdded = this.BlockAddedList.SelectMany(x => x.StructureCostVersions);
 
-                return sccMainTask.Union(sccChildTasks).Union(sccBlocksAdded)
-                    .OrderBy(x => x.Name);
+                return sccMainTask
+                    .Union(sccChildTasks)
+                    .Union(sccBlocksAdded)
+                    .OrderBy(sccVersionWrapper => sccVersionWrapper.Name);
             }
         }
 
@@ -80,11 +82,12 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
             //если нет актуального scc, добавляем его
             if (this.Model.ProductBlock.StructureCostNumberIsRequired)
             {
-                if (this.StructureCostVersions.Any(sccVersion => sccVersion.OriginalStructureCostNumber == originalStructureCostNumber) == false)
+                if (this.StructureCostVersions.Any(sccVersion => sccVersion.OriginalStructureCostNumber == originalStructureCostNumber && sccVersion.Model.PriceIncreaseFactor.Equals(this.Model.PriceIncreaseFactor)) == false)
                 {
-                    var scc = new SccVersionWrapper(new StructureCostVersion(), this.Model.ProductBlock.ToString(), true, this.Model.PriceIncreaseFactor);
+                    var scc = new SccVersionWrapper(new StructureCostVersion(), this.Model.ProductBlock.ToString(), true);
                     this.StructureCostVersions.Add(scc);
                     scc.OriginalStructureCostNumber = originalStructureCostNumber;
+                    scc.PriceIncreaseFactor = this.Model.PriceIncreaseFactor;
                     StructureCostVersions.AcceptChanges();
                 }
             }
@@ -132,7 +135,7 @@ namespace HVTApp.UI.PriceEngineering.Tce.Second
 
             var originalStructureCostNumber = this.Model.ProductBlock.StructureCostNumber;
             var structureCostName = this.Model.ProductBlock.ToString();
-            StructureCostVersions = new ValidatableChangeTrackingCollection<SccVersionWrapper>(Model.StructureCostVersions.Select(x => new SccVersionWrapper(x, structureCostName, originalStructureCostNumber == x.OriginalStructureCostNumber, this.Model.PriceIncreaseFactor)));
+            StructureCostVersions = new ValidatableChangeTrackingCollection<SccVersionWrapper>(Model.StructureCostVersions.Select(x => new SccVersionWrapper(x, structureCostName, originalStructureCostNumber == x.OriginalStructureCostNumber && x.PriceIncreaseFactor.Equals(this.Model.PriceIncreaseFactor))));
             RegisterCollection(StructureCostVersions, Model.StructureCostVersions);
         }
     }
