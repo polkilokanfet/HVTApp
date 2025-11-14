@@ -26,5 +26,10 @@ namespace HVTApp.Model.POCOs
         /// </summary>
         [Designation("Коэффициент удорожания")]
         public double? PriceIncreaseFactor { get; set; }
+
+        public override string ToString()
+        {
+            return $"scc: {OriginalStructureCostNumber}, V: {Version}, PFI: {PriceIncreaseFactor}";
+        }
     }
 }

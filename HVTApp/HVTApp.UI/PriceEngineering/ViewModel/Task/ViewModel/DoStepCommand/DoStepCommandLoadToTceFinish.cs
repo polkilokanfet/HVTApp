@@ -46,7 +46,9 @@ namespace HVTApp.UI.PriceEngineering.DoStepCommand
             sb.AppendLine($"Заявка в TeamCenter: {ViewModel.TasksWrapperBackManager.TceNumber}");
             foreach (var sccVersion in ViewModel.TasksTceItem.SccVersions.Where(scc => scc.IsActual))
             {
-                sb.AppendLine($" - {sccVersion.Name}: [{sccVersion.OriginalStructureCostNumber} => {sccVersion.Version}]");
+                sb.AppendLine(sccVersion.Model.PriceIncreaseFactor.HasValue
+                    ? $" - {sccVersion.Name}: [{sccVersion.OriginalStructureCostNumber} => {sccVersion.Version}], [К уд. = {sccVersion.Model.PriceIncreaseFactor.Value}]"
+                    : $" - {sccVersion.Name}: [{sccVersion.OriginalStructureCostNumber} => {sccVersion.Version}]");
             }
 
             return sb.ToString();

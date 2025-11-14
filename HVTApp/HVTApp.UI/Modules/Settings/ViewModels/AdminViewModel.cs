@@ -53,51 +53,24 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
 
                     using (var unitOfWork = container.Resolve<IUnitOfWork>())
                     {
-                        //var productsAll = unitOfWork.Repository<Product>().GetAll();
-
-                        //var productGroups = productsAll
-                        //    .GroupBy(x => x)
-                        //    .Where(x => x.Count() > 1)
-                        //    .ToList();
-
-                        //sb.AppendLine("   Products");
-                        //foreach (var productsGroup in productGroups)
-                        //{
-                        //    var productOk = productsGroup.Single(x => x.ProductBlock.StructureCostNumber != null);
-                        //    var productRemove = productsGroup.Single(x => x.ProductBlock.StructureCostNumber is null);
-                            
-                        //    sb.AppendLine(productRemove.ToString());
-
-                        //    foreach (var productDependent in unitOfWork.Repository<ProductDependent>().Find(x => x.Product.Equals(productRemove)))
-                        //        productDependent.Product = productOk;
-
-                        //    unitOfWork.Repository<Product>().Delete(productRemove);
-                        //}
-                        //unitOfWork.SaveChanges();
-                        //container.Resolve<IMessageService>().Message(sb.ToString());
-
-
-                        //sb.AppendLine("   Blocks");
-                        var blocks = unitOfWork.Repository<ProductBlock>().GetAll();
-
-                        var blocksGroups = blocks
-                            .GroupBy(x => x)
-                            .Where(x => x.Count() > 1)
+                        var tasks = unitOfWork.Repository<PriceEngineeringTask>()
+                            .Find(x => x.PriceIncreaseFactor.HasValue)
+                            .Where(x => x.IsFinishedByDesignDepartment)
+                            .Where(x => x.Status == ScriptStep.LoadToTceFinish)
                             .ToList();
 
-                        foreach (var blockGroup in blocksGroups)
+                        foreach (var priceEngineeringTask in tasks)
                         {
-                            var productBlock = blockGroup.Single(x => x.StructureCostNumber is null);
-                            sb.AppendLine($"- block {productBlock}");
-
-                            foreach (var product in unitOfWork.Repository<Product>().Find(x => x.ProductBlock != null && x.ProductBlock.Id == productBlock.Id))
+                            var sccs = priceEngineeringTask.StructureCostVersions
+                                .Where(x => x.OriginalStructureCostNumber == priceEngineeringTask.ProductBlock.StructureCostNumber)
+                                .ToList();
+                            if (sccs.Any())
                             {
-                                sb.AppendLine($"- product {product}");
-                                unitOfWork.Repository<Product>().Delete(product);
+                                sccs.ForEach(x => x.PriceIncreaseFactor = priceEngineeringTask.PriceIncreaseFactor);
+                                sb.AppendLine($"{priceEngineeringTask} ({sccs.ToStringEnum()})");
                             }
-
-                            unitOfWork.Repository<ProductBlock>().Delete(productBlock);
                         }
+
 
                         unitOfWork.SaveChanges();
                     }
