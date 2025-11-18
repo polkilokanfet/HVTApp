@@ -12,8 +12,15 @@ namespace HVTApp.Model.POCOs
     {
         public static StructureCostVersion GetStructureCostVersion(this IStructureCostVersionsContainer container)
         {
-            return container.StructureCostVersions
-                .FirstOrDefault(version => version.OriginalStructureCostNumber == container.ProductBlock.StructureCostNumber);
+            if (container is PriceEngineeringTask task)
+                return container.StructureCostVersions
+                    .FirstOrDefault(version =>
+                        version.OriginalStructureCostNumber == container.ProductBlock.StructureCostNumber &&
+                        version.PriceIncreaseFactor.Equals(task.PriceIncreaseFactor));
+            else
+                return container.StructureCostVersions
+                    .FirstOrDefault(version => 
+                        version.OriginalStructureCostNumber == container.ProductBlock.StructureCostNumber);
         }
 
         ///// <summary>

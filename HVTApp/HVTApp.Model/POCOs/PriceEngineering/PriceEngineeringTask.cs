@@ -508,7 +508,10 @@ namespace HVTApp.Model.POCOs
             }
         }
 
-        private string GetStructureCostNumber(IStructureCostVersionsContainer structureCostVersionsContainer, string tceNumber, IPriceService priceService)
+        private string GetStructureCostNumber(
+            IStructureCostVersionsContainer structureCostVersionsContainer, 
+            string tceNumber, 
+            IPriceService priceService)
         {
             if (tceNumber != null && structureCostVersionsContainer.GetStructureCostVersion() != null)
             {
