@@ -38,7 +38,7 @@ namespace HVTApp.Services.PrintService
             var paraFormat1 = docWriter.CreateParagraphProperties();
             paraFormat1.Alignment = ParagraphAlignment.Both;
             var specification = _supervisions.First().SalesUnit.Specification;
-            docWriter.PrintParagraph($"В соответствии с договором 0401-21-0050 от 01.07.2021 г., прошу Вас организовать выезд специалиста для проведения шеф-монтажных работ (согласно спецификации {specification?.Number} к договору {specification?.Contract.Number} от {specification?.Contract.Date.ToShortDateString()}) на следующем оборудовании:", paraFormat1);
+            docWriter.PrintParagraph($"В соответствии с договором 0401-26-0002 от 16.01.2026 г., прошу Вас организовать выезд специалиста для проведения шеф-монтажных работ (согласно спецификации {specification?.Number} к договору {specification?.Contract.Number} от {specification?.Contract.Date.ToShortDateString()}) на следующем оборудовании:", paraFormat1);
             
             #region Print Main Table
 
