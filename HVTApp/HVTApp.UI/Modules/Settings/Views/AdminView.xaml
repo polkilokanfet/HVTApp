@@ -11,6 +11,7 @@
         <Button Content="Выбрать продукт" Command="{Binding Command3}"/>
         <Button Content="Выбрать блок" Command="{Binding Command4}"/>
         <Button Content="Выбрать блок (добавленные продукты)" Command="{Binding Command5}"/>
+        <TextBox Text="{Binding Result, UpdateSourceTrigger=PropertyChanged}"/>
     </StackPanel>
     
 </inf:ViewBase>

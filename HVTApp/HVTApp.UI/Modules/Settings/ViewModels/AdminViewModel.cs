@@ -21,16 +21,28 @@ using HVTApp.UI.PriceEngineering.PriceEngineeringTasksContainer;
 using HVTApp.UI.PriceEngineering.Tce.Second;
 using HVTApp.UI.TechnicalRequrementsTasksModule.Wrapper;
 using Microsoft.Practices.ObjectBuilder2;
+using Prism.Mvvm;
 
 namespace HVTApp.UI.Modules.Settings.ViewModels
 {
-    public class AdminViewModel
+    public class AdminViewModel : BindableBase
     {
+        private string _result;
         public DelegateLogCommand Command1 { get; }
         public DelegateLogCommand Command2 { get; }
         public DelegateLogCommand Command3 { get; }
         public DelegateLogCommand Command4 { get; }
         public DelegateLogCommand Command5 { get; }
+
+        public string Result
+        {
+            get => _result;
+            set
+            {
+                _result = value;
+                RaisePropertyChanged();
+            }
+        }
 
         public AdminViewModel(IUnityContainer container)
         {
@@ -53,28 +65,36 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
 
                     using (var unitOfWork = container.Resolve<IUnitOfWork>())
                     {
-                        var tasks = unitOfWork.Repository<PriceEngineeringTask>()
-                            .Find(x => x.PriceIncreaseFactor.HasValue)
-                            .Where(x => x.IsFinishedByDesignDepartment)
-                            .Where(x => x.Status == ScriptStep.LoadToTceFinish)
+                        var salesUnits = unitOfWork.Repository<SalesUnit>()
+                            .Find(x =>
+                                x.Specification != null &&
+                                x.PaymentsActual.Any())
+                            .Where(x =>
+                                x.RealizationDateCalculated.Year > 2025 &&
+                                x.OrderInTakeDate.Year <= 2025)
+                            .OrderBy(x => x.Specification.Contract.Number)
+                            .ThenBy(x => x.Specification.Number)
                             .ToList();
 
-                        foreach (var priceEngineeringTask in tasks)
+                        foreach (var salesUnit in salesUnits)
                         {
-                            var sccs = priceEngineeringTask.StructureCostVersions
-                                .Where(x => x.OriginalStructureCostNumber == priceEngineeringTask.ProductBlock.StructureCostNumber)
-                                .ToList();
-                            if (sccs.Any())
+                            if (Math.Abs(salesUnit.Specification.Vat - 22) < 0.001)
                             {
-                                sccs.ForEach(x => x.PriceIncreaseFactor = priceEngineeringTask.PriceIncreaseFactor);
-                                sb.AppendLine($"{priceEngineeringTask} ({sccs.ToStringEnum()})");
+                                sb.AppendLine($"Договор: {salesUnit.Specification.Contract.Number}, сп.№{salesUnit.Specification.Number}");
+                                sb.AppendLine($"{salesUnit.ToString()}");
+                                foreach (var paymentActual in salesUnit.PaymentsActual)
+                                {
+                                    var original = paymentActual.Sum;
+                                    paymentActual.Sum = original * 1.2 / 1.22;
+                                    sb.AppendLine($"   {original} => {paymentActual.Sum}");
+                                }
                             }
                         }
-
 
                         unitOfWork.SaveChanges();
                     }
 
+                    Result = sb.ToString();
                     container.Resolve<IMessageService>().Message(sb.ToString());
 
                     //Clipboard.SetText(sb.ToString());

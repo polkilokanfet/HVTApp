@@ -40,36 +40,7 @@ namespace HVTApp.UI.Modules.Sales.ViewModels.Groups
             GroupsViewModel = container.Resolve<TGroupsViewModel>();
 
             SaveCommand = new DelegateLogCommand(
-                () =>
-                {
-                    //отписка от событий изменени€ строк с оборудованием
-                    this.GroupsViewModel.GroupChanged -= OnGroupChanged;
-
-                    GroupsViewModel.AcceptChanges();
-
-                    //добавл€ем сущность, если ее не существовало
-                    if (UnitOfWork.Repository<TModel>().GetById(DetailsViewModel.Item.Model.Id) == null)
-                        UnitOfWork.Repository<TModel>().Add(DetailsViewModel.Item.Model);
-
-                    DetailsViewModel.Item.AcceptChanges();
-                    Container.Resolve<IEventAggregator>().GetEvent<TAfterSaveModelEvent>().Publish(DetailsViewModel.Item.Model);
-
-                    //сохран€ем
-                    try
-                    {
-                        UnitOfWork.SaveChanges();
-                    }
-                    catch (DbUpdateConcurrencyException e)
-                    {
-                        Container.Resolve<IMessageService>().Message("ќшибка при сохранении", e.PrintAllExceptions());
-                    }
-
-                    //регистраци€ на событи€ изменени€ строк с оборудованием
-                    this.GroupsViewModel.GroupChanged += OnGroupChanged;
-
-                    SaveCommand.RaiseCanExecuteChanged();
-
-                },
+                SaveCommand_Execute,
                 () =>
                 {
                     //все сущности должны быть валидны
@@ -126,6 +97,36 @@ namespace HVTApp.UI.Modules.Sales.ViewModels.Groups
         }
 
         public bool IsConfirmGoBackWithoutSaving { get; private set; } = false;
+
+        protected virtual void SaveCommand_Execute()
+        {
+            //отписка от событий изменени€ строк с оборудованием
+            this.GroupsViewModel.GroupChanged -= OnGroupChanged;
+
+            GroupsViewModel.AcceptChanges();
+
+            //добавл€ем сущность, если ее не существовало
+            if (UnitOfWork.Repository<TModel>().GetById(DetailsViewModel.Item.Model.Id) == null)
+                UnitOfWork.Repository<TModel>().Add(DetailsViewModel.Item.Model);
+
+            DetailsViewModel.Item.AcceptChanges();
+            Container.Resolve<IEventAggregator>().GetEvent<TAfterSaveModelEvent>().Publish(DetailsViewModel.Item.Model);
+
+            //сохран€ем
+            try
+            {
+                UnitOfWork.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException e)
+            {
+                Container.Resolve<IMessageService>().Message("ќшибка при сохранении", e.PrintAllExceptions());
+            }
+
+            //регистраци€ на событи€ изменени€ строк с оборудованием
+            this.GroupsViewModel.GroupChanged += OnGroupChanged;
+
+            SaveCommand.RaiseCanExecuteChanged();
+        }
 
         protected override void GoBackCommand_Execute()
         {

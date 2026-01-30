@@ -138,5 +138,24 @@ namespace HVTApp.UI.Modules.Sales.ViewModels
             var ourCompanyWrapper = new CompanySimpleWrapper(ourCompany);
             EnumerableExtensions.ForEach(GroupsViewModel.Groups, x => x.Producer = ourCompanyWrapper);
         }
+
+        protected override void SaveCommand_Execute()
+        {
+            // если в спецификации поменяли НДС, необходимо изменить совершённые платежи
+            if (this.DetailsViewModel.Item.VatIsChanged)
+            {
+                var vatOriginal = this.DetailsViewModel.Item.VatOriginalValue;
+                var vatActual = this.DetailsViewModel.Item.Vat;
+                foreach (var salesUnit in this.DetailsViewModel.Item.Model.SalesUnits)
+                {
+                    foreach (var paymentActual in salesUnit.PaymentsActual)
+                    {
+                        paymentActual.Sum = paymentActual.Sum * (1.0 + vatOriginal / 100.0) / (1.0 + vatActual / 100.0);
+                    }
+                }
+            }
+
+            base.SaveCommand_Execute();
+        }
     }
 }
