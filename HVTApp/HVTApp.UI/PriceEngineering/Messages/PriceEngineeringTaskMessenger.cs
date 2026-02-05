@@ -129,20 +129,25 @@ namespace HVTApp.UI.PriceEngineering.Messages
             //исполнителю
             if (this._viewModel.Model.UserConstructor != null &&
                 this._viewModel.Model.UserConstructor.IsPriceEngineeringTaskMessagesEnabled)
+            {
                 this.SendNotification(this._viewModel.Model.UserConstructor, Role.Constructor);
+            }
 
-            if (this._viewModel.Model.UserConstructorInspector != null &&
-                this._viewModel.Model.UserConstructorInspector.IsPriceEngineeringTaskMessagesEnabled)
+            if (this._viewModel.Model.UserConstructorInspector != null)
             {
                 //проверяющему
-                this.SendNotification(this._viewModel.Model.UserConstructorInspector, Role.Constructor);
+                if (this._viewModel.Model.UserConstructorInspector.IsPriceEngineeringTaskMessagesEnabled)
+                {
+                    this.SendNotification(this._viewModel.Model.UserConstructorInspector, Role.Constructor);
+                }
             }
-            else
+            else if(this._viewModel.Model.DesignDepartment?.Head != null)
             {
                 //руководителю
-                if(this._viewModel.Model.DesignDepartment?.Head != null &&
-                   this._viewModel.Model.DesignDepartment.Head.IsPriceEngineeringTaskMessagesEnabled)
+                if (this._viewModel.Model.DesignDepartment.Head.IsPriceEngineeringTaskMessagesEnabled)
+                {
                     this.SendNotification(this._viewModel.Model.DesignDepartment.Head, Role.DesignDepartmentHead);
+                }
             }
         }
 
@@ -182,5 +187,4 @@ namespace HVTApp.UI.PriceEngineering.Messages
             _container.Resolve<IEventAggregator>().GetEvent<PriceEngineeringTaskReciveMessageEvent>().Unsubscribe(OnReciveMessageEvent);
         }
     }
-
 }

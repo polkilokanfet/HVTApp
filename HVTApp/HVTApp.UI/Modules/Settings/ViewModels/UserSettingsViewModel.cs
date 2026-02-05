@@ -29,6 +29,8 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
                 () => 
                     User.IsValid && 
                     User.IsChanged);
+
+            User.PropertyChanged += (sender, args) => SaveCommand.RaiseCanExecuteChanged();
         }
     }
 }

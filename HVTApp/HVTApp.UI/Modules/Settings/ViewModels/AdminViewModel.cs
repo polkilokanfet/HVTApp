@@ -65,32 +65,8 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
 
                     using (var unitOfWork = container.Resolve<IUnitOfWork>())
                     {
-                        var salesUnits = unitOfWork.Repository<SalesUnit>()
-                            .Find(x =>
-                                x.Specification != null &&
-                                x.PaymentsActual.Any())
-                            .Where(x =>
-                                x.RealizationDateCalculated.Year > 2025 &&
-                                x.OrderInTakeDate.Year <= 2025)
-                            .OrderBy(x => x.Specification.Contract.Number)
-                            .ThenBy(x => x.Specification.Number)
-                            .ToList();
-
-                        foreach (var salesUnit in salesUnits)
-                        {
-                            if (Math.Abs(salesUnit.Specification.Vat - 22) < 0.001)
-                            {
-                                sb.AppendLine($"Договор: {salesUnit.Specification.Contract.Number}, сп.№{salesUnit.Specification.Number}");
-                                sb.AppendLine($"{salesUnit.ToString()}");
-                                foreach (var paymentActual in salesUnit.PaymentsActual)
-                                {
-                                    var original = paymentActual.Sum;
-                                    paymentActual.Sum = original * 1.2 / 1.22;
-                                    sb.AppendLine($"   {original} => {paymentActual.Sum}");
-                                }
-                            }
-                        }
-
+                        var users = unitOfWork.Repository<User>().GetAll();
+                        users.ForEach(user => user.IsPriceEngineeringTaskMessagesEnabled = true);
                         unitOfWork.SaveChanges();
                     }
 
