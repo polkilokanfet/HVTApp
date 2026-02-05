@@ -29,6 +29,9 @@ namespace HVTApp.Model.POCOs
         [Designation("Актуален"), Required, OrderStatus(5)]
         public bool IsActual { get; set; } = true;
 
+        [Designation("Показывать сообщения в задачах ТСП"), Required, OrderStatus(30)]
+        public bool IsPriceEngineeringTaskMessagesEnabled { get; set; } = true;
+
         public override string ToString()
         {
             return $"{Employee.Person} ({Employee.Position})";

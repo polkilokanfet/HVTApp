@@ -119,22 +119,29 @@ namespace HVTApp.UI.PriceEngineering.Messages
         /// </summary>
         private void SendNotifications()
         {
-            var manager = _viewModel.Model.GetPriceEngineeringTasks(this.UnitOfWork).UserManager;
-            this.SendNotification(manager, Role.SalesManager);
-
             //менеджеру
-            if (this._viewModel.Model.UserConstructor != null)
+            var manager = _viewModel.Model.GetPriceEngineeringTasks(this.UnitOfWork).UserManager;
+            if (manager.IsPriceEngineeringTaskMessagesEnabled)
+            {
+                this.SendNotification(manager, Role.SalesManager);
+            }
+
+            //исполнителю
+            if (this._viewModel.Model.UserConstructor != null &&
+                this._viewModel.Model.UserConstructor.IsPriceEngineeringTaskMessagesEnabled)
                 this.SendNotification(this._viewModel.Model.UserConstructor, Role.Constructor);
 
-            if (this._viewModel.Model.UserConstructorInspector != null)
+            if (this._viewModel.Model.UserConstructorInspector != null &&
+                this._viewModel.Model.UserConstructorInspector.IsPriceEngineeringTaskMessagesEnabled)
             {
-                //исполнителю
+                //проверяющему
                 this.SendNotification(this._viewModel.Model.UserConstructorInspector, Role.Constructor);
             }
             else
             {
                 //руководителю
-                if(this._viewModel.Model.DesignDepartment?.Head != null)
+                if(this._viewModel.Model.DesignDepartment?.Head != null &&
+                   this._viewModel.Model.DesignDepartment.Head.IsPriceEngineeringTaskMessagesEnabled)
                     this.SendNotification(this._viewModel.Model.DesignDepartment.Head, Role.DesignDepartmentHead);
             }
         }

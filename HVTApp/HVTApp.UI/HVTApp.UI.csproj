@@ -445,6 +445,8 @@
     <Compile Include="Modules\Sales\Project1\Wrappers\ProjectUnitGroupsContainer.cs" />
     <Compile Include="Modules\Sales\ViewModels\Groups\RoundUpModule.cs" />
     <Compile Include="Modules\Sales\ViewModels\LoadSpecificationScanCommand.cs" />
+    <Compile Include="Modules\Settings\ViewModels\UserSettingsViewModel.cs" />
+    <Compile Include="Modules\Settings\ViewModels\UserSettingsWrapper.cs" />
     <Compile Include="PriceEngineering\Converters\PriceEngineeringTaskPriceIncreaseFactorVisibilityConverter.cs" />
     <Compile Include="PriceEngineering\Converters\PriceIncreaseFactorForBackManagerVisibilityConverter.cs" />
     <Compile Include="PriceEngineering\Converters\ProductBlockStructureCostNumberIsRequiredVisibilityConverter.cs" />
@@ -1044,12 +1046,12 @@
       <DependentUpon>SupervisionPriceWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Settings\ViewModels\DataBaseBackupViewModel.cs" />
-    <Compile Include="Modules\Settings\ViewModels\UserSettingsViewModel.cs" />
+    <Compile Include="Modules\Settings\ViewModels\SyncSettingsViewModel.cs" />
     <Compile Include="Modules\Settings\Views\DataBaseBackupView.xaml.cs">
       <DependentUpon>DataBaseBackupView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Settings\Views\UserSettingsView.xaml.cs">
-      <DependentUpon>UserSettingsView.xaml</DependentUpon>
+    <Compile Include="Modules\Settings\Views\SyncSettingsView.xaml.cs">
+      <DependentUpon>SyncSettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\BookRegistration\Views\IncomingRequestView.xaml.cs">
       <DependentUpon>IncomingRequestView.xaml</DependentUpon>
@@ -1294,8 +1296,8 @@
     <Compile Include="Modules\Settings\Views\AdminView.xaml.cs">
       <DependentUpon>AdminView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Modules\Settings\Views\PasswordView.xaml.cs">
-      <DependentUpon>PasswordView.xaml</DependentUpon>
+    <Compile Include="Modules\Settings\Views\UserSettingsView.xaml.cs">
+      <DependentUpon>UserSettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\SupplyModule\Tabs\TabDates.xaml.cs">
       <DependentUpon>TabDates.xaml</DependentUpon>
@@ -2244,11 +2246,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Modules\Settings\Views\UserSettingsView.xaml">
+    <Page Include="Modules\Settings\Views\SyncSettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Modules\Settings\Views\PasswordView.xaml">
+    <Page Include="Modules\Settings\Views\UserSettingsView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

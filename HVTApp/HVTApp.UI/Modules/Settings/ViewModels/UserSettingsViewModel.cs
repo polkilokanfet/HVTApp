@@ -1,29 +1,34 @@
-﻿using HVTApp.Infrastructure.Interfaces.Services.EventService;
+﻿using HVTApp.Infrastructure;
+using HVTApp.Model;
+using HVTApp.Model.POCOs;
 using HVTApp.UI.Commands;
-using Microsoft.Practices.Unity;
+using Prism.Mvvm;
 
 namespace HVTApp.UI.Modules.Settings.ViewModels
 {
-    public class UserSettingsViewModel
+    public class UserSettingsViewModel : BindableBase
     {
-        public DelegateLogCommand StartEventServiceCommand { get; }
-        public DelegateLogCommand StopEventServiceCommand { get; }
+        public PasswordViewModel PasswordViewModel { get; }
+        public UserSettingsWrapper User { get; }
 
-        public UserSettingsViewModel(IUnityContainer container)
+        public DelegateLogCommand SaveCommand { get; set; }
+
+        public UserSettingsViewModel(IUnitOfWork unitOfWork, PasswordViewModel passwordViewModel)
         {
-            var eventServiceClient = container.Resolve<IEventServiceClient>();
+            PasswordViewModel = passwordViewModel;
 
-            StartEventServiceCommand = new DelegateLogCommand(async () =>
+            var user = unitOfWork.Repository<User>().GetById(GlobalAppProperties.User.Id);
+            User = new UserSettingsWrapper(user);
+
+            SaveCommand = new DelegateLogCommand(
+                () =>
                 {
-                    await eventServiceClient.Stop();
-                    await eventServiceClient.Start();
-                });
-
-            StopEventServiceCommand = new DelegateLogCommand(async () =>
-                {
-                    await eventServiceClient.Stop();
-                });
-
+                    User.AcceptChanges();
+                    unitOfWork.SaveChanges();
+                },
+                () => 
+                    User.IsValid && 
+                    User.IsChanged);
         }
     }
 }

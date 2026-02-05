@@ -10127,6 +10127,17 @@ namespace HVTApp.Model.Wrapper
         public bool IsActualIsChanged => GetIsChanged(nameof(IsActual));
 
         /// <summary>
+        /// Показывать сообщения в задачах ТСП
+        /// </summary>
+        public System.Boolean IsPriceEngineeringTaskMessagesEnabled
+        {
+          get { return Model.IsPriceEngineeringTaskMessagesEnabled; }
+          set { SetValue(value); }
+        }
+        public System.Boolean IsPriceEngineeringTaskMessagesEnabledOriginalValue => GetOriginalValue<System.Boolean>(nameof(IsPriceEngineeringTaskMessagesEnabled));
+        public bool IsPriceEngineeringTaskMessagesEnabledIsChanged => GetIsChanged(nameof(IsPriceEngineeringTaskMessagesEnabled));
+
+        /// <summary>
         /// Id
         /// </summary>
         public System.Guid Id
