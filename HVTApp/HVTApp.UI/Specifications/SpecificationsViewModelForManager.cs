@@ -40,48 +40,53 @@ namespace HVTApp.UI.Specifications
                 },
                 () => SelectedItem != null);
 
-            RemoveItemCommand = new DelegateLogConfirmationCommand(
-                MessageService,
-                () =>
-                {
-                    var unitOfWork = Container.Resolve<IUnitOfWork>();
+            //RemoveItemCommand = new DelegateLogConfirmationCommand(
+            //    MessageService,
+            //    () =>
+            //    {
+            //        var unitOfWork = Container.Resolve<IUnitOfWork>();
 
-                    var specification = unitOfWork.Repository<Specification>().GetById(SelectedLookup.Id);
-                    if (specification == null) return;
+            //        var specification = unitOfWork.Repository<Specification>().GetById(SelectedLookup.Id);
+            //        if (specification == null) return;
 
-                    var salesUnits = unitOfWork.Repository<SalesUnit>()
-                        .Find(salesUnit => salesUnit.Specification?.Id == specification.Id);
+            //        var salesUnits = unitOfWork.Repository<SalesUnit>()
+            //            .Find(salesUnit => salesUnit.Specification?.Id == specification.Id);
 
-                    foreach (var salesUnit in salesUnits)
-                    {
-                        var items = unitOfWork.Repository<TaskInvoiceForPaymentItem>()
-                            .Find(item => item.SalesUnits.Contains(salesUnit));
-                        if (items.Any())
-                        {
-                            MessageService.Message("Уведомление", "Спецификация фигурирует в заданиях на создание счёта. Удалить нельзя.");
-                            return;
-                        }
-                    }
+            //        bool hasTaskInvoiceForPayment = false;
+            //        foreach (var salesUnit in salesUnits)
+            //        {
+            //            var items = unitOfWork.Repository<TaskInvoiceForPaymentItem>()
+            //                .Find(item => item.SalesUnits.Contains(salesUnit));
+            //            if (items.Any())
+            //            {
+            //                hasTaskInvoiceForPayment = true;
 
-                    salesUnits.ForEach(salesUnit => salesUnit.Specification = null);
-                    specification.PriceEngineeringTasks.ForEach(task => task.Specification = null);
-                    specification.TechnicalRequrements.ForEach(requrements => requrements.Specification = null);
+            //                var dr = MessageService.ConfirmationDialog( "По этой спецификации формировался счёт на оплату. Вы уверены в удалении?");
+            //                if(dr == false)
+            //                    return;
+            //            }
+            //        }
 
-                    try
-                    {
-                        unitOfWork.Repository<Specification>().Delete(specification);
-                        unitOfWork.SaveChanges();
-                    }
-                    catch (DbUpdateException e)
-                    {
-                        MessageService.Message(e.GetType().ToString(), e.PrintAllExceptions());
-                        return;
-                    }
+            //        salesUnits.ForEach(salesUnit => salesUnit.Specification = null);
+            //        specification.PriceEngineeringTasks.ForEach(task => task.Specification = null);
+            //        specification.TechnicalRequrements.ForEach(requrements => requrements.Specification = null);
 
-                    EventAggregator.GetEvent<AfterRemoveSpecificationEvent>().Publish(specification);
+            //        try
+            //        {
+            //            if(hasTaskInvoiceForPayment == false) 
+            //                unitOfWork.Repository<Specification>().Delete(specification);
+            //            unitOfWork.SaveChanges();
+            //        }
+            //        catch (DbUpdateException e)
+            //        {
+            //            MessageService.Message(e.GetType().ToString(), e.PrintAllExceptions());
+            //            return;
+            //        }
 
-                },
-                () => SelectedItem != null);
+            //        EventAggregator.GetEvent<AfterRemoveSpecificationEvent>().Publish(specification);
+
+            //    },
+            //    () => SelectedItem != null);
         }
     }
 }

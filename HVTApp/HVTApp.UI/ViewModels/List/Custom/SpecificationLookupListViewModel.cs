@@ -39,8 +39,7 @@ namespace HVTApp.UI.ViewModels
                         var specification = unitOfWork.Repository<Specification>().GetById(SelectedLookup.Id);
                         if (specification == null) return;
 
-                        var salesUnits = unitOfWork.Repository<SalesUnit>()
-                            .Find(salesUnit => salesUnit.Specification?.Id == specification.Id);
+                        var salesUnits = specification.SalesUnits;
 
                         foreach (var salesUnit in salesUnits)
                         {
@@ -48,14 +47,17 @@ namespace HVTApp.UI.ViewModels
                                 .Find(item => item.SalesUnits.Contains(salesUnit));
                             if (items.Any())
                             {
-                                MessageService.Message("Уведомление", "Спецификация фигурирует в заданиях на создание счёта. Удалить нельзя.");
-                                return;
+                                var dr = MessageService.ConfirmationDialog("Спецификация фигурирует в заданиях на создание счёта. Вы уверены в удалении?");
+                                if(dr == false)
+                                    return;
+
+                                break;
                             }
                         }
 
                         salesUnits.ForEach(salesUnit => salesUnit.Specification = null);
                         specification.PriceEngineeringTasks.ForEach(task => task.Specification = null);
-                        specification.TechnicalRequrements.ForEach(requrements => requrements.Specification = null);
+                        specification.TechnicalRequrements.ForEach(requirements => requirements.Specification = null);
 
                         try
                         {
