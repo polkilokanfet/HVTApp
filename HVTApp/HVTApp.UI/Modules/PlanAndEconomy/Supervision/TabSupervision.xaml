@@ -4,11 +4,31 @@
                                  xmlns:inf="clr-namespace:HVTApp.Infrastructure;assembly=HVTApp.Infrastructure"
                                  x:Class="HVTApp.UI.Modules.PlanAndEconomy.Supervision.TabSupervision"
                                  Header="Обновление">
-    
+
     <infRib:RibbonGroup Caption="Действия">
         <infRib:ButtonTool Caption="Сохранить" Command="{Binding SaveCommand}" SmallImage="/HVTApp.UI;component/Images/save.png"/>
         <infRib:ButtonTool Caption="Обновить" Command="{Binding ReloadCommand}" SmallImage="/HVTApp.UI;component/Images/refresh.png"/>
-        <infRib:ButtonTool Caption="Письмо" Command="{Binding PrintLetterCommand}" SmallImage="/HVTApp.UI;component/Images/print.png"/>
     </infRib:RibbonGroup>
-    
+
+    <infRib:RibbonGroup Caption="Данные в письме о ШМ">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MinWidth="50"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="Номер договора: "/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SupervisionContractNumber, UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Grid.Row="1" Grid.Column="0" Content="Дата договора: "/>
+            <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding SupervisionContractDate}"/>
+        </Grid>
+    </infRib:RibbonGroup>
+
+    <infRib:RibbonGroup Caption="Письмо о ШМ">
+        <infRib:ButtonTool Caption="Сформировать" Command="{Binding PrintLetterCommand}" SmallImage="/HVTApp.UI;component/Images/print.png"/>
+    </infRib:RibbonGroup>
+
 </inf:RibbonTabItemWithViewModel>

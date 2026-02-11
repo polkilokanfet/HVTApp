@@ -1,5 +1,12 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HVTApp.UI.Properties" GeneratedClassName="Settings">
   <Profiles />
-  <Settings />
+  <Settings>
+    <Setting Name="SupervisionContractNumber" Type="System.String" Scope="User">
+      <Value Profile="(Default)">0401-26-0002</Value>
+    </Setting>
+    <Setting Name="SupervisionContractDate" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2026-01-12</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

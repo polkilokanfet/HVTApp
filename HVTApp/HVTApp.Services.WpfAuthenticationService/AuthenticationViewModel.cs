@@ -28,7 +28,7 @@ namespace HVTApp.Services.WpfAuthenticationService
 
         public string Login
         {
-            get { return _login; }
+            get => _login;
             set
             {
                 _login = value;
@@ -38,7 +38,7 @@ namespace HVTApp.Services.WpfAuthenticationService
 
         public string Password
         {
-            get { return _password; }
+            get => _password;
             set
             {
                 _password = value;
@@ -84,9 +84,9 @@ namespace HVTApp.Services.WpfAuthenticationService
         private void CheckUser()
         {
             var password = Guid.Empty;
-            if (!String.IsNullOrEmpty(_password))
+            if (!string.IsNullOrEmpty(_password))
                 password = StringToGuid.GetHashString(_password);
-            User = _users.FirstOrDefault(x => x.Login == Login && x.Password == password);
+            User = _users.FirstOrDefault(user => user.Login == Login && user.Password == password);
 
             Roles.Clear();
             SelectedRole = null;

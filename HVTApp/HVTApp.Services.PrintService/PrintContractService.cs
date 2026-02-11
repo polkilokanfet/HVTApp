@@ -211,7 +211,7 @@ namespace HVTApp.Services.PrintService
             var sum = unitsGroups.Sum(x => x.Total);
             var paragraphPropertiesCenter = docWriter.CreateParagraphProperties();
             paragraphPropertiesCenter.Alignment = ParagraphAlignment.Center;
-            docWriter.PrintParagraph($"Общая стоимость по спецификации: {sum.ToSumWordCurrency()} рублей, без НДС.", paragraphPropertiesCenter);
+            docWriter.PrintParagraph($"Общая стоимость по спецификации: {sum.ToSumWordCurrency()}, без НДС.", paragraphPropertiesCenter);
 
             #endregion
 

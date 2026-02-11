@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.ViewModels;
@@ -34,6 +33,28 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.Supervision
         public DelegateLogCommand SaveCommand { get; }
 
         public DelegateLogCommand PrintLetterCommand { get; }
+
+        public string SupervisionContractNumber
+        {
+            get => Properties.Settings.Default.SupervisionContractNumber;
+            set
+            {
+                Properties.Settings.Default.SupervisionContractNumber = value;
+                Properties.Settings.Default.Save();
+                RaisePropertyChanged();
+            }
+        }
+
+        public DateTime SupervisionContractDate
+        {
+            get => Properties.Settings.Default.SupervisionContractDate;
+            set
+            {
+                Properties.Settings.Default.SupervisionContractDate = value;
+                Properties.Settings.Default.Save();
+                RaisePropertyChanged();
+            }
+        }
 
         public SupervisionViewModel(IUnityContainer container) : base(container)
         {
@@ -109,7 +130,12 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.Supervision
                     if (unitOfWork.SaveEntity(letter).OperationCompletedSuccessfully)
                     {
                         Container.Resolve<IPrintSupervisionLetterService>()
-                            .PrintSupervisionLetter(SelectedUnits.Cast<SupervisionWr>().Select(x => x.Model), letter, fileManagerService.GetLettersDefaultStoragePath());
+                            .PrintSupervisionLetter(
+                                SelectedUnits.Cast<SupervisionWr>().Select(x => x.Model), 
+                                SupervisionContractNumber,
+                                SupervisionContractDate,
+                                letter, 
+                                fileManagerService.GetLettersDefaultStoragePath());
                     }
 
                 },

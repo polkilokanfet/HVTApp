@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Media;
-using HVTApp.Infrastructure;
-using HVTApp.Infrastructure.Extensions;
-using HVTApp.Infrastructure.Services;
-using HVTApp.Model;
 using HVTApp.Model.POCOs;
 using HVTApp.Model.Services;
 using HVTApp.Services.PrintService.Extensions;
@@ -19,9 +15,17 @@ namespace HVTApp.Services.PrintService
         public PrintSupervisionLetterService(IUnityContainer container) : base(container) { }
 
         private List<Supervision> _supervisions;
-        public void PrintSupervisionLetter(IEnumerable<Supervision> supervisions1, Document letter, string path = "")
+        private string _supervisionContractNumber;
+        private DateTime _supervisionContractDate;
+        public void PrintSupervisionLetter(
+            IEnumerable<Supervision> supervisions1,
+            string supervisionContractNumber,
+            DateTime supervisionContractDate, 
+            Document letter, string path = "")
         {
             _supervisions = supervisions1.OrderBy(x => x.SalesUnit.SerialNumber).ToList();
+            _supervisionContractNumber = supervisionContractNumber;
+            _supervisionContractDate = supervisionContractDate;
             this.PrintOnLetterhead(letter, path);
         }
 
@@ -38,7 +42,7 @@ namespace HVTApp.Services.PrintService
             var paraFormat1 = docWriter.CreateParagraphProperties();
             paraFormat1.Alignment = ParagraphAlignment.Both;
             var specification = _supervisions.First().SalesUnit.Specification;
-            docWriter.PrintParagraph($"В соответствии с договором 0401-26-0002 от 16.01.2026 г., прошу Вас организовать выезд специалиста для проведения шеф-монтажных работ (согласно спецификации {specification?.Number} к договору {specification?.Contract.Number} от {specification?.Contract.Date.ToShortDateString()}) на следующем оборудовании:", paraFormat1);
+            docWriter.PrintParagraph($"В соответствии с договором {_supervisionContractNumber} от {_supervisionContractDate.ToShortDateString()} г., прошу Вас организовать выезд специалиста для проведения шеф-монтажных работ (согласно спецификации {specification?.Number} к договору {specification?.Contract.Number} от {specification?.Contract.Date.ToShortDateString()}) на следующем оборудовании:", paraFormat1);
             
             #region Print Main Table
 
@@ -111,7 +115,7 @@ namespace HVTApp.Services.PrintService
 
             #region Print Text After Table
 
-            docWriter.PrintParagraph("Оплата стоимости шеф-монтажных работ будет произведена в соответствии с договором 0401-21-0050 от 01.07.2021 г.", paraFormat1);
+            docWriter.PrintParagraph($"Оплата стоимости шеф-монтажных работ будет произведена в соответствии с договором {_supervisionContractNumber} от {_supervisionContractDate.ToShortDateString()} г.", paraFormat1);
             var manager = _supervisions.First().SalesUnit.Project.Manager.Employee;
             docWriter.PrintParagraph($"Ответственный менеджер: {manager.Person}, тел.: {manager.PhoneNumber}; e-mail: {manager.Email}", paraFormat1);
             docWriter.PrintParagraph("Приложение: письмо Заказчика.", paraFormat1);
