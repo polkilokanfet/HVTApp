@@ -209,11 +209,9 @@ namespace HVTApp.Services.PrintService
 
             //Сумма прописью
             var sum = unitsGroups.Sum(x => x.Total);
-            var vatSum = sum * specification.Vat / 100;
-            var totalSum = sum + vatSum;
             var paragraphPropertiesCenter = docWriter.CreateParagraphProperties();
             paragraphPropertiesCenter.Alignment = ParagraphAlignment.Center;
-            docWriter.PrintParagraph($"Всего по настоящей спецификации: {totalSum.ToSumWordCurrency()}, в том числе НДС {vatSum.ToSumWordCurrency()}", paragraphPropertiesCenter);
+            docWriter.PrintParagraph($"Общая стоимость по спецификации: {sum.ToSumWordCurrency()} рублей, без НДС.", paragraphPropertiesCenter);
 
             #endregion
 
@@ -234,7 +232,7 @@ namespace HVTApp.Services.PrintService
                 { "Шеф-монтаж", GetSupervisionConditionsForSpecification(unitsGroups, addSupervisionAttachment) },
                 { "Изготовитель", "ООО \"Эльмаш (УЭТМ)\" (ИНН 6686007865)" },
                 { "Адреса электронной почты", $"Согласно статье 12(2) договора поставки для направления уведомлений, сообщений, писем Стороны определяют следующие адреса: {c1.Email} (Поставщик), {c2.Email} (Покупатель)" },
-                { "Иные условия", "Нет" }
+                { "Иные условия", "Сумма НДС предъявляется поставщиком Покупателю дополнительно к цене на товар, исчисляется в соответствии с действующей ставкой налога, предусмотренной НК РФ на момент отгрузки/оплаты." }
             };
 
             docWriter.StartTable(2, GetTableProperties(docWriter, docWriter.CreateTableBorderProperties()));
