@@ -209,9 +209,10 @@ namespace HVTApp.Services.PrintService
 
             //Сумма прописью
             var sum = unitsGroups.Sum(x => x.Total);
+            var sumVat = sum * specification.Vat / 100.0;
             var paragraphPropertiesCenter = docWriter.CreateParagraphProperties();
             paragraphPropertiesCenter.Alignment = ParagraphAlignment.Center;
-            docWriter.PrintParagraph($"Общая стоимость по спецификации: {sum.ToSumWordCurrency()}, без НДС.", paragraphPropertiesCenter);
+            docWriter.PrintParagraph($"Общая стоимость по спецификации: {(sum + sumVat).ToSumWordCurrency()}, в том числе НДС {sumVat.ToSumWordCurrency()}.", paragraphPropertiesCenter);
 
             #endregion
 
