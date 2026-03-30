@@ -199,7 +199,8 @@ namespace HVTApp.Model.POCOs
                     ScriptStep.LoadToTceFinish,
                     ScriptStep.ProductionRequestStart,
                     ScriptStep.ProductionRequestFinish,
-                    ScriptStep.ProductionRequestStop
+                    ScriptStep.ProductionRequestStop, 
+                    ScriptStep.ProductionRequestCancel
                 };
 
                 return statuses.Contains(Status);
