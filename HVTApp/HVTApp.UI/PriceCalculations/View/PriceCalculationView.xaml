@@ -46,7 +46,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
@@ -189,17 +188,6 @@
             <GroupBox Grid.Row="2" Header="Комментарий">
                 <TextBox Text="{Binding HistoryItem.Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </GroupBox>
-
-            <Expander Grid.Row="3" IsExpanded="False" Header="Информация о КД" Visibility="{Binding CurrentUserIsManager, Mode=OneTime, Converter={StaticResource VisibilityConverter}}">
-                <TextBox HorizontalScrollBarVisibility="Auto" 
-                         VerticalScrollBarVisibility="Auto"
-                         MaxHeight="300"
-                         VerticalAlignment="Stretch"
-                         Text="{Binding DesignDocumentationInfo, Mode=OneWay}"
-                         IsReadOnly="True" 
-                         Background="Transparent" 
-                         BorderThickness="0"/>
-            </Expander>
 
         </Grid>
     </GroupBox>

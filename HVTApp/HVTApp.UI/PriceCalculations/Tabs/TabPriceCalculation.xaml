@@ -79,6 +79,11 @@
                            Command="{Binding LoadFileFromDbCommand}"
                            SmallImage="/HVTApp.UI;component/Images/out.png" />
 
+        <infRib:ButtonTool Caption="Карточка"
+                           Command="{Binding LoadCardCommand}"
+                           Visibility="{Binding CurrentUserIsManager, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           SmallImage="/HVTApp.UI;component/Images/out.png" />
+
         <infRib:ButtonTool Caption="Сохранить" Command="{Binding SaveCommand}" SmallImage="/HVTApp.UI;component/Images/save.png"/>
 
     </infRib:RibbonGroup>

@@ -61,6 +61,7 @@
     <Compile Include="PrintBlankLetterService.cs" />
     <Compile Include="PrintContractService.cs" />
     <Compile Include="PrintNoticeOfCompletionOfProductionService.cs" />
+    <Compile Include="PrintPriceCalculationInformationCardService.cs" />
     <Compile Include="PrintPriceEngineeringService.cs" />
     <Compile Include="PrintServiceBase.cs" />
     <Compile Include="PrintSupervisionLetterService.cs" />

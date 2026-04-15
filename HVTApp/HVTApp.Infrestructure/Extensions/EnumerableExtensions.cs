@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Infragistics.Windows.Editors;
 
 namespace HVTApp.Infrastructure.Extensions
@@ -104,6 +105,21 @@ namespace HVTApp.Infrastructure.Extensions
             return firstList.All(x => secondList.Contains(x));
         }
 
+        /// <summary>
+        /// Последовательности имеют пересечения по Id
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="firstEnumerable"></param>
+        /// <param name="secondEnumerable"></param>
+        /// <returns></returns>
+        public static bool HasIntersectById<T>(this IEnumerable<T> firstEnumerable, IEnumerable<T> secondEnumerable)
+            where T : IId
+        {
+            return firstEnumerable.Select(member => member.Id)
+                .Intersect(
+                    secondEnumerable.Select(member => member.Id))
+                .Any();
+        }
 
         /// <summary>
         /// Последовательность содержит элемент с таким Id
