@@ -22,7 +22,7 @@ namespace HVTApp.Services.PrintService
         public void Print(PriceCalculation calculation)
         {
             //полный путь к файлу (с именем файла)
-            var fullPath = Path.GetTempPath() + $"Карточка";
+            var fullPath = $"{Path.GetTempPath()}Карточка.doc";
 
             var docWriter = GetWordDocumentWriter(fullPath);
             if (docWriter == null) return;
@@ -34,6 +34,9 @@ namespace HVTApp.Services.PrintService
             foreach (var priceCalculationItem in calculation.PriceCalculationItems.OrderBy(x => x.PositionInTeamCenter))
             {
                 var salesUnit = priceCalculationItem.SalesUnits.First();
+                var headCompany = salesUnit.Facility.OwnerCompany
+                    .ParentCompanies()
+                    .FirstOrDefault(x => x.ParentCompany == null) ?? salesUnit.Facility.OwnerCompany;
 
                 docWriter.PrintParagraph("");
                 docWriter.PrintParagraph($"поз.{priceCalculationItem.PositionInTeamCenter} {salesUnit.Product.ToString()}");
@@ -46,7 +49,7 @@ namespace HVTApp.Services.PrintService
                     { "Объект", salesUnit.Facility.ToString() },
                     { "Владелец объекта", salesUnit.Facility.OwnerCompany.ToString() },
                     { "Местоположение", salesUnit.Facility.Address.ToString() },
-                    { "Головная компания", salesUnit.Facility.OwnerCompany.ParentCompanies().FirstOrDefault(x => x.ParentCompany == null)?.ToString() },
+                    { "Головная компания", headCompany.ToString() },
                     { "Заключение ОГК", GetDesignerInformation(priceCalculationItem) }
                 };
 
@@ -108,7 +111,7 @@ namespace HVTApp.Services.PrintService
 
                 var result = sb.ToString();
                 sb.Clear();
-                sb.AppendLine($"Заключение ОГК ВВА по наличию КД (ID в УП ВВА: {tasks.NumberFull}; ID в TeamCenter: {tasks.TceNumber}):");
+                sb.AppendLine($"ID в УП ВВА: {tasks.NumberFull}; ID в TeamCenter: {tasks.TceNumber}");
                 sb.AppendLine(string.IsNullOrWhiteSpace(result)
                     ? "Документация в наличии (не потребуется времени на её разработку)"
                     : result);
@@ -120,7 +123,7 @@ namespace HVTApp.Services.PrintService
 
         private string GetBlockInfo(PriceEngineeringTask task)
         {
-            return $"   Блок ({task.ProductBlock.Designation} (ID в УП ВВА: {task.Number}))";
+            return $" - Блок ({task.ProductBlock.Designation} (ID в УП ВВА: {task.Number}))";
         }
 
         protected override string GetFullPath(Document document, string path)
