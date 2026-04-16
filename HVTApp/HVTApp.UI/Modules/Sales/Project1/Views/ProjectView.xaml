@@ -164,6 +164,7 @@
                                     <dp:TextField AlternateBinding="{Binding Producer}" BindingType="UseAlternateBinding" Label="Производитель" Width="Auto" />
                                     <dp:TextField AlternateBinding="{Binding PaymentConditionSet.Model}" BindingType="UseAlternateBinding" Label="Условия оплаты" Width="300" />
                                     <dp:TextField AlternateBinding="{Binding Comment, Mode=TwoWay}" BindingType="UseAlternateBinding" Label="Комментарий" Width="200" AllowEdit="True" />
+                                    <dp:TextField AlternateBinding="{Binding OrderNumber}" BindingType="UseAlternateBinding" Label="з/з" Width="Auto" />
                                     <dp:TextField AlternateBinding="{Binding Specification}" BindingType="UseAlternateBinding" Label="Спецификация" Width="Auto" />
                                     <dp:CheckBoxField Name="IsRemoved" AlternateBinding="{Binding IsRemoved}" BindingType="UseAlternateBinding" Label="Удалён" Width="Auto" Visibility="Hidden"/>
                                     <dp:Field Name="Units" IsExpandable="True"/>
@@ -317,6 +318,30 @@
                                 </ScrollViewer>
 
                             </TabItem>
+
+                            <TabItem Header="Платежи (без НДС)">
+                                <ScrollViewer
+                                    HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Auto">
+
+                                    <dp:XamDataGrid
+                                        x:Name="PaymentsDataGrid"
+                                        DataSource="{Binding SelectedUnit.Payments}" 
+                                        Style="{StaticResource XamDataGridWithoutGroupByArea}">
+                                        <dp:XamDataGrid.FieldLayouts>
+                                            <dp:FieldLayout>
+                                                <dp:FieldLayout.Fields>
+                                                    <dp:DateTimeField AlternateBinding="{Binding Date}" BindingType="UseAlternateBinding" Label="Дата" Width="Auto" AllowResize="False"/>
+                                                    <dp:NumericField AlternateBinding="{Binding Sum}" BindingType="UseAlternateBinding" Label="Сумма" Width="Auto" AllowResize="False"/>
+                                                    <dp:NumericField AlternateBinding="{Binding Part}" BindingType="UseAlternateBinding" Label="Часть (%)" Width="Auto" AllowResize="False" />
+                                                </dp:FieldLayout.Fields>
+                                            </dp:FieldLayout>
+                                        </dp:XamDataGrid.FieldLayouts>
+                                    </dp:XamDataGrid>
+                                </ScrollViewer>
+
+                            </TabItem>
+
 
                         </TabControl>
 

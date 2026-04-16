@@ -9,11 +9,13 @@ using HVTApp.Model.Wrapper.Base.TrackingCollections;
 using Microsoft.Practices.ObjectBuilder2;
 using Prism.Mvvm;
 using static HVTApp.UI.Modules.Sales.Project1.Wrappers.ProjectUnit;
+using EnumerableExtensions = HVTApp.Infrastructure.Extensions.EnumerableExtensions;
 
 namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 {
     public class ProjectUnitGroup : BindableBase, IProjectUnit
     {
+        private IProjectUnit _projectUnitImplementation;
         public ICollection<ProjectUnit> Units { get; }
 
         public int Amount => Units.Count;
@@ -122,6 +124,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
         }
 
         public Specification Specification => Units.First().Specification;
+        public string OrderNumber => EnumerableExtensions.ToDistinctOrderedString(Units.Select(projectUnit => projectUnit.OrderNumber));
 
         public IEnumerable<ProjectUnitProductIncludedGroup> ProductsIncludedGroups =>
             this.Units
@@ -133,6 +136,11 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 
         public Price Price => GlobalAppProperties.PriceService.GetPrice(this.Units.Select(unit => unit.Model), Units.First().Model.RealizationDateCalculated, true);
         public ProjectUnitCalculatedParts CalculatedParts { get; }
+
+        public IEnumerable<PaymentViewModel> Payments => this.Units
+            .SelectMany(projectUnit => projectUnit.Payments)
+            .OrderBy(paymentViewModel => paymentViewModel.Date)
+            .ThenByDescending(paymentViewModel => paymentViewModel.Sum);
 
         public IEnumerable<Price> Prices => new List<Price> { this.Price };
 

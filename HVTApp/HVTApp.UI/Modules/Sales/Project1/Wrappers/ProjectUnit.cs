@@ -20,6 +20,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
         }
 
         public Specification Specification => this.Model.Specification;
+        public string OrderNumber => this.Model.Order?.Number;
 
         #region SimpleProperties
 
@@ -134,6 +135,12 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 
         public Price Price => GlobalAppProperties.PriceService.GetPrice(this.Model, this.Model.RealizationDateCalculated, true);
         public ProjectUnitCalculatedParts CalculatedParts { get; }
+
+        public IEnumerable<PaymentViewModel> Payments =>
+            this.Model.PaymentsActual
+                .Select(paymentActual => new PaymentViewModel(paymentActual, Model.Cost))
+                .OrderBy(paymentViewModel => paymentViewModel.Date);
+
         public IEnumerable<Price> Prices => new List<Price> { this.Price };
 
         #region Ctors
@@ -207,6 +214,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
                 if (!Equals(x.PaymentConditionSet?.Model.Id, y.PaymentConditionSet?.Model.Id)) return false;
                 if (!Equals(x.Producer?.Model.Id, y.Producer?.Model.Id)) return false;
                 if (!Equals(x.Specification?.Id, y.Specification?.Id)) return false;
+                if (!Equals(x.OrderNumber, y.OrderNumber)) return false;
 
                 var productsInclX = x.ProductsIncludedGroups
                     .SelectMany(productIncludedGroup => productIncludedGroup.Items)

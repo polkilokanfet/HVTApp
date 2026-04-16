@@ -26,6 +26,7 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
 
         Project Project { get; set; }
         Specification Specification { get; }
+        string OrderNumber { get; }
 
         /// <summary>
         /// ¬ключенные продукты
@@ -36,5 +37,26 @@ namespace HVTApp.UI.Modules.Sales.Project1.Wrappers
         Price Price { get; }
 
         ProjectUnitCalculatedParts CalculatedParts { get; }
+
+        IEnumerable<PaymentViewModel> Payments { get; }
+    }
+
+    public class PaymentViewModel
+    {
+        public DateTime Date { get; }
+
+        public double Sum { get; }
+
+        public double Cost { get; }
+
+        public double Part => Sum / Cost * 100.0;
+
+        public PaymentViewModel(PaymentActual payment, double cost)
+        {
+            this.Date = payment.Date;
+            this.Sum = payment.Sum;
+            this.Cost = cost;
+        }
+
     }
 }
