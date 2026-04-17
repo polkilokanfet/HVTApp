@@ -2,6 +2,7 @@
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Services;
 using HVTApp.Model.POCOs;
+using HVTApp.Model.Services;
 using HVTApp.UI.Commands;
 using Microsoft.Practices.Unity;
 
@@ -41,6 +42,21 @@ namespace HVTApp.UI.ViewModels
 
                     this.Item.Statuses.Remove(status);
                 }, () => this.SelectedStatusesItem != null);
+
+            SelectProductBlockEngineerCommand = new DelegateLogCommand(() =>
+            {
+                var getProductService = Container.Resolve<IGetProductService>();
+                var productBlock = getProductService.GetProductBlock(this.Item.Model.ProductBlockEngineer);
+                if (productBlock == null) return;
+
+                using (var unitOfWork = Container.Resolve<IUnitOfWork>())
+                {
+                    var priceEngineeringTask = unitOfWork.Repository<PriceEngineeringTask>().GetById(this.Item.Model.Id);
+                    productBlock = unitOfWork.Repository<ProductBlock>().GetById(productBlock.Id);
+                    priceEngineeringTask.ProductBlockEngineer = productBlock;
+                    unitOfWork.SaveChanges();
+                }
+            });
         }
     }
 }

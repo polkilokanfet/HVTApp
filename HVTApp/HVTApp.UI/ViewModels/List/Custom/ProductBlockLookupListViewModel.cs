@@ -13,6 +13,10 @@ using Microsoft.Practices.Unity;
 
 namespace HVTApp.UI.ViewModels
 {
+    public partial class PriceEngineeringTaskLookupListViewModel
+    {
+
+    }
     public partial class ProductBlockLookupListViewModel
     {
         private class PricesByQuarter
