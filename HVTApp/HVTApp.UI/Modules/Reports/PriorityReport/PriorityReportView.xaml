@@ -5,7 +5,9 @@
               xmlns:inf="clr-namespace:HVTApp.Infrastructure;assembly=HVTApp.Infrastructure"
               xmlns:controls="clr-namespace:HVTApp.Infrastructure.Controls;assembly=HVTApp.Infrastructure">
 
-    <controls:LoadableContentControl ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+         
+        LoadingInProcess="{Binding  LoadingInProcess}">
         
         <infg:XamDataGrid DataSource="{Binding Groups}">
 

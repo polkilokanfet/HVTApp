@@ -8,7 +8,10 @@
               xmlns:system="clr-namespace:System;assembly=mscorlib"
               x:Class="HVTApp.UI.Modules.PlanAndEconomy.Views.ProductionPlanView">
 
-    <controls:LoadableContentControl x:Name="LoadbleControl" ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+        x:Name="LoadbleControl" 
+        
+        LoadingInProcess="{Binding  LoadingInProcess}">
         <infg:XamDataGrid DataSource="{Binding OrderItems}" 
                           ActiveDataItem="{Binding SelectedOrderItem}">
 

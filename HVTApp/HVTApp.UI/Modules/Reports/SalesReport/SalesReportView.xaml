@@ -5,7 +5,10 @@
               xmlns:controls="clr-namespace:HVTApp.Infrastructure.Controls;assembly=HVTApp.Infrastructure" 
               xmlns:components="clr-namespace:HVTApp.UI.Components">
 
-    <controls:LoadableContentControl x:Name="LoadbleControl" ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+        x:Name="LoadbleControl" 
+        
+        LoadingInProcess="{Binding  LoadingInProcess}">
 
         <infg:XamDataGrid DataSource="{Binding Units}"
                           SelectedDataItem="{Binding SelectedSalesReportUnit}">

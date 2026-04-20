@@ -5,7 +5,9 @@
               x:Class="HVTApp.UI.Modules.PlanAndEconomy.Supervision.SupervisionView"
               xmlns:controls="clr-namespace:HVTApp.Infrastructure.Controls;assembly=HVTApp.Infrastructure">
 
-    <controls:LoadableContentControl ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+         
+        LoadingInProcess="{Binding  LoadingInProcess}">
 
         <infg:XamDataGrid DataSource="{Binding Units}" 
                           VerticalAlignment="Stretch" 

@@ -10,11 +10,8 @@ namespace HVTApp.Infrastructure.ViewModels
 {
     public abstract class LoadableExportableViewModel : ViewModelBaseCanExportToExcelSaveCustomization
     {
-        /// <summary>
-        /// флаг протекани€ в данный момент загрузки данных
-        /// </summary>
-        private bool _loadingInProcess = false;
         private bool _isLoaded = false;
+        private bool _loadingInProcess;
 
         public bool IsLoaded
         {
@@ -32,13 +29,26 @@ namespace HVTApp.Infrastructure.ViewModels
         }
 
         /// <summary>
+        /// флаг протекани€ в данный момент загрузки данных
+        /// </summary>
+        public bool LoadingInProcess
+        {
+            get => _loadingInProcess;
+            private set => SetProperty(ref _loadingInProcess, value, () =>
+            {
+                ((DelegateCommand)ReloadCommand).RaiseCanExecuteChanged();
+            });
+        }
+
+        /// <summary>
         /// «агрузка завершена
         /// </summary>
         public event Action LoadComplited;
 
         public ICommand ReloadCommand { get; }
 
-        protected LoadableExportableViewModel(IUnityContainer container, bool loadDataInCtor = true) : base(container)
+        protected LoadableExportableViewModel(IUnityContainer container, bool loadDataInCtor = true) 
+            : base(container)
         {
             ReloadCommand = new DelegateCommand(ReloadCommand_Execute, ReloadCommand_CanExecute);
 
@@ -50,7 +60,7 @@ namespace HVTApp.Infrastructure.ViewModels
 
         private bool ReloadCommand_CanExecute()
         {
-            return _loadingInProcess == false;
+            return LoadingInProcess == false;
         }
 
         protected virtual void ReloadCommand_Execute()
@@ -60,18 +70,19 @@ namespace HVTApp.Infrastructure.ViewModels
 
         private void Load()
         {
-            _loadingInProcess = true;
-            ((DelegateCommand)ReloadCommand).RaiseCanExecuteChanged();
-
-            IsLoaded = false;
             BeforeGetData();
-            Task.Run(() => { GetData(); })
+            LoadingInProcess = true;
+            IsLoaded = false;
+            Task.Run(() =>
+                {
+                    GetData();
+                })
                 .Await(
                     () =>
                     {
                         AfterGetData();
                         IsLoaded = true;
-                        _loadingInProcess = false;
+                        LoadingInProcess = false;
                         ((DelegateCommand)ReloadCommand).RaiseCanExecuteChanged();
                     }, 
                     ErrorCallback);

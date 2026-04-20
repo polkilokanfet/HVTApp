@@ -11,38 +11,30 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <StackPanel.Style>
-                        <Style>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=Content1, Path=Visibility}" Value="Visible">
-                                    <Setter Property="Label.Visibility" Value="Collapsed" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </StackPanel.Style>
+                <StackPanel
+                    x:Name="LoadElement"
+                    Orientation="Vertical" 
+                    VerticalAlignment="Center" 
+                    HorizontalAlignment="Center"
+                    Visibility="{Binding LoadingInProcess, Converter={StaticResource BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, ElementName=Root}">
 
                     <Label Content="Загрузка данных..." HorizontalAlignment="Center"/>
                     <ProgressBar x:Name="ProgressBar1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="300" Height="15" Margin="5, 10" IsIndeterminate="True" />
                 </StackPanel>
 
-
-
-                <!--<Label Content="Ожидание данных..." VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Label.Style>
+                <ContentPresenter x:Name="Content1" 
+                                  Content="{TemplateBinding Content}">
+                    <ContentPresenter.Style>
                         <Style>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ElementName=Content1, Path=Visibility}" Value="Visible">
+                                <DataTrigger Binding="{Binding ElementName=LoadElement, Path=Visibility}" Value="Visible">
                                     <Setter Property="Label.Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Label.Style>
-                </Label>-->
+                    </ContentPresenter.Style>
 
-                <ContentPresenter x:Name="Content1" 
-                                  Content="{TemplateBinding Content}"
-                                  Visibility="{Binding ContentIsLoaded, Converter={StaticResource BooleanToVisibilityConverter}, UpdateSourceTrigger=PropertyChanged, Mode=OneWay, ElementName=Root}" />
+                </ContentPresenter>
             </Grid>
         </DataTemplate>
     </UserControl.ContentTemplate>

@@ -4,6 +4,7 @@ using System.Linq;
 using HVTApp.DataAccess;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
+using HVTApp.Infrastructure.Services;
 using HVTApp.Infrastructure.ViewModels;
 using HVTApp.Model;
 using HVTApp.Model.POCOs;
@@ -37,23 +38,34 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         public DelegateLogCommand NewCommand { get; }
         public DelegateLogCommand EditCommand { get; }
 
-        public PaymentsActualViewModel(IUnityContainer container) : base(container)
+        public PaymentsActualViewModel(IUnityContainer container) : base(container, false)
         {
             NewCommand = new DelegateLogCommand(() => RequestNavigate(new PaymentDocument()));
             EditCommand = new DelegateLogCommand(
-                () => RequestNavigate((SelectedItem as SalesUnitPayment).PaymentDocument),
+                () => RequestNavigate(((SalesUnitPayment)SelectedItem).PaymentDocument),
                 () => SelectedItem is SalesUnitPayment);
         }
 
         private void RequestNavigate(PaymentDocument paymentDocument)
         {
-            Container.Resolve<IRegionManager>().RequestNavigateContentRegion<PaymentsActual.PaymentDocumentView>(new NavigationParameters { { "", paymentDocument } });
+            Container.Resolve<IRegionManager>().RequestNavigateContentRegion<PaymentDocumentView>(new NavigationParameters { { "", paymentDocument } });
+        }
+
+        private bool _load;
+        protected override void BeforeGetData()
+        {
+            _load = Container.Resolve<IMessageService>()
+                .ConfirmationDialog("Вы действительно хотите загрузить все поступления?\n* новые поступления можно занести без загрузки всех данных.");
         }
 
         private IOrderedEnumerable<SalesUnitPaymentGroup> _groups;
         protected override void GetData()
         {
+            if (_load == false)
+                return;
+
             UnitOfWork = Container.Resolve<IUnitOfWork>();
+
 
             var salesUnits = GlobalAppProperties.UserIsManager
                 ? ((ISalesUnitRepository) UnitOfWork.Repository<SalesUnit>()).GetAllWithActualPaymentsOfCurrentUser()
@@ -80,7 +92,8 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         protected override void AfterGetData()
         {
             PaymentGroups.Clear();
-            PaymentGroups.AddRange(_groups);
+            if (_groups != null)
+                PaymentGroups.AddRange(_groups);
         }
     }
 }

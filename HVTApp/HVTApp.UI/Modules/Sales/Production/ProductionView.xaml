@@ -15,7 +15,10 @@
         <localConverters:ProductionGroupToColorConverter x:Key="ProductionGroupToColorConverter"/>
     </components:ViewBaseSaveCustomization.Resources>
 
-    <controls:LoadableContentControl x:Name="LoadbleControl" ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+        x:Name="LoadbleControl" 
+        
+        LoadingInProcess="{Binding  LoadingInProcess}">
 
         <GroupBox Header="Размещенное в производстве оборудование">
             <infg:XamDataGrid DataSource="{Binding GroupsInProduction}"

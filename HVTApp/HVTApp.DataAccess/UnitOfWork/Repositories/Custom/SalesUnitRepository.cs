@@ -193,7 +193,10 @@ namespace HVTApp.DataAccess
             else
             {
                 query = Context.Set<SalesUnit>().AsQueryable()
-                    .Where(salesUnit => salesUnit.IsRemoved == false && salesUnit.Order != null && salesUnit.Order.Number.Contains(orderNumber.Trim()));
+                    .Where(salesUnit => 
+                        salesUnit.IsRemoved == false && 
+                        salesUnit.Order != null && 
+                        salesUnit.Order.Number.Contains(orderNumber.Trim()));
             }
 
             query = query

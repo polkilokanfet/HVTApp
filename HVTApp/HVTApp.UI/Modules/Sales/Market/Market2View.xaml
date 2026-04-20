@@ -50,9 +50,11 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <controls:LoadableContentControl x:Name="ContentControl" 
-                                             ContentIsLoaded="{Binding IsLoaded}"
-                                             Grid.Row="0">
+            <controls:LoadableContentControl 
+                x:Name="ContentControl" 
+                
+                LoadingInProcess="{Binding  LoadingInProcess}"
+                Grid.Row="0">
                 
                 <dp:XamDataGrid DataSource="{Binding ProjectItems}"
                                 ActiveDataItem="{Binding SelectedItem, Mode=TwoWay}"

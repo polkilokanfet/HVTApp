@@ -25,7 +25,8 @@
         <controls:LoadableContentControl
             Grid.Row="1" 
             x:Name="LoadableControl" 
-            ContentIsLoaded="{Binding IsLoaded}">
+            
+            LoadingInProcess="{Binding  LoadingInProcess}">
 
             <infg:XamDataGrid DataSource="{Binding Units}">
 

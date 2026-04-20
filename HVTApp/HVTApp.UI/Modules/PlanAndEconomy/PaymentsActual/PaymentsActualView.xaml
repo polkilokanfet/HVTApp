@@ -7,7 +7,9 @@
               x:Class="HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual.PaymentsActualView"
               xmlns:controls="clr-namespace:HVTApp.Infrastructure.Controls;assembly=HVTApp.Infrastructure">
 
-    <controls:LoadableContentControl ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+         
+        LoadingInProcess="{Binding  LoadingInProcess}">
         
         <infg:XamDataGrid DataSource="{Binding PaymentGroups}" 
                           SelectedDataItem="{Binding SelectedItem}">

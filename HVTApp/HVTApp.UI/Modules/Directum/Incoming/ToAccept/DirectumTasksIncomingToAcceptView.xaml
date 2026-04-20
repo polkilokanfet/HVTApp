@@ -8,7 +8,10 @@
               xmlns:controls="clr-namespace:HVTApp.Infrastructure.Controls;assembly=HVTApp.Infrastructure" 
               prism:ViewModelLocator.AutoWireViewModel="True">
 
-    <controls:LoadableContentControl x:Name="LoadbleControl" ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+        x:Name="LoadbleControl" 
+        
+        LoadingInProcess="{Binding  LoadingInProcess}">
 
         <dataPresenter:XamDataGrid DataSource="{Binding Items}"
                                    ActiveDataItem="{Binding SelectedItem}">

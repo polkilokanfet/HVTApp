@@ -19,7 +19,9 @@
     </inf:ViewBase.Resources>
 
 
-    <controls:LoadableContentControl ContentIsLoaded="{Binding IsLoaded}">
+    <controls:LoadableContentControl 
+         
+        LoadingInProcess="{Binding  LoadingInProcess}">
         <infg:XamDataGrid DataSource="{Binding Groups}">
 
             <infg:XamDataGrid.ContextMenu>
