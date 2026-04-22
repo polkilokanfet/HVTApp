@@ -1,4 +1,4 @@
-using Microsoft.Practices.ObjectBuilder2;
+using System.Linq;
 using Microsoft.Practices.Unity;
 
 namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
@@ -11,12 +11,16 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
 
         protected override void ExecuteMethod()
         {
-            ViewModel.Item.Payments.ForEach(payment => payment.SetRestPay());
+            foreach (var payment in ViewModel.Item.Payments)
+            {
+                payment.Sum += payment.SumNotPaid;
+            }
         }
 
         protected override bool CanExecuteMethod()
         {
-            return ViewModel.Item != null;
+            return ViewModel.Item != null &&
+                   ViewModel.Item.Payments.Any();
         }
     }
 }

@@ -2,38 +2,58 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using HVTApp.Infrastructure.Extensions;
 using HVTApp.Model.POCOs;
-using HVTApp.Model.Wrapper;
+using HVTApp.Model.Wrapper.Base;
 
 namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
 {
-    public class PaymentActualWrapper2 : PaymentActualWrapper
+    public class PaymentActualWrapper2 : WrapperBase<PaymentActual>
     {
-        private readonly double _sumNotPaid;
+        #region WrapperProperties
 
-        public SalesUnit SalesUnit { get; }
+        /// <summary>
+        /// Дата
+        /// </summary>
+        public DateTime Date
+        {
+            get => Model.Date;
+            set => SetValue(value);
+        }
+        public DateTime DateOriginalValue => GetOriginalValue<DateTime>(nameof(Date));
+        public bool DateIsChanged => GetIsChanged(nameof(Date));
+
+        /// <summary>
+        /// Сумма
+        /// </summary>
+        public double Sum
+        {
+            get => Model.Sum;
+            set => SetValue(value);
+        }
+        public double SumOriginalValue => GetOriginalValue<double>(nameof(Sum));
+        public bool SumIsChanged => GetIsChanged(nameof(Sum));
+
+        #endregion
+
+        public double SumNotPaid => Model.SalesUnit.Cost - Model.SalesUnit.PaymentsActual.Sum(x => x.Sum);
+        public double SumNotPaidWithVat => this.SumNotPaid * (100.0 + Model.SalesUnit.Vat) / 100.0;
 
         public double SumWithVat
         {
-            get => Sum * (100.0 + SalesUnit.Vat) / 100.0;
+            get => Sum * (100.0 + Model.SalesUnit.Vat) / 100.0;
             set
             {
-                Sum = value / ((100.0 + SalesUnit.Vat) / 100.0);
+                Sum = value / ((100.0 + Model.SalesUnit.Vat) / 100.0);
                 RaisePropertyChanged();
             }
         }
 
-        public double SumNotPaidWithVat => SalesUnit.SumNotPaidWithVat;
+        public string ErrorMessages => this.Errors.ActualErrors?.Select(errorInfo => errorInfo.Message).ToStringEnum();
 
 
-        public PaymentActualWrapper2(PaymentActual model, SalesUnit salesUnit, PaymentDocument paymentDocument) : base(model)
+        public PaymentActualWrapper2(PaymentActual model) : base(model)
         {
-            SalesUnit = salesUnit ?? throw new ArgumentNullException(nameof(salesUnit));
-            this.SalesUnitId = salesUnit.Id;
-            this.PaymentDocumentId = paymentDocument.Id;
-
-            _sumNotPaid = salesUnit.Cost - salesUnit.PaymentsActual.Where(paymentActual => paymentActual.Id != model.Id).Sum(paymentActual => paymentActual.Sum);
-
             this.PropertyChanged += (sender, args) =>
             {
                 if (args.PropertyName == nameof(Sum))
@@ -41,24 +61,29 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
                     RaisePropertyChanged(nameof(SumWithVat));
                     RaisePropertyChanged(nameof(SumNotPaidWithVat));
                 }
-            };
-        }
 
-        /// <summary>
-        /// Поставить суммой платежа весь остаток
-        /// </summary>
-        public void SetRestPay()
-        {
-            this.Sum = _sumNotPaid;
+                this.Model.SalesUnit.RefreshFirstPaymentInfo();
+            };
+
+            this.ErrorsChanged += (sender, args) =>
+            {
+                RaisePropertyChanged(nameof(ErrorMessages));
+            };
         }
 
         protected override IEnumerable<ValidationResult> ValidateOther()
         {
+            if (this.Date > DateTime.Today.AddYears(50))
+            {
+                yield return new ValidationResult("Даты позже 50 лет с текущей даты недопустимы!", new[] { nameof(Date) });
+            }
+
             if (this.Sum < 0)
             {
                 yield return new ValidationResult("Сумма платежа не должна быть меньше 0", new[] { nameof(Sum) });
             }
-            if (this.SalesUnit != null && this.Sum > _sumNotPaid)
+
+            if (this.SumNotPaid < 0)
             {
                 yield return new ValidationResult("Сумма платежа не должна быть больше остатка на оплату", new[] { nameof(Sum) });
             }

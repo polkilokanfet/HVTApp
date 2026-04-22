@@ -15,16 +15,12 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
             var payment = ViewModel.SelectedPayment;
 
             //добавление  платежа в список потенциальных
-            ViewModel.Potential.Insert(0, ViewModel.UnitOfWork1.Repository<SalesUnit>().GetById(payment.SalesUnitId));
+            ViewModel.Potential.Insert(0, payment.Model.SalesUnit);
 
             //удаление платежа из документа
-            ViewModel.Item.Payments.Remove(ViewModel.SelectedPayment);
+            ViewModel.Item.Payments.Remove(payment);
 
-            //удаление платежа из юнита автоматически идет в PaymentDocumentWrapper1
-
-            //удаления платежа из репозитория
-            if (ViewModel.UnitOfWork1.Repository<PaymentActual>().GetById(payment.Model.Id) != null)
-                ViewModel.UnitOfWork1.Repository<PaymentActual>().Delete(payment.Model);
+            //удаление платежа из юнита автоматически идет в PaymentActualWrapper2
         }
 
         protected override bool CanExecuteMethod()

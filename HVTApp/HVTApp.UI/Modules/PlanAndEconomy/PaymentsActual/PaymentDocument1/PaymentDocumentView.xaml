@@ -43,18 +43,19 @@
                     <igWpf:XamDataGrid.FieldLayouts>
                         <igWpf:FieldLayout>
                             <igWpf:FieldLayout.Fields>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Facility}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Объект" Width="150"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Product.ProductType}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Тип" Width="150"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Product.Designation}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Обозначение" Width="200"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Order}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="З/з" Width="Auto"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.OrderPosition}" BindingType="UseAlternateBinding" Label="Поз." Width="Auto"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Specification.Contract.Contragent}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Контрагент" Width="100"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Specification.Number}" BindingType="UseAlternateBinding" Label="Сп.№" Width="Auto"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Specification.Contract.Number}" BindingType="UseAlternateBinding" Label="Договор" Width="Auto"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Facility}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Объект" Width="150"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Product.ProductType}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Тип" Width="150"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Product.Designation}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Обозначение" Width="200"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Order}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="З/з" Width="Auto"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.OrderPosition}" BindingType="UseAlternateBinding" Label="Поз." Width="Auto"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Specification.Contract.Contragent}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Контрагент" Width="100"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Specification.Number}" BindingType="UseAlternateBinding" Label="Сп.№" Width="Auto"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Specification.Contract.Number}" BindingType="UseAlternateBinding" Label="Договор" Width="Auto"/>
                                 <igWpf:NumericField AlternateBinding="{Binding SumWithVat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" BindingType="UseAlternateBinding" Label="Сумма" Width="Auto" AllowEdit="True"/>
                                 <igWpf:NumericField AlternateBinding="{Binding SumNotPaidWithVat}" BindingType="UseAlternateBinding" Label="Остаток" Width="Auto"/>
-                                <igWpf:NumericField AlternateBinding="{Binding SalesUnit.Vat}" BindingType="UseAlternateBinding" Label="НДС" Width="Auto"/>
-                                <igWpf:TextField AlternateBinding="{Binding SalesUnit.Project.Manager}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Менеджер" Width="Auto"/>
+                                <igWpf:NumericField AlternateBinding="{Binding Model.SalesUnit.Vat}" BindingType="UseAlternateBinding" Label="НДС" Width="Auto"/>
+                                <igWpf:TextField AlternateBinding="{Binding Model.SalesUnit.Project.Manager}" Converter="{StaticResource ObjectToStringConverter}" BindingType="UseAlternateBinding" Label="Менеджер" Width="Auto"/>
+                                <igWpf:TextField AlternateBinding="{Binding ErrorMessages}" BindingType="UseAlternateBinding" Label="Ошибки в строке" Width="Auto"/>
                             </igWpf:FieldLayout.Fields>
                         </igWpf:FieldLayout>
 

@@ -6,24 +6,42 @@ using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Services;
 using HVTApp.Model.Events;
 using HVTApp.Model.POCOs;
-using HVTApp.Model.Wrapper;
 using HVTApp.UI.Commands;
-using HVTApp.UI.ViewModels;
 using Microsoft.Practices.Unity;
+using Prism.Events;
 
 namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
 {
-    public class PaymentDocumentViewModel : BaseDetailsViewModel<PaymentDocumentWrapper1, PaymentDocument, AfterSavePaymentDocumentEvent>
+    public class PaymentDocumentViewModel : ViewModelBase
     {
         #region Fields
 
         private PaymentActualWrapper2 _selectedPayment;
         private object[] _selectedPotentialUnits;
-        private readonly IMessageService _messageService;
+        private PaymentDocumentWrapper1 _paymentDocumentWrapper;
 
         #endregion
 
         #region Props
+
+        public PaymentDocumentWrapper1 Item
+        {
+            get => _paymentDocumentWrapper;
+            private set => SetProperty(ref _paymentDocumentWrapper, value, () =>
+            {
+                RestPaymentCommand.RaiseCanExecuteChanged();
+                _paymentDocumentWrapper.PropertyChanged += (sender, args) =>
+                {
+                    SaveCommand.RaiseCanExecuteChanged();
+                    RestPaymentCommand.RaiseCanExecuteChanged();
+                };
+
+                _paymentDocumentWrapper.Payments.CollectionChanged += (sender, args) =>
+                {
+                    RestPaymentCommand.RaiseCanExecuteChanged();
+                };
+            });
+        }
 
         /// <summary>
         /// Потенциальные платежи
@@ -58,9 +76,6 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
             }
         }
 
-        //костыль
-        public IUnitOfWork UnitOfWork1 => this.UnitOfWork;
-
         public string OrderNumberFilter { get; set; }
 
         #endregion
@@ -88,17 +103,17 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         public RestPaymentCommand RestPaymentCommand { get; }
 
         public ICommand LoadPotentialCommand { get; }
-        
+
+        public DelegateLogCommand SaveCommand { get; }
+
         #endregion
 
         public PaymentDocumentViewModel(IUnityContainer container) : base(container)
         {
-            _messageService = container.Resolve<IMessageService>();
-
-            AddPaymentCommand = new AddPaymentCommand(this, this.Container);
-            RemovePaymentCommand = new RemovePaymentCommand(this, this.Container);
+            AddPaymentCommand = new AddPaymentCommand(this, container);
+            RemovePaymentCommand = new RemovePaymentCommand(this, container);
             RemoveDocumentCommand = new DelegateLogConfirmationCommand(
-                this.Container.Resolve<IMessageService>(),
+                container.Resolve<IMessageService>(),
                 () =>
                 {
                     this.Item.RejectChanges();
@@ -106,17 +121,15 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
                     foreach (var paymentActualWrapper2 in this.Item.Payments.ToList())
                     {
                         this.Item.Payments.Remove(paymentActualWrapper2);
-                        paymentActualWrapper2.SalesUnit.PaymentsActual.Remove(paymentActualWrapper2.Model);
-                        this.RefreshSalesUnit(paymentActualWrapper2);
-                        this.UnitOfWork1.Repository<PaymentActual>().Delete(paymentActualWrapper2.Model);
+                        this.UnitOfWork.Repository<PaymentActual>().Delete(paymentActualWrapper2.Model);
                     }
 
-                    this.UnitOfWork1.Repository<PaymentDocument>().Delete(this.Item.Model);
-                    this.UnitOfWork1.SaveChanges();
+                    this.UnitOfWork.Repository<PaymentDocument>().Delete(this.Item.Model);
+                    this.UnitOfWork.SaveChanges();
 
                     this.GoBackCommand.Execute(null);
                 },
-                () => this.UnitOfWork1.Repository<PaymentDocument>().GetById(this.Item.Model.Id) != null);
+                () => this.UnitOfWork.Repository<PaymentDocument>().GetById(this.Item.Model.Id) != null);
             RestPaymentCommand = new RestPaymentCommand(this, this.Container);
 
             LoadPotentialCommand = new DelegateLogCommand(
@@ -126,7 +139,7 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
                     //(исключая то, что в выбранном платеже и полностью оплачено)
                     Potential.Clear();
                     Potential.AddRange(((ISalesUnitRepository)UnitOfWork.Repository<SalesUnit>()).GetAllForPaymentDocument(OrderNumberFilter)
-                        .Except(Item.Payments.Select(payment => payment.SalesUnit))
+                        .Except(Item.Payments.Select(payment => payment.Model.SalesUnit))
                         .Where(salesUnit => salesUnit.IsPaid == false)
                         .OrderBy(salesUnit => salesUnit.Facility.ToString())
                         .ThenBy(salesUnit => salesUnit.Project.Name)
@@ -135,55 +148,40 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
                     SelectedPotentialUnits = null;
 
                     if (Potential.Any() == false)
-                        _messageService.Message("Уведомление", "Вашим критериям не соответствует ни одна строка.");
+                        container.Resolve<IMessageService>().Message("Уведомление", "Вашим критериям не соответствует ни одна строка.");
                 });
+
+            SaveCommand = new DelegateLogCommand(
+                () =>
+                {
+                    var paymentsRemoved = this.Item.Payments
+                        .RemovedItems
+                        .Select(x => x.Model);
+
+                    UnitOfWork.Repository<PaymentActual>().DeleteRange(paymentsRemoved);
+
+                    if (UnitOfWork.SaveChanges().OperationCompletedSuccessfully)
+                    {
+                        Item.AcceptChanges();
+
+                        this.Container.Resolve<IEventAggregator>()
+                            .GetEvent<AfterSaveActualPaymentDocumentEvent>()
+                            .Publish(this.Item.Model);
+
+                        SaveCommand.RaiseCanExecuteChanged();
+                    }
+                },
+                () => 
+                    this.Item.IsValid &&
+                    this.Item.IsChanged);
         }
 
-        protected override PaymentDocumentWrapper1 CreateWrapper(PaymentDocument entity)
+        public void Load(PaymentDocument paymentDocument)
         {
-            return new PaymentDocumentWrapper1(entity, this.UnitOfWork, _messageService);
-        }
-
-        protected override void AfterLoading()
-        {
-            RestPaymentCommand.RaiseCanExecuteChanged();
-            base.AfterLoading();
-        }
-
-        protected override void SaveItem()
-        {
-            //var units = this.Item.Payments.Where(paymentActual => paymentActual.IsChanged).Select(paymentActual => paymentActual.SalesUnit).ToList();
-            //var entity = new ActualPaymentEventEntity(this.Item.Model, units);
-
-            var paymentsRemoved = this.Item.Payments.RemovedItems;
-            var paymentsAll = paymentsRemoved.Union(this.Item.Payments).Distinct();
-
-            foreach (var payment in paymentsAll)
-            {
-                this.RefreshSalesUnit(payment);
-            }
-
-            base.SaveItem();
-            EventAggregator.GetEvent<AfterSaveActualPaymentDocumentEvent>().Publish(this.Item.Model);
-
-
-            //EventAggregator.GetEvent<AfterSaveActualPaymentDocumentEvent>().Publish(entity);
-            //foreach (var salesUnit in units)
-            //{
-            //    EventAggregator.GetEvent<AfterSaveActualPaymentEvent>().Publish(salesUnit);
-            //}
-        }
-
-        private void RefreshSalesUnit(PaymentActualWrapper2 payment)
-        {
-            var salesUnit = payment.SalesUnit;
-
-            salesUnit.FirstPaymentDate = salesUnit
-                .PaymentsActual.Where(paymentActual => paymentActual.Sum > 0)
-                .OrderBy(paymentActual => paymentActual.Date)
-                .FirstOrDefault()?
-                .Date;
-            salesUnit.PaidSum = salesUnit.PaymentsActual.Sum(paymentActual => paymentActual.Sum);
+            var pd = paymentDocument == null
+                ? new PaymentDocument()
+                : UnitOfWork.Repository<PaymentDocument>().GetById(paymentDocument.Id);
+            this.Item = new PaymentDocumentWrapper1(pd);
         }
     }
 

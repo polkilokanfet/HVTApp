@@ -10,7 +10,13 @@ namespace HVTApp.Model.POCOs
     {
         public Guid SalesUnitId { get; set; }
 
+        [NotForWrapper, NotForDetailsView, NotForListView]
+        public virtual SalesUnit SalesUnit { get; set; }
+
         public Guid PaymentDocumentId { get; set; }
+
+        [NotForWrapper, NotForDetailsView, NotForListView]
+        public virtual PaymentDocument PaymentDocument { get; set; }
 
         [Designation("Дата"), Required]
         public DateTime Date { get; set; }

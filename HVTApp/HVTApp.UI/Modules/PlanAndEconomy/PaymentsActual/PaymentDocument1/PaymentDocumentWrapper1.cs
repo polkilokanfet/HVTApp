@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using HVTApp.Infrastructure;
-using HVTApp.Infrastructure.Services;
 using HVTApp.Model.POCOs;
 using HVTApp.Model.Wrapper.Base;
 using HVTApp.Model.Wrapper.Base.TrackingCollections;
@@ -14,8 +11,6 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
 {
     public class PaymentDocumentWrapper1 : WrapperBase<PaymentDocument>
     {
-        private readonly IMessageService _messageService;
-
         #region SimpleProperties
 
         //Number
@@ -52,11 +47,6 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
             get => Model.Date;
             set
             {
-                if (value > DateTime.Today.AddYears(50))
-                {
-                    _messageService.Message("Предупреждение", "Даты позже 50 лет с текущей даты недопустимы!");
-                    return;
-                }
                 Payments.ForEach(payment => payment.Date = value);
                 RaisePropertyChanged();
             }
@@ -69,71 +59,31 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         {
             get
             {
-                return Payments.Any()
+                return Payments != null && Payments.Any()
                     ? Payments.Sum(payment => payment.SumWithVat)
                     : 0;
             }
             set
             {
-                if (value < 0)
-                {
-                    _messageService.Message("Предупреждение", "Отрицательные платежи недопустимы!");
-                    return;
-                }
-
-                if (!Payments.Any())
-                {
-                    _messageService.Message("Предупреждение", "Добавте в платежку оборудование.");
-                    return;
-                }
-
                 //неоплаченное без учета текущего платежа (c НДС)
-                var notPaidWithVat = Payments.Sum(payment => payment.SalesUnit.SumNotPaidWithVat) + Payments.Sum(x => x.SumWithVat);
+                var notPaidWithVat =
+                    Payments.Sum(payment => payment.Model.SalesUnit.SumNotPaidWithVat) +
+                    Payments.Sum(payment => payment.SumWithVat);
 
-                //если предложена сумма, превышающая, не пропускаем
-                if (value - notPaidWithVat > 0.000001)
-                {
-                    _messageService.Message("Предупреждение", $"Сумма платежки слишком велика. Возможный максимум: {notPaidWithVat:C}");
-                    return;
-                }
-
-                Payments.ForEach(payment => payment.SumWithVat = value * ((payment.SalesUnit.SumNotPaidWithVat + payment.SumWithVat) / notPaidWithVat));
+                Payments.ForEach(payment => payment.SumWithVat = value * ((payment.Model.SalesUnit.SumNotPaidWithVat + payment.SumWithVat) / notPaidWithVat));
             }
         }
 
 
-        public PaymentDocumentWrapper1(PaymentDocument model, IUnitOfWork unitOfWork, IMessageService messageService) : base(model)
+        public PaymentDocumentWrapper1(PaymentDocument model) : base(model)
         {
-            _messageService = messageService;
-
             #region InitializeCollectionProperties
 
             if (Model.Payments == null) throw new ArgumentException("Payments cannot be null");
-            Payments = new ValidatableChangeTrackingCollection<PaymentActualWrapper2>(Model.Payments.Select(paymentActual => new PaymentActualWrapper2(paymentActual, unitOfWork.Repository<SalesUnit>().GetById(paymentActual.SalesUnitId), model)));
+            Payments = new PaymentsCollection(Model.Payments.Select(paymentActual => new PaymentActualWrapper2(paymentActual)));
             RegisterCollection(Payments, Model.Payments);
 
             #endregion
-
-            this.Payments.CollectionChanged += (sender, args) =>
-            {
-                //добавляем в SalesUnit новые платежи
-                if (args.Action == NotifyCollectionChangedAction.Add)
-                {
-                    foreach (var paymentActualWrapper in args.NewItems.Cast<PaymentActualWrapper2>())
-                    {
-                        paymentActualWrapper.SalesUnit.PaymentsActual.Add(paymentActualWrapper.Model);
-                    }
-                }
-
-                //удаляем из SalesUnit старые платежи
-                if (args.Action == NotifyCollectionChangedAction.Remove)
-                {
-                    foreach (var paymentActualWrapper in args.OldItems.Cast<PaymentActualWrapper2>())
-                    {
-                        paymentActualWrapper.SalesUnit.PaymentsActual.Remove(paymentActualWrapper.Model);
-                    }
-                }
-            };
 
             this.Payments.PropertyChanged += (sender, args) =>
             {
@@ -149,6 +99,13 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
                 yield return new ValidationResult("НДС не может быть отрицательным", new[] { nameof(Vat) });
             }
 
+            if (Payments != null)
+            {
+                if (Payments.Any() == false)
+                {
+                    yield return new ValidationResult("П/п не может быть без оборудования/услуг", new[] { nameof(Payments) });
+                }
+            }
         }
     }
 }

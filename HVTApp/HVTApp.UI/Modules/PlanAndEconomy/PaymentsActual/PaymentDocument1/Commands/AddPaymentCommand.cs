@@ -19,7 +19,12 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
 
             foreach (var selectedUnit in salesUnits)
             {
-                ViewModel.Item.Payments.Add(new PaymentActualWrapper2(new PaymentActual(), selectedUnit, ViewModel.Item.Model));
+                var paymentActual = new PaymentActual
+                {
+                    SalesUnit = selectedUnit, 
+                    PaymentDocument = ViewModel.Item.Model
+                };
+                ViewModel.Item.Payments.Add(new PaymentActualWrapper2(paymentActual));
                 ViewModel.Potential.Remove(selectedUnit);
             }
             ViewModel.SelectedPotentialUnits = null;

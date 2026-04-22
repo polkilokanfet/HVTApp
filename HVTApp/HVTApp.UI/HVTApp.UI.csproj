@@ -272,6 +272,7 @@
     <Compile Include="Modules\PlanAndEconomy\PaymentsActual\PaymentDocument1\Commands\RemovePaymentCommand.cs" />
     <Compile Include="Modules\PlanAndEconomy\PaymentsActual\PaymentDocument1\Commands\RestPaymentCommand.cs" />
     <Compile Include="Modules\PlanAndEconomy\PaymentsActual\PaymentDocument1\PaymentDocumentWrapper1.cs" />
+    <Compile Include="Modules\PlanAndEconomy\PaymentsActual\PaymentDocument1\PaymentsCollection.cs" />
     <Compile Include="Modules\PlanAndEconomy\SpecificationSignDates\SpecificationSignDatesViewModel.cs" />
     <Compile Include="Modules\PlanAndEconomy\SpecificationSignDates\SpecificationSignDatesView.xaml.cs">
       <DependentUpon>SpecificationSignDatesView.xaml</DependentUpon>

@@ -755,5 +755,23 @@ namespace HVTApp.Model.POCOs
             return null;
         }
 
+        public void RefreshFirstPaymentInfo()
+        {
+            if (PaymentsActual.Any())
+            {
+                this.FirstPaymentDate = this
+                    .PaymentsActual.Where(paymentActual => paymentActual.Sum > 0)
+                    .OrderBy(paymentActual => paymentActual.Date)
+                    .FirstOrDefault()?
+                    .Date;
+
+                this.PaidSum = this.PaymentsActual.Sum(paymentActual => paymentActual.Sum);
+            }
+            else
+            {
+                this.FirstPaymentDate = null;
+                this.PaidSum = 0;
+            }
+        }
     }
 }

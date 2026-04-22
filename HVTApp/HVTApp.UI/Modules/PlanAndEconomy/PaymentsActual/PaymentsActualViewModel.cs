@@ -38,9 +38,9 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         public DelegateLogCommand NewCommand { get; }
         public DelegateLogCommand EditCommand { get; }
 
-        public PaymentsActualViewModel(IUnityContainer container) : base(container, false)
+        public PaymentsActualViewModel(IUnityContainer container) : base(container)
         {
-            NewCommand = new DelegateLogCommand(() => RequestNavigate(new PaymentDocument()));
+            NewCommand = new DelegateLogCommand(() => RequestNavigate(null));
             EditCommand = new DelegateLogCommand(
                 () => RequestNavigate(((SalesUnitPayment)SelectedItem).PaymentDocument),
                 () => SelectedItem is SalesUnitPayment);
@@ -51,9 +51,12 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
             Container.Resolve<IRegionManager>().RequestNavigateContentRegion<PaymentDocumentView>(new NavigationParameters { { "", paymentDocument } });
         }
 
-        private bool _load;
+        private bool _load = true;
         protected override void BeforeGetData()
         {
+            if (GlobalAppProperties.User.RoleCurrent != Role.Economist)
+                return;
+
             _load = Container.Resolve<IMessageService>()
                 .ConfirmationDialog("Вы действительно хотите загрузить все поступления?\n* новые поступления можно занести без загрузки всех данных.");
         }
