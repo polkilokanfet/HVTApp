@@ -42,7 +42,7 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         {
             NewCommand = new DelegateLogCommand(() => RequestNavigate(null));
             EditCommand = new DelegateLogCommand(
-                () => RequestNavigate(((SalesUnitPayment)SelectedItem).PaymentDocument),
+                () => RequestNavigate(((SalesUnitPayment)SelectedItem).Payment.PaymentDocument),
                 () => SelectedItem is SalesUnitPayment);
         }
 
@@ -73,20 +73,19 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
             var salesUnits = GlobalAppProperties.UserIsManager
                 ? ((ISalesUnitRepository) UnitOfWork.Repository<SalesUnit>()).GetAllWithActualPaymentsOfCurrentUser()
                 : ((ISalesUnitRepository) UnitOfWork.Repository<SalesUnit>()).GetAllWithActualPayments();
-            var documents = UnitOfWork.Repository<PaymentDocument>().GetAll();
 
             var payments = new List<SalesUnitPayment>();
             foreach (var salesUnit in salesUnits)
             {
                 payments.AddRange(salesUnit.PaymentsActual.Select(payment =>
-                    new SalesUnitPayment(salesUnit, payment, documents.Single(paymentDocument => paymentDocument.Payments.Contains(payment)))));
+                    new SalesUnitPayment(payment)));
             }
             _groups = payments.GroupBy(salesUnitPayment => new
                 {
-                    OrderId = salesUnitPayment.SalesUnit.Order?.Id,
-                    FacilityId = salesUnitPayment.SalesUnit.Facility.Id,
-                    ProductId = salesUnitPayment.SalesUnit.Product.Id,
-                    SpecificationId = salesUnitPayment.SalesUnit.Specification?.Id
+                    OrderId = salesUnitPayment.Payment.SalesUnit.Order?.Id,
+                    FacilityId = salesUnitPayment.Payment.SalesUnit.Facility.Id,
+                    ProductId = salesUnitPayment.Payment.SalesUnit.Product.Id,
+                    SpecificationId = salesUnitPayment.Payment.SalesUnit.Specification?.Id
                 })
                 .Select(x => new SalesUnitPaymentGroup(x))
                 .OrderByDescending(x => x.LastDate);

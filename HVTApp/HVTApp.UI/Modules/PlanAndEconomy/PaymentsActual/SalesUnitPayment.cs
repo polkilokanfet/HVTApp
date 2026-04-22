@@ -7,7 +7,7 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
 {
     public class SalesUnitPaymentGroup
     {
-        private List<SalesUnit> _salesUnits;
+        private readonly List<SalesUnit> _salesUnits;
 
         public List<SalesUnitPayment> SalesUnitPayments { get; }
 
@@ -20,40 +20,39 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
         public double Sum => SalesUnitPayments.Sum(x => x.Payment.Sum);
         public double SumWithVat => SalesUnitPayments.Sum(x => x.SumWithVat);
 
-        public double PercentPaid => 100.0 - PercentNotPaid;
-        public double PercentNotPaid => Math.Abs(SumToPay) < 0.000001 ? 0 : _salesUnits.Sum(x => x.SumNotPaid) / SumToPay * 100.0;
+        public double PercentPaid => Math.Abs(SumToPay) < 0.000001
+            ? 0
+            : SalesUnitPayments.Sum(x => x.Payment.Sum) / SumToPay * 100.0;
 
-        public double SumNotPaidWithVat => _salesUnits.Sum(x => x.SumNotPaidWithVat);
+        public double PercentNotPaid => 100.0 - PercentPaid;
+
+        public double SumNotPaidWithVat => _salesUnits.Sum(salesUnit => salesUnit.SumNotPaidWithVat);
         public DateTime LastDate => SalesUnitPayments.Select(x => x.Payment.Date).Max();
 
         public SalesUnitPaymentGroup(IEnumerable<SalesUnitPayment> salesUnitPayments)
         {
             SalesUnitPayments = salesUnitPayments
                 .OrderByDescending(x => x.Payment.Date)
-                .ThenBy(x => x.SalesUnit.OrderPosition)
+                .ThenBy(x => x.Payment.SalesUnit.OrderPosition)
                 .ToList();
 
-            _salesUnits = SalesUnitPayments.Select(x => x.SalesUnit).Distinct().ToList();
+            _salesUnits = SalesUnitPayments.Select(x => x.Payment.SalesUnit).Distinct().ToList();
         }
     }
 
     public class SalesUnitPayment
     {
-        public SalesUnit SalesUnit { get; }
         public PaymentActual Payment { get; }
-        public PaymentDocument PaymentDocument { get; }
 
-        public double SumWithVat => Payment.Sum * (100.0 + SalesUnit.Vat) / 100.0;
-        public Contract Contract => SalesUnit.Specification?.Contract;
+        public double SumWithVat => Payment.Sum * (100.0 + Payment.SalesUnit.Vat) / 100.0;
+        public Contract Contract => Payment.SalesUnit.Specification?.Contract;
         public Company Contragent => Contract?.Contragent;
-        public double Percent => Payment.Sum / SalesUnit.Cost * 100.0;
-        public double PercentNotPaid => SalesUnit.SumNotPaid / SalesUnit.Cost * 100.0;
+        public double Percent => Payment.Sum / Payment.SalesUnit.Cost * 100.0;
+        public double PercentNotPaid => 100.0 - Percent;
 
-        public SalesUnitPayment(SalesUnit salesUnit, PaymentActual payment, PaymentDocument paymentDocument)
+        public SalesUnitPayment(PaymentActual payment)
         {
-            SalesUnit = salesUnit;
             Payment = payment;
-            PaymentDocument = paymentDocument;
         }
     }
 }
