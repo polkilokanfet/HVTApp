@@ -31,7 +31,7 @@
                     <infg:NumericField AlternateBinding="{Binding SumWithVat}" Label="Оплачено (с НДС)" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:NumericField AlternateBinding="{Binding PercentPaid}" Label="%" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:CheckBoxField AlternateBinding="{Binding IsPaid}" Label="Оплачен" BindingType="UseAlternateBinding" Width="Auto"/>
-                    <infg:NumericField AlternateBinding="{Binding SumNotPaidWithVat}" Label="Не оплачено" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
+                    <infg:NumericField AlternateBinding="{Binding SumNotPaidWithVat}" Label="Не оплачено (с НДС)" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:NumericField AlternateBinding="{Binding PercentNotPaid}" Label="%" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:TextField AlternateBinding="{Binding SalesUnitPayment.Contract}" Converter="{StaticResource ObjectToStringConverter}" Label="Договор" BindingType="UseAlternateBinding" Width="Auto"/>
                     <infg:TextField AlternateBinding="{Binding SalesUnitPayment.Payment.SalesUnit.Specification}" Converter="{StaticResource ObjectToStringConverter}" Label="Сп." BindingType="UseAlternateBinding" Width="Auto"/>
@@ -49,8 +49,7 @@
                     <infg:NumericField AlternateBinding="{Binding SumWithVat}" Label="Платеж (с НДС)" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:NumericField AlternateBinding="{Binding Percent}" Label="%" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:CheckBoxField AlternateBinding="{Binding Payment.SalesUnit.IsPaid}" Label="Оплачен" BindingType="UseAlternateBinding" Width="Auto"/>
-                    <infg:NumericField AlternateBinding="{Binding Payment.SalesUnit.SumNotPaidWithVat}" Label="Не оплачено" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
-                    <infg:NumericField AlternateBinding="{Binding PercentNotPaid}" Label="%" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
+                    <infg:NumericField AlternateBinding="{Binding Payment.SalesUnit.SumNotPaidWithVat}" Label="Не оплачено (с НДС)" BindingType="UseAlternateBinding" Width="Auto" AllowResize="False"/>
                     <infg:TextField AlternateBinding="{Binding Payment.PaymentDocument.Number}" Label="Платежка" BindingType="UseAlternateBinding" Width="Auto"/>
                 </infg:FieldLayout>
 
