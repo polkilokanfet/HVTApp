@@ -28,6 +28,11 @@ namespace HVTApp.DataAccess
 
             HasMany(task => task.PriceCalculationItems).WithOptional().HasForeignKey(task => task.PriceEngineeringTaskId).WillCascadeOnDelete(false);
             HasMany(task => task.UpdateStructureCostNumberTasks).WithRequired().WillCascadeOnDelete(false);
+
+            //HasMany(task => task.PriceEngineeringTasksToSplit)
+            //    .WithOptional()
+            //    .HasForeignKey(task => task.PriceEngineeringTaskToSplitFrontId)
+            //    .WillCascadeOnDelete(false);
         }
     }
 }

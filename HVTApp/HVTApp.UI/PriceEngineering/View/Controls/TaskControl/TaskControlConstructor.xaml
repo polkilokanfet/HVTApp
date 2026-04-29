@@ -195,6 +195,14 @@
                         </Button>
                     </StackPanel>
                 </Border>
+
+                <Button Command="{Binding SplitPriceEngineeringTaskCommand}"
+                        ToolTip="Разделить задачу на подобные"
+                        Background="Transparent"
+                        Margin="3 0 0 0">
+                    <fa:FontAwesome Icon="CodeFork"  Foreground="IndianRed"/>
+                </Button>
+
                 <Button
                     VerticalAlignment="Center"
                     Content="..." 

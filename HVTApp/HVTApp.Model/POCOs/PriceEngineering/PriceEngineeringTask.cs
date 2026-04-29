@@ -146,6 +146,17 @@ namespace HVTApp.Model.POCOs
         public double? PriceIncreaseFactor { get; set; }
 
         public virtual Specification Specification { get; set; }
+
+        ///// <summary>
+        ///// Идентичные задачи (например, 3 одинаковых привода в 1 выключателе)
+        ///// </summary>
+        //[Designation("Идентичные задачи (например, 3 одинаковых привода в 1 выключателе)")]
+        //public virtual List<PriceEngineeringTask> PriceEngineeringTasksToSplit { get; set; }
+
+        ///// <summary>
+        ///// ИД лицевой задачи по которой прорабатывается данная задача
+        ///// </summary>
+        //public Guid PriceEngineeringTaskToSplitFrontId { get; set; }
     }
 
     public partial class PriceEngineeringTask
@@ -582,12 +593,12 @@ namespace HVTApp.Model.POCOs
             {
                 ProductBlock = this.ProductBlockEngineer,
                 DependentProducts = this.ChildPriceEngineeringTasks
-                    .Where(x => x.UserConstructorInitiator == null)
-                    .Select(x =>
+                    .Where(task => task.UserConstructorInitiator == null)
+                    .Select(task =>
                     new ProductDependent
                     {
-                        Product = x.GetProduct(),
-                        Amount = 1
+                        Product = task.GetProduct(),
+                        Amount = task.Amount
                     }).ToList()
             };
         }

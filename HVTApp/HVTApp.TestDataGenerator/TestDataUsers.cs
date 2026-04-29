@@ -303,6 +303,7 @@ namespace HVTApp.TestDataGenerator
         #region DesignDepartment
 
         public DesignDepartment DesignDepartmentDeadTanks;
+        public DesignDepartment DesignDepartmentLiveTanks;
         public DesignDepartment DesignDepartmentDrives;
         public DesignDepartment DesignDepartmentCurrentTransformers;
         public DesignDepartment DesignDepartmentVoltageTransformers;
@@ -345,6 +346,35 @@ namespace HVTApp.TestDataGenerator
                         }
                     }
 
+                }
+            });
+
+            DesignDepartmentLiveTanks.Clone(new DesignDepartment
+            {
+                Name = "Выключатели колонковые",
+                Head = UserDavidov,
+                Staff = new List<User> { UserDavidov, UserBaranova },
+                ParameterSets = new List<DesignDepartmentParameters>()
+                {
+                    new DesignDepartmentParameters
+                    {
+                        Name = "ВГТ",
+                        Parameters = new List<Parameter>
+                        {
+                            ParameterBreaker, ParameterBreakerLiveTank
+                        }
+                    }
+                },
+                ParameterSetsAddedBlocks = new List<DesignDepartmentParametersAddedBlocks>()
+                {
+                    new DesignDepartmentParametersAddedBlocks()
+                    {
+                        Name = "ЗИП",
+                        Parameters = new List<Parameter>
+                        {
+                            ParameterDependentEquipmentTypeZip
+                        }
+                    }
                 }
             });
 

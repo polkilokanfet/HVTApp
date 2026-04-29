@@ -54,7 +54,7 @@
                     CommandParameter="{Binding Model}">
                     <StackPanel Orientation="Horizontal">
                         <fa:FontAwesome Icon="Money"/>
-                        <TextBlock Text="Включить в спецификацию"/>
+                        <TextBlock Text="В спецификацию"/>
                     </StackPanel>
 
                 </controls:ButtonIsVisibleWhenCanExecute>

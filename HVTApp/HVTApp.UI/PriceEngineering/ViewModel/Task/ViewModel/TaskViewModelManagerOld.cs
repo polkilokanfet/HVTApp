@@ -127,7 +127,7 @@ namespace HVTApp.UI.PriceEngineering
             #endregion
         }
 
-        private Product Pp(IUnitOfWork unitOfWork, Product product)
+        private Product GetSavedOrSaveProduct(IUnitOfWork unitOfWork, Product product)
         {
             var getProductService = Container.Resolve<IGetProductService>();
             var result = getProductService.GetSavedOrSaveProduct(product);
@@ -145,12 +145,11 @@ namespace HVTApp.UI.PriceEngineering
             {
                 if (priceEngineeringTask.SalesUnits.Any() == false) return;
 
-                var getProductService = Container.Resolve<IGetProductService>();
                 var unitOfWork = Container.Resolve<IUnitOfWork>();
 
                 priceEngineeringTask = unitOfWork.Repository<PriceEngineeringTask>().GetById(priceEngineeringTask.Id);
 
-                var product = this.Pp(unitOfWork, priceEngineeringTask.GetProduct());
+                var product = this.GetSavedOrSaveProduct(unitOfWork, priceEngineeringTask.GetProduct());
                 var salesUnits = priceEngineeringTask.SalesUnits;
 
                 var productBlocksAdded = priceEngineeringTask
@@ -164,7 +163,7 @@ namespace HVTApp.UI.PriceEngineering
                     .Where(added => added.IsOnBlock == false)
                     .Select(x => new ProductIncluded
                     {
-                        Product = this.Pp(unitOfWork, x.GetProduct()),
+                        Product = this.GetSavedOrSaveProduct(unitOfWork, x.GetProduct()),
                         Amount = x.Amount
                     })
                     .ToList();
@@ -191,7 +190,7 @@ namespace HVTApp.UI.PriceEngineering
                         .Where(x => x.IsOnBlock == true)
                         .Select(x => new ProductIncluded
                         {
-                            Product = this.Pp(unitOfWork, x.GetProduct()),
+                            Product = this.GetSavedOrSaveProduct(unitOfWork, x.GetProduct()),
                             Amount = x.Amount
                         })
                         .ToList();
@@ -200,7 +199,7 @@ namespace HVTApp.UI.PriceEngineering
                     {
                         productsIncludedOnBlock.Add(new ProductIncluded()
                         {
-                            Product = this.Pp(unitOfWork, new Product
+                            Product = this.GetSavedOrSaveProduct(unitOfWork, new Product
                             {
                                 ProductBlock = task.ProductBlock
                             })

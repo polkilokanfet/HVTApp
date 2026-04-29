@@ -35,7 +35,7 @@ namespace HVTApp.UI.PriceEngineering
         /// <param name="container"></param>
         /// <param name="tasksViewModelManager">Контейнер задач, в которую вложена эта задача</param>
         public TaskViewModelManagerNew(IUnityContainer container, IUnitOfWork unitOfWork, IEnumerable<SalesUnit> salesUnits, TasksViewModelManager tasksViewModelManager) 
-            : this(container, unitOfWork, salesUnits.First().Product)
+            : this(container, unitOfWork, salesUnits.First().Product, 1)
         {
             _tasksViewModelManager = tasksViewModelManager;
             this.SalesUnits.AddRange(salesUnits.Select(salesUnit => new SalesUnitWithSignalToStartProductionWrapper(salesUnit)));
@@ -47,41 +47,26 @@ namespace HVTApp.UI.PriceEngineering
         /// <param name="container"></param>
         /// <param name="unitOfWork"></param>
         /// <param name="product"></param>
-        public TaskViewModelManagerNew(IUnityContainer container, IUnitOfWork unitOfWork, Product product) 
+        /// <param name="amount"></param>
+        public TaskViewModelManagerNew(IUnityContainer container, IUnitOfWork unitOfWork, Product product, int amount) 
             : base(container, unitOfWork)
         {
             this.Model.ProductBlockEngineer = product.ProductBlock;
             this.Model.ProductBlockManager = product.ProductBlock;
+            
+            this.Amount = amount;
 
-            //бюро
-            //если ТСП на ремкомплект
-            _kitDepartments = product.DesignDepartmentsKits.Where(dd => dd.IsKitDepartment).ToList();
-            if (_kitDepartments.Any())
-            {
-                var designDepartment = UnitOfWork.Repository<DesignDepartment>().GetById(_kitDepartments.First().Id);
-                this.DesignDepartment = new DesignDepartmentEmptyWrapper(designDepartment);
-            }
-            //если ТСП не на ремкомплект
-            else
-            {
-                var department = UnitOfWork.Repository<DesignDepartment>().Find(designDepartment => designDepartment.ProductBlockIsSuitable(this.Model.ProductBlockEngineer)).FirstOrDefault();
-                if (department != null)
-                {
-                    this.DesignDepartment = new DesignDepartmentEmptyWrapper(department);
-                }
-            }
-
+            _kitDepartments = product.DesignDepartmentsKits.Where(department => department.IsKitDepartment).ToList();
+            this.DesignDepartment = GetDesignDepartment();
+            
             ChildPriceEngineeringTasks = new ValidatableChangeTrackingCollection<TaskViewModel>(new List<TaskViewModel>());
             RegisterCollection(ChildPriceEngineeringTasks, Model.ChildPriceEngineeringTasks);
             
             foreach (var dependentProduct in product.DependentProducts)
             {
-                for (int i = 0; i < dependentProduct.Amount; i++)
-                {
-                    var vm = new TaskViewModelManagerNew(container, unitOfWork, dependentProduct.Product);
-                    this.ChildPriceEngineeringTasks.Add(vm);
-                    vm.Parent = this;
-                }
+                var vm = new TaskViewModelManagerNew(container, unitOfWork, dependentProduct.Product, dependentProduct.Amount);
+                this.ChildPriceEngineeringTasks.Add(vm);
+                vm.Parent = this;
             }
 
             #region Commands
@@ -115,6 +100,25 @@ namespace HVTApp.UI.PriceEngineering
 
             //задача в процессе создания, нужно добавить соответствующий статус
             this.Statuses.Add(new PriceEngineeringTaskStatusEmptyWrapper(new PriceEngineeringTaskStatus { StatusEnum = ScriptStep.Create.Value }));
+        }
+
+        private DesignDepartmentEmptyWrapper GetDesignDepartment()
+        {
+            //если ТСП на ремкомплект
+            if (_kitDepartments.Any())
+            {
+                var designDepartment = UnitOfWork.Repository<DesignDepartment>().GetById(_kitDepartments.First().Id);
+                return new DesignDepartmentEmptyWrapper(designDepartment);
+            }
+
+            //если ТСП не на ремкомплект
+            var department = UnitOfWork.Repository<DesignDepartment>().Find(designDepartment => designDepartment.ProductBlockIsSuitable(this.Model.ProductBlockEngineer)).FirstOrDefault();
+            if (department != null)
+            {
+                return new DesignDepartmentEmptyWrapper(department);
+            }
+
+            return null;
         }
     }
 }

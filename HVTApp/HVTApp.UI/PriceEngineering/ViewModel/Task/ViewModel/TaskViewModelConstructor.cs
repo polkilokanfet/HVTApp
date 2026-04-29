@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
@@ -17,9 +18,12 @@ using HVTApp.Model.Wrapper.Base.TrackingCollections;
 using HVTApp.UI.Commands;
 using HVTApp.UI.PriceEngineering.DoStepCommand;
 using HVTApp.UI.PriceEngineering.ParametersService1;
+using HVTApp.UI.PriceEngineering.View;
 using HVTApp.UI.PriceEngineering.Wrapper;
 using Microsoft.Practices.Unity;
+using Prism.Commands;
 using Prism.Events;
+using Prism.Regions;
 
 namespace HVTApp.UI.PriceEngineering
 {
@@ -127,6 +131,8 @@ namespace HVTApp.UI.PriceEngineering
         /// Команда вставки всей задачи из буфера обмена
         /// </summary>
         public DelegateLogConfirmationCommand PastePriceEngineeringTaskCommand { get; }
+
+        public DelegateLogConfirmationCommand SplitPriceEngineeringTaskCommand { get; }
 
         #endregion
 
@@ -306,10 +312,9 @@ namespace HVTApp.UI.PriceEngineering
                         var product = getProductService.GetSavedOrSaveProduct(new Product { ProductBlock = block });
                         product = unitOfWork.Repository<Product>().GetById(product.Id);
 
-                        var taskViewModel = new TaskViewModelManagerNew(Container, unitOfWork, product)
+                        var taskViewModel = new TaskViewModelManagerNew(Container, unitOfWork, product, 1)
                         {
                             ParentPriceEngineeringTaskId = this.Model.Id,
-                            Amount = 1
                         };
 
                         if (taskViewModel.DesignDepartment == null)
@@ -344,6 +349,37 @@ namespace HVTApp.UI.PriceEngineering
                     var blocks = Container.Resolve<IJsonService>().ReadJsonFile<List<PriceEngineeringTaskProductBlockAdded>>($"{fPath}\\test.json");
                     this.ProductBlocksAdded.AddRange(blocks.Select(x => new TaskProductBlockAddedWrapperConstructor(x)));
                 });
+
+            SplitPriceEngineeringTaskCommand = new DelegateLogConfirmationCommand(
+                _messageService,
+                $"Вы уверены, что хотите разделить задачу на {this.Amount}?",
+                () =>
+                {
+                    if (SaveCommand.CanExecute())
+                    {
+                        var dr = _messageService.ConfirmationDialog("Сохранить предварительно задачу?");
+                        if (dr)
+                            SaveCommand.Execute();
+                    }
+
+                    using (var unitOfWork = container.Resolve<IUnitOfWork>())
+                    {
+                        var parenTask = unitOfWork.Repository<PriceEngineeringTask>().GetById(this.Model.Id);
+                        for (int i = 1; i < parenTask.Amount; i++)
+                        {
+                            var task = GetCopy(parenTask);
+                            task.Amount = 1;
+                            unitOfWork.Repository<PriceEngineeringTask>().Add(task);
+                        }
+
+                        parenTask.Amount = 1;
+                        unitOfWork.SaveChanges();
+                    }
+
+                    var parameters = new NavigationParameters { { nameof(PriceEngineeringTask), parentTask.Model } };
+                    container.Resolve<IRegionManager>().RequestNavigateContentRegion<PriceEngineeringTasksViewConstructor>(parameters);
+                },
+                () => IsEditMode && this.Amount > 1);
 
 
             eventAggregator.GetEvent<CopyProductBlockEvent>().Subscribe(() =>
@@ -420,6 +456,38 @@ namespace HVTApp.UI.PriceEngineering
         }
 
         #endregion
+
+        private PriceEngineeringTask GetCopy(PriceEngineeringTask parentTask)
+        {
+            var result = ShallowCopyEntity(parentTask);
+
+            result.ChildPriceEngineeringTasks = parentTask.ChildPriceEngineeringTasks.Select(GetCopy).ToList();
+            result.ProductBlocksAdded = parentTask.ProductBlocksAdded.Select(ShallowCopyEntity).ToList();
+            result.Messages = parentTask.Messages.Select(ShallowCopyEntity).ToList();
+            result.Statuses = parentTask.Statuses.Select(ShallowCopyEntity).ToList();
+
+            return result;
+        }
+
+        private static TEntity ShallowCopyEntity<TEntity>(TEntity source)
+            where TEntity : class, new()
+        {
+            var sourceProperties = typeof(TEntity)
+                .GetProperties()
+                .Where(info => 
+                    info.CanRead && 
+                    info.CanWrite &&
+                    info.Name != "Id" &&
+                    info.Name != "FilesAnswers")
+                .ToList(); 
+            var newObj = new TEntity();
+
+            foreach (var property in sourceProperties)
+            {
+                property.SetValue(newObj, property.GetValue(source, null), null);
+            }
+            return newObj;
+        }
 
         private bool RemoveBlockAdded(PriceEngineeringTaskProductBlockAdded ba)
         {

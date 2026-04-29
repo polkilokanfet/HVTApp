@@ -2026,7 +2026,7 @@ namespace HVTApp.TestDataGenerator
             {
                 ParentProductParameters = new List<Parameter> { ParameterBreaker, ParameterVoltage330kV },
                 ChildProductParameters = new List<Parameter> { ParameterDrivePPV },
-                ChildProductsAmount = 1,
+                ChildProductsAmount = 3,
                 IsUnique = false
             });
 
@@ -2034,7 +2034,7 @@ namespace HVTApp.TestDataGenerator
             {
                 ParentProductParameters = new List<Parameter> { ParameterBreaker, ParameterVoltage500kV },
                 ChildProductParameters = new List<Parameter> { ParameterDrivePPV },
-                ChildProductsAmount = 1,
+                ChildProductsAmount = 3,
                 IsUnique = false
             });
 

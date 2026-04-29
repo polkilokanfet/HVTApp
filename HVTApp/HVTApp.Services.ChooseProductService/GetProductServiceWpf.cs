@@ -172,7 +172,7 @@ namespace HVTApp.Services.GetProductService
             else
                 savedBlocks.Add(product.ProductBlock);
 
-            //для каждого зависиммого продукта
+            //для каждого зависимого продукта
             foreach (var dependentProduct in product.DependentProducts)
             {
                 var savedProduct = savedProducts.SingleOrDefault(product1 => product1.Equals(dependentProduct.Product));

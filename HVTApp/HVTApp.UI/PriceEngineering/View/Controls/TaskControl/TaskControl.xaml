@@ -51,7 +51,7 @@
                                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                                     <Label Content="Блок (Id задачи"/>
                                     <TextBox Text="{Binding Model.Number, Mode=OneWay}" IsReadOnly="True" Background="Transparent" BorderThickness="0"/>
-                                    <Label Content="): "/>
+                                    <Label Content="):"/>
                                 </StackPanel>
                                 <Grid Grid.Column="1">
                                     <Grid.ColumnDefinitions>
@@ -59,13 +59,23 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
 
                                     <ContentControl Grid.Column="0" Content="{Binding ElementName=Root, Path=AreaSelectProductBlock}"/>
                                     <view:ProductBlockControl Grid.Column="1" ProductBlock="{Binding ProductBlockEngineer.Model, Mode=OneWay}"/>
 
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                        <Label Content="Кол.:"></Label>
+                                        <TextBox Width="20"
+                                                 BorderThickness="0" Background="AliceBlue"
+                                                 IsReadOnly="True" 
+                                                 ToolTip="Количество блоков на один родительский"
+                                                 Text="{Binding Amount, Mode=OneTime}"/>
+                                    </StackPanel>
+
                                     <!--SCC и чертёж-->
-                                    <Grid Grid.Column="2"                                            
+                                    <Grid Grid.Column="3"                                            
                                           Visibility="{Binding  ProductBlockEngineer.Model, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ProductBlockStructureCostNumberIsRequiredVisibilityConverter}}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -127,10 +137,10 @@
 
                                     </Grid>
 
-                                    <Label Grid.Column="2" Content="Не требует состава (стракчакоста)"
+                                    <Label Grid.Column="3" Content="Не требует стракчакоста"
                                            Visibility="{Binding  ProductBlockEngineer.Model, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ProductBlockStructureCostNumberIsRequiredVisibilityReverseConverter}}"/>
 
-                                    <Label Grid.Column="3" Content="Требует согласования" Foreground="Red" VerticalAlignment="Center" Margin="2 0" FontWeight="Bold"
+                                    <Label Grid.Column="4" Content="Требует согласования" Foreground="Red" VerticalAlignment="Center" Margin="2 0" FontWeight="Bold"
                                            Visibility="{Binding IsValidForProduction, Converter={StaticResource BooleanToVisibilityReverseConverter}, UpdateSourceTrigger=PropertyChanged}"/>
 
                                 </Grid>

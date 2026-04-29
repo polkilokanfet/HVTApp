@@ -71,6 +71,12 @@ namespace HVTApp.UI.PriceEngineering.DoStepCommand
             ViewModel.IsValidForProduction = MessageService.ConfirmationDialog("Проверка", "Предоставленного ТЗ достаточно для производства?", defaultNo: true);
         }
 
+        protected override void DoStepAction()
+        {
+            base.DoStepAction();
+            ViewModel.SplitPriceEngineeringTaskCommand.RaiseCanExecuteChanged();
+        }
+
         protected override string GetStatusComment()
         {
             var sb = new StringBuilder()
