@@ -65,8 +65,8 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
 
                     using (var unitOfWork = container.Resolve<IUnitOfWork>())
                     {
-                        var users = unitOfWork.Repository<User>().GetAll();
-                        users.ForEach(user => user.IsPriceEngineeringTaskMessagesEnabled = true);
+                        var tasks = unitOfWork.Repository<PriceEngineeringTask>().Find(task => task.Amount == 0);
+                        tasks.ForEach(task => task.Amount = 1);
                         unitOfWork.SaveChanges();
                     }
 

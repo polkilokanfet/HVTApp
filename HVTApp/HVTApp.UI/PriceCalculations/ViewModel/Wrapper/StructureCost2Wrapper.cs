@@ -14,8 +14,8 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public string Number
         {
-            get { return GetValue<string>(); }
-            set { SetValue(value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public string NumberOriginalValue => GetOriginalValue<string>(nameof(Number));
         public bool NumberIsChanged => GetIsChanged(nameof(Number));
@@ -25,8 +25,8 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public string OriginalStructureCostNumber
         {
-            get { return GetValue<string>(); }
-            set { SetValue(value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public string OriginalStructureCostNumberOriginalValue => GetOriginalValue<string>(nameof(OriginalStructureCostNumber));
         public bool OriginalStructureCostNumberIsChanged => GetIsChanged(nameof(OriginalStructureCostNumber));
@@ -36,8 +36,8 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public double AmountNumerator
         {
-            get { return GetValue<double>(); }
-            set { SetValue(value); }
+            get => GetValue<double>();
+            set => SetValue(value);
         }
         public double AmountNumeratorOriginalValue => GetOriginalValue<double>(nameof(AmountNumerator));
         public bool AmountNumeratorIsChanged => GetIsChanged(nameof(AmountNumerator));
@@ -47,8 +47,8 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public double AmountDenomerator
         {
-            get { return GetValue<double>(); }
-            set { SetValue(value); }
+            get => GetValue<double>();
+            set => SetValue(value);
         }
         public double AmountDenomeratorOriginalValue => GetOriginalValue<double>(nameof(AmountDenomerator));
         public bool AmountDenomeratorIsChanged => GetIsChanged(nameof(AmountDenomerator));
@@ -58,8 +58,8 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public double? UnitPrice
         {
-            get { return GetValue<double?>(); }
-            set { SetValue(value); }
+            get => GetValue<double?>();
+            set => SetValue(value);
         }
         public double? UnitPriceOriginalValue => GetOriginalValue<double?>(nameof(UnitPrice));
         public bool UnitPriceIsChanged => GetIsChanged(nameof(UnitPrice));
@@ -69,8 +69,8 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public string Comment
         {
-            get { return GetValue<string>(); }
-            set { SetValue(value); }
+            get => GetValue<string>();
+            set => SetValue(value);
         }
         public string CommentOriginalValue => GetOriginalValue<string>(nameof(Comment));
         public bool CommentIsChanged => GetIsChanged(nameof(Comment));
@@ -80,11 +80,12 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// </summary>
         public System.Guid Id
         {
-            get { return GetValue<System.Guid>(); }
-            set { SetValue(value); }
+            get => GetValue<System.Guid>();
+            set => SetValue(value);
         }
         public System.Guid IdOriginalValue => GetOriginalValue<System.Guid>(nameof(Id));
         public bool IdIsChanged => GetIsChanged(nameof(Id));
+
         #endregion
 
         #region GetProperties
@@ -98,6 +99,7 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.Wrapper
         /// Total
         /// </summary>
         public double? Total => GetValue<double?>();
+
         #endregion
 
         public StructureCost2Wrapper(StructureCost model) : base(model)

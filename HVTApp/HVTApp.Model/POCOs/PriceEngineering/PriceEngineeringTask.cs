@@ -49,8 +49,8 @@ namespace HVTApp.Model.POCOs
         public virtual User UserConstructorInitiator { get; set; }
 
 
-        [Designation("Количество блоков продукта"), Required, OrderStatus(950)]
-        public int Amount { get; set; }
+        [Designation("Количество блоков продукта в родительском блоке"), Required, OrderStatus(950)]
+        public int Amount { get; set; } = 1;
 
         [Designation("Блок продукта от менеджера"), Required, OrderStatus(900)]
         public virtual ProductBlock ProductBlockManager { get; set; }
@@ -500,6 +500,7 @@ namespace HVTApp.Model.POCOs
                 var structureCostNumber = GetStructureCostNumber(this, tceNumber, priceService);
                 var structureCost = GetNewStructureCost(ProductBlockEngineer, structureCostNumber, 1, 1);
                 structureCost.PriceIncreaseFactor = this.PriceIncreaseFactor;
+                structureCost.AmountNumerator = this.Amount;
                 yield return structureCost;
             }
 
@@ -507,7 +508,7 @@ namespace HVTApp.Model.POCOs
             foreach (var blockAdded in ProductBlocksAdded.Where(productBlockAdded => productBlockAdded.IsRemoved == false))
             {
                 var structureCostNumber1 = GetStructureCostNumber(blockAdded, tceNumber, priceService);
-                yield return GetNewStructureCost(blockAdded.ProductBlock, structureCostNumber1, blockAdded.Amount, blockAdded.IsOnBlock ? 1 : salesUnitsAmount.Value);
+                yield return GetNewStructureCost(blockAdded.ProductBlock, structureCostNumber1, blockAdded.Amount * this.Amount, blockAdded.IsOnBlock ? 1 : salesUnitsAmount.Value);
             }
 
             //стракчакосты вложенных задач

@@ -439,7 +439,7 @@ namespace HVTApp.UI.PriceCalculations.ViewModel.PriceCalculation1
             var item = new PriceCalculationItem2Wrapper(priceEngineeringTask.SalesUnits.ToList());
             item.PaymentConditionSet = new PaymentConditionSetEmptyWrapper(priceEngineeringTask.SalesUnits.First().PaymentConditionSet);
             item.Model.PriceEngineeringTaskId = priceEngineeringTask.Id;
-
+            
             var priceService = Container.Resolve<IPriceService>();
             foreach (var structureCost in priceEngineeringTask.GetStructureCosts(priceEngineeringTasks.TceNumber, null, priceService))
             {
