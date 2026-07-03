@@ -50,8 +50,6 @@ namespace EventServiceClient2
             return true;
         }
 
-        #region PriceEngineeringTasks
-
         public bool OnNotificationCallback(NotificationActionType actionType, Guid targetEntityId)
         {
             var notificationUnit = new NotificationUnit
@@ -62,7 +60,19 @@ namespace EventServiceClient2
                 RecipientUserId = GlobalAppProperties.User.Id,
                 TargetEntityId = targetEntityId
             };
+
+#if DEBUG
             _notificationFromDataBaseService.ShowNotification(notificationUnit);
+#else
+            try
+            {
+                _notificationFromDataBaseService.ShowNotification(notificationUnit);
+            }
+            catch
+            {
+                return false;
+            }
+#endif
             return true;
         }
 
@@ -85,8 +95,5 @@ namespace EventServiceClient2
 
             return true;
         }
-
-
-        #endregion
     }
 }

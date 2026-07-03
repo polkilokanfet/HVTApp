@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Extensions;
 using HVTApp.Infrastructure.Interfaces.Services;
 using HVTApp.Infrastructure.Interfaces.Services.EventService;
 using HVTApp.Infrastructure.Services;
-using HVTApp.Model.Events;
 using HVTApp.Model.Events.EventServiceEvents;
 using HVTApp.Model.POCOs;
 using HVTApp.Model.Services;
@@ -51,9 +47,6 @@ namespace NotificationsMainService
 
             //подписка на уведомления о событиях в ТСП
             _eventAggregator.GetEvent<NotificationEvent>().Subscribe(OnNotificationEvent, true);
-
-            //подписка на сохранение платежного документа
-            _eventAggregator.GetEvent<AfterSavePaymentDocumentEvent>().Subscribe(OnAfterSavePaymentDocumentEvent, true);
         }
 
         private void EventServiceClientOnStartEvent()
@@ -76,58 +69,57 @@ namespace NotificationsMainService
 
         #endregion
 
+        //#region OnAfterSavePaymentDocumentEvent
 
-        #region OnAfterSavePaymentDocumentEvent
+        //private void OnAfterSavePaymentDocumentEvent(PaymentDocument paymentDocument)
+        //{
+        //    if (paymentDocument.Payments.Any() == false) return;
 
-        private void OnAfterSavePaymentDocumentEvent(PaymentDocument paymentDocument)
-        {
-            if (paymentDocument.Payments.Any() == false) return;
+        //    var salesUnits = new List<SalesUnit>();
+        //    paymentDocument.Payments
+        //        .ForEach(paymentActual => salesUnits.Add(_unitOfWork.Repository<SalesUnit>().GetById(paymentActual.SalesUnitId)));
 
-            var salesUnits = new List<SalesUnit>();
-            paymentDocument.Payments
-                .ForEach(paymentActual => salesUnits.Add(_unitOfWork.Repository<SalesUnit>().GetById(paymentActual.SalesUnitId)));
+        //    var manager = salesUnits.First().Project.Manager;
+        //    var email = manager.Employee.Email;
+        //    var subject = "[УП ВВА] Пришла денюжка!";
+        //    var message = GetEmailMessageOnAfterSavePaymentDocumentEvent(paymentDocument, salesUnits);
 
-            var manager = salesUnits.First().Project.Manager;
-            var email = manager.Employee.Email;
-            var subject = "[УП ВВА] Пришла денюжка!";
-            var message = GetEmailMessageOnAfterSavePaymentDocumentEvent(paymentDocument, salesUnits);
+        //    var emails = _unitOfWork.Repository<NotificationsReportsSettings>()
+        //        .GetAll()
+        //        .FirstOrDefault()?
+        //        .SavePaymentDocumentDistributionList
+        //        .Where(user => string.IsNullOrEmpty(user.Employee.Email) == false)
+        //        .Select(user => user.Employee.Email)
+        //        .ToList() ?? new List<string>();
 
-            var emails = _unitOfWork.Repository<NotificationsReportsSettings>()
-                .GetAll()
-                .FirstOrDefault()?
-                .SavePaymentDocumentDistributionList
-                .Where(user => string.IsNullOrEmpty(user.Employee.Email) == false)
-                .Select(user => user.Employee.Email)
-                .ToList() ?? new List<string>();
+        //    if (string.IsNullOrEmpty(email) == false) emails.Add(email);
 
-            if (string.IsNullOrEmpty(email) == false) emails.Add(email);
+        //    foreach (var email1 in emails)
+        //    {
+        //        Task.Run(() => _emailService.SendMail(email1, subject, message)).Await();
+        //    }
+        //}
 
-            foreach (var email1 in emails)
-            {
-                Task.Run(() => _emailService.SendMail(email1, subject, message)).Await();
-            }
-        }
+        //private string GetEmailMessageOnAfterSavePaymentDocumentEvent(PaymentDocument paymentDocument, IEnumerable<SalesUnit> salesUnits)
+        //{
+        //    var units = salesUnits.ToList();
+        //    var sb = new StringBuilder();
+        //    sb.AppendLine($"Платежный документ №{paymentDocument.Number} от {paymentDocument.Date.ToShortDateString()} г.");
+        //    sb.AppendLine($"Сумма с НДС: {paymentDocument.SumWithVat:N} руб.");
+        //    sb.AppendLine($"Менеджер: {units.GroupBy(x => x.Project.Manager).Select(x => x.Key.Employee.Person).ToStringEnum()}");
+        //    sb.AppendLine($"Контрагент: {units.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => x.Key.Contract.Contragent).ToStringEnum()}");
+        //    sb.AppendLine($"Договор: {units.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => x.Key.Contract.Number).ToStringEnum()}");
+        //    sb.AppendLine($"Спецификация: {units.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => $"{x.Key.Number} от {x.Key.Date.ToShortDateString()}").ToStringEnum()}");
+        //    sb.AppendLine("За позиции:");
+        //    foreach (var salesUnit in units)
+        //    {
+        //        sb.AppendLine($" - з/з: {salesUnit.Order?.Number}; поз.: {salesUnit.OrderPosition}; Объект: {salesUnit.Facility}; Наименование: {salesUnit.Product}");
+        //    }
 
-        private string GetEmailMessageOnAfterSavePaymentDocumentEvent(PaymentDocument paymentDocument, IEnumerable<SalesUnit> salesUnits)
-        {
-            var units = salesUnits.ToList();
-            var sb = new StringBuilder();
-            sb.AppendLine($"Платежный документ №{paymentDocument.Number} от {paymentDocument.Date.ToShortDateString()} г.");
-            sb.AppendLine($"Сумма с НДС: {paymentDocument.SumWithVat:N} руб.");
-            sb.AppendLine($"Менеджер: {units.GroupBy(x => x.Project.Manager).Select(x => x.Key.Employee.Person).ToStringEnum()}");
-            sb.AppendLine($"Контрагент: {units.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => x.Key.Contract.Contragent).ToStringEnum()}");
-            sb.AppendLine($"Договор: {units.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => x.Key.Contract.Number).ToStringEnum()}");
-            sb.AppendLine($"Спецификация: {units.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => $"{x.Key.Number} от {x.Key.Date.ToShortDateString()}").ToStringEnum()}");
-            sb.AppendLine("За позиции:");
-            foreach (var salesUnit in units)
-            {
-                sb.AppendLine($" - з/з: {salesUnit.Order?.Number}; поз.: {salesUnit.OrderPosition}; Объект: {salesUnit.Facility}; Наименование: {salesUnit.Product}");
-            }
+        //    return sb.ToString();
+        //}
 
-            return sb.ToString();
-        }
-
-        #endregion
+        //#endregion
 
         public void Dispose()
         {

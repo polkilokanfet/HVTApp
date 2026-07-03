@@ -77,6 +77,9 @@ namespace NotificationsService
                 case NotificationActionType.TaskInvoiceForPaymentStop:
                     return new NotificationHelperTaskInvoiceForPayment(_unitOfWork, unit, _regionManager, _eventAggregator, _notificationTextService);
 
+                case NotificationActionType.PaymentDocumentSaved:
+                    return new NotificationHelperPaymentDocumentSaved(_unitOfWork, unit, _regionManager, _eventAggregator, _notificationTextService);
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

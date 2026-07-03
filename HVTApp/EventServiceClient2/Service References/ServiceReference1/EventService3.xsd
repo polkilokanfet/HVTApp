@@ -41,6 +41,7 @@
       <xs:enumeration value="TaskInvoiceForPaymentInstruct" />
       <xs:enumeration value="TaskInvoiceForPaymentStop" />
       <xs:enumeration value="PriceEngineeringTaskProductionRequestCancel" />
+      <xs:enumeration value="PaymentDocumentSaved" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="NotificationActionType" nillable="true" type="tns:NotificationActionType" />

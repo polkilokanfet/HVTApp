@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using HVTApp.Infrastructure;
 using HVTApp.Infrastructure.Enums;
+using HVTApp.Infrastructure.Extensions;
 using HVTApp.Model;
 using HVTApp.Model.POCOs;
 using HVTApp.Model.Services;
@@ -169,6 +170,12 @@ namespace NotificationsService
 
                 #endregion
 
+                #region PaymentDocumentSaved
+
+                case NotificationActionType.PaymentDocumentSaved:
+                    return "Сохранён платёжный документ";
+                #endregion
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -286,9 +293,46 @@ namespace NotificationsService
 
                 #endregion
 
+                #region PaymentDocumentSaved
+
+                case NotificationActionType.PaymentDocumentSaved:
+                {
+                    using (var unitOfWork = _unitOfWorkFactory.GetUnitOfWork())
+                    {
+                        var paymentDocument = unitOfWork.Repository<PaymentDocument>().GetById(notificationUnit.TargetEntityId);
+                        return this.GetCommonInfo(paymentDocument);
+                    }
+                }
+
+                #endregion
+
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private string GetCommonInfo(PaymentDocument paymentDocument)
+        {
+            if (paymentDocument.Payments.Any() == false) return "Платежей нет";
+
+            var salesUnits = paymentDocument.Payments
+                .Select(paymentActual => paymentActual.SalesUnit).ToList();
+            
+            var sb = new StringBuilder();
+            sb.AppendLine($"Платежный документ №{paymentDocument.Number} от {paymentDocument.Date.ToShortDateString()} г.");
+            sb.AppendLine($"Сумма с НДС: {paymentDocument.SumWithVat:N} руб.");
+            //sb.AppendLine($"Менеджер: {units.GroupBy(x => x.Project.Manager).Select(x => x.Key.Employee.Person).ToStringEnum()}");
+            sb.AppendLine($"Контрагент: {salesUnits.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => x.Key.Contract.Contragent).ToStringEnum()}");
+            sb.AppendLine($"Договор: {salesUnits.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => x.Key.Contract.Number).ToStringEnum()}");
+            sb.AppendLine($"Спецификация: {salesUnits.Where(x => x.Specification != null).GroupBy(x => x.Specification).Select(x => $"{x.Key.Number} от {x.Key.Date.ToShortDateString()}").ToStringEnum()}");
+            sb.AppendLine("За позиции:");
+            foreach (var salesUnit in salesUnits)
+            {
+                sb.AppendLine($" - з/з: {salesUnit.Order?.Number}; поз.: {salesUnit.OrderPosition}; Объект: {salesUnit.Facility}; Наименование: {salesUnit.Product}");
+            }
+
+            return sb.ToString();
         }
 
         private string GetCommonInfo(PriceEngineeringTasks tasks)

@@ -3,8 +3,11 @@ using System.Linq;
 using System.Windows.Input;
 using HVTApp.DataAccess;
 using HVTApp.Infrastructure;
+using HVTApp.Infrastructure.Enums;
 using HVTApp.Infrastructure.Services;
+using HVTApp.Model;
 using HVTApp.Model.Events;
+using HVTApp.Model.Events.EventServiceEvents;
 using HVTApp.Model.POCOs;
 using HVTApp.UI.Commands;
 using Microsoft.Practices.Unity;
@@ -163,6 +166,24 @@ namespace HVTApp.UI.Modules.PlanAndEconomy.PaymentsActual
                     if (UnitOfWork.SaveChanges().OperationCompletedSuccessfully)
                     {
                         Item.AcceptChanges();
+
+                        var recipientUserId = this.Item.Payments?.FirstOrDefault()?.Model.SalesUnit.Project.ManagerId;
+                        if (recipientUserId != null)
+                        {
+                            var notificationUnit = new NotificationUnit
+                            {
+                                ActionType = NotificationActionType.PaymentDocumentSaved,
+                                RecipientRole = Role.SalesManager,
+                                RecipientUserId = recipientUserId.Value, 
+                                SenderRole = Role.Economist,
+                                SenderUserId = GlobalAppProperties.User.Id, 
+                                TargetEntityId = this.Item.Model.Id
+                            };
+
+                            this.Container.Resolve<IEventAggregator>()
+                                .GetEvent<NotificationEvent>()
+                                .Publish(notificationUnit);
+                        }
 
                         this.Container.Resolve<IEventAggregator>()
                             .GetEvent<AfterSaveActualPaymentDocumentEvent>()

@@ -64,6 +64,8 @@
         TaskInvoiceForPaymentInstruct,
         TaskInvoiceForPaymentStop,
 
-        PriceEngineeringTaskProductionRequestCancel
+        PriceEngineeringTaskProductionRequestCancel,
+
+        PaymentDocumentSaved
     }
 }

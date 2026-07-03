@@ -208,6 +208,15 @@ namespace HVTApp.Model.POCOs
                     return "Остановлена задача на формирование счёта";
 
                 #endregion
+
+                #region PaymentDocumentSaved
+
+                case NotificationActionType.PaymentDocumentSaved:
+                    return "Сохранён платёжный документ";
+
+                #endregion
+
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -217,7 +226,7 @@ namespace HVTApp.Model.POCOs
 
         public string GetCommonInfo(PriceEngineeringTasks tasks, PriceEngineeringTask taskTarget, PriceEngineeringTask taskTop)
         {
-            SalesUnit salesUnit = taskTop.SalesUnits.FirstOrDefault();
+            var salesUnit = taskTop.SalesUnits.FirstOrDefault();
 
             var sb = new StringBuilder();
             sb.AppendLine($"Номер сборки в УП ВВА: {tasks.NumberFull}");
