@@ -149,7 +149,10 @@ namespace HVTApp.UI.ViewModels
                         var productBlocks = unitOfWork.Repository<ProductBlock>().GetAll();
                         foreach (var block in productBlocks)
                         {
-                            var designation = block.Designation;
+                            if (block.IsKit)
+                                continue;
+
+                            var designation = GlobalAppProperties.ProductDesignationService.GetDesignation(block);
                             var designationSpecial = block.DesignationSpecial;
 
                             if (designation.Length > 256)
@@ -157,8 +160,13 @@ namespace HVTApp.UI.ViewModels
 
                             if (designation != designationSpecial)
                             {
-                                sb.AppendLine($"{designationSpecial} => {designation}");
-                                block.DesignationSpecial = designation;
+                                var r = $"{designationSpecial} => {designation}";
+                                if (string.IsNullOrWhiteSpace(designationSpecial) || 
+                                    MessageService.ConfirmationDialog("Заменить обозначение?", r, defaultYes:true))
+                                {
+                                    sb.AppendLine(r);
+                                    block.DesignationSpecial = designation;
+                                }
                             }
                         }
 
