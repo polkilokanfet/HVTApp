@@ -274,6 +274,7 @@
     <Compile Include="Wrapper\Custom\Functionality\PriceEngineeringTaskFileTechnicalRequirementsWrapper.cs" />
     <Compile Include="Wrapper\Custom\Functionality\PriceEngineeringTasksFileTechnicalRequirementsWrapper.cs" />
     <Compile Include="Wrapper\Custom\Functionality\ProductBlockWrapper.cs" />
+    <Compile Include="Wrapper\Custom\Functionality\ProductBlockWrapper1.cs" />
     <Compile Include="Wrapper\Custom\Functionality\ProductCostDependentProductsWrapper.cs" />
     <Compile Include="Wrapper\Custom\Functionality\ProductIncludedWrapper.cs" />
     <Compile Include="Wrapper\Custom\Functionality\ProductWrapper.cs" />

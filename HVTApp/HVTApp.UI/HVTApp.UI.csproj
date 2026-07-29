@@ -1431,9 +1431,9 @@
     <Compile Include="ViewModels\Details\Custom\DesignDepartmentViewModel.cs" />
     <Compile Include="ViewModels\Details\Custom\FacilityViewModel.cs" />
     <Compile Include="ViewModels\Details\Custom\PriceEngineeringTaskDetailsViewModel.cs" />
-    <Compile Include="ViewModels\Details\Custom\ProductBlockDetailsViewModel.cs" />
     <Compile Include="ViewModels\Details\EmployeeDetailsViewModel.cs" />
     <Compile Include="ViewModels\Details\FacilityDetailsViewModel.cs" />
+    <Compile Include="ViewModels\Details\Custom\ProductBlockDetailsViewModel.cs" />
     <Compile Include="ViewModels\Details\IncomingRequestDetailsViewModel.cs" />
     <Compile Include="ViewModels\Details\LocalityDetailsViewModel.cs" />
     <Compile Include="ViewModels\Details\ProductCategoryPriceAndCostDetailsViewModel.cs" />

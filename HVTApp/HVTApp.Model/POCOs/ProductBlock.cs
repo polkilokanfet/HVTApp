@@ -50,7 +50,7 @@ namespace HVTApp.Model.POCOs
         /// <summary>
         /// Параметры (упорядоченные)
         /// </summary>
-        [Designation("Параметры (упорядоченные)"), NotMapped, OrderStatus(-10)]
+        [Designation("Параметры (упорядоченные)"), NotMapped, OrderStatus(-10), NotForDetailsView, NotForWrapper]
         public List<Parameter> ParametersOrdered => Parameters.OrderBy(parameter => parameter).ToList();
 
         [Designation("Обозначение"), NotMapped, OrderStatus(9)]

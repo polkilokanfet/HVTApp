@@ -2660,7 +2660,7 @@ namespace HVTApp.Model.Wrapper
         public bool ParentPriceEngineeringTasksIdIsChanged => GetIsChanged(nameof(ParentPriceEngineeringTasksId));
 
         /// <summary>
-        /// Количество блоков продукта
+        /// Количество блоков продукта в родительском блоке
         /// </summary>
         public System.Int32 Amount
         {
@@ -6876,11 +6876,6 @@ namespace HVTApp.Model.Wrapper
         /// </summary>
         public IValidatableChangeTrackingCollection<SumOnDateWrapper> FixedCosts { get; private set; }
 
-        /// <summary>
-        /// Параметры (упорядоченные)
-        /// </summary>
-        public IValidatableChangeTrackingCollection<ParameterWrapper> ParametersOrdered { get; private set; }
-
         #endregion
 
         #region GetProperties
@@ -6943,9 +6938,6 @@ namespace HVTApp.Model.Wrapper
           if (Model.FixedCosts == null) throw new ArgumentException($"{nameof(Model.FixedCosts)} cannot be null");
           FixedCosts = new ValidatableChangeTrackingCollection<SumOnDateWrapper>(Model.FixedCosts.Select(e => new SumOnDateWrapper(e)));
           RegisterCollection(FixedCosts, Model.FixedCosts);
-          if (Model.ParametersOrdered == null) throw new ArgumentException($"{nameof(Model.ParametersOrdered)} cannot be null");
-          ParametersOrdered = new ValidatableChangeTrackingCollection<ParameterWrapper>(Model.ParametersOrdered.Select(e => new ParameterWrapper(e)));
-          RegisterCollection(ParametersOrdered, Model.ParametersOrdered);
         }
 	}
 
