@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using HVTApp.Model;
 
 namespace HVTApp.UI.PriceEngineering.Converters
 {
@@ -13,6 +14,12 @@ namespace HVTApp.UI.PriceEngineering.Converters
             if (value is TaskViewModel priceEngineeringTaskViewModel)
             {
                 if (priceEngineeringTaskViewModel.IsTarget)
+                {
+                    return Visibility.Visible;
+                }
+
+                if (priceEngineeringTaskViewModel.Model.UserConstructorInitiator != null &&
+                    priceEngineeringTaskViewModel.Model.UserConstructorInitiator.IsAppCurrentUser())
                 {
                     return Visibility.Visible;
                 }

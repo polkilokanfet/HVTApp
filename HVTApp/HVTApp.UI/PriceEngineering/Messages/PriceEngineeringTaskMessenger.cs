@@ -75,7 +75,9 @@ namespace HVTApp.UI.PriceEngineering.Messages
                     container.Resolve<IEventAggregator>().GetEvent<PriceEngineeringTaskSendMessageEvent>().Publish(message);
                     this.MessageText = string.Empty;
                 },
-                () => AllowTexting && string.IsNullOrWhiteSpace(MessageText) == false);
+                () => 
+                    AllowTexting && 
+                    string.IsNullOrWhiteSpace(MessageText) == false);
 
             _viewModel.Statuses.CollectionChanged += (sender, args) =>
             {
@@ -87,7 +89,6 @@ namespace HVTApp.UI.PriceEngineering.Messages
                     this.Items.Insert(0, PriceEngineeringTaskStatusMessage.Convert(statusWrapper.Model));
                 }
             };
-
 
             _container.Resolve<IEventAggregator>().GetEvent<PriceEngineeringTaskReciveMessageEvent>().Subscribe(OnReciveMessageEvent);
         }
