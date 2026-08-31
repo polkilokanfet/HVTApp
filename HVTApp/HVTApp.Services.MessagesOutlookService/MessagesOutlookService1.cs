@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using HVTApp.Infrastructure.Services;
 using OpenMcdf;
+using FileFormatException = OpenMcdf.FileFormatException;
 
 namespace HVTApp.Services.MessagesOutlookService
 {
@@ -22,7 +23,7 @@ namespace HVTApp.Services.MessagesOutlookService
                         Subject = msg.Subject,
                         BodyText = msg.BodyText,
                         BodyHtml = msg.BodyHtml,
-                        SentOnDate = msg.SentOn,
+                        SentOnDate = msg.SentOn?.DateTime,
                         Sender = new UserOutlook(msg.Sender.Email, msg.Sender.DisplayName),
                         Recipients = msg.Recipients.Select(recipient => new UserOutlook(recipient.Email, recipient.DisplayName)).ToList(),
                         HasAttachments = msg.Attachments.Any()
@@ -37,7 +38,7 @@ namespace HVTApp.Services.MessagesOutlookService
 
                 return message;
             }
-            catch (CFFileFormatException e)
+            catch (FileFormatException e)
             {
                 throw;
             }
@@ -56,7 +57,7 @@ namespace HVTApp.Services.MessagesOutlookService
                 {
                     result.Add(this.GetOutlookMessage(filePath));
                 }
-                catch (CFFileFormatException e)
+                catch (FileFormatException e)
                 {
                 }
             }
