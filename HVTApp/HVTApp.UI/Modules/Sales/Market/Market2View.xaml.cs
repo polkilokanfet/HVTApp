@@ -64,7 +64,7 @@ namespace HVTApp.UI.Modules.Sales.Market
 
             viewModel.Outlook.SelectedMessageChanged += msg =>
             {
-                if (msg != null)
+                if (msg?.BodyHtml != null)
                 {
                     WebBrowserForMessages.NavigateToString(FixHtml(msg.BodyHtml));
                 }
