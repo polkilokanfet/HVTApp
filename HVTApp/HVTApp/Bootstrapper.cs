@@ -163,6 +163,7 @@ namespace HVTApp
             Container.RegisterType<IEventServiceClient, EventServiceClient>(new ContainerControlledLifetimeManager());
             Container.RegisterType<ISendNotificationThroughApp, EventServiceClient>(new ContainerControlledLifetimeManager());
             Container.RegisterType<INotificationsReportService, NotificationsReportService>();
+            Container.RegisterType<INotificationServiceClient, HVTApp.NotificationService1.NotificationService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<INotificationMainService, NotificationMainService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<INotificationFromDataBaseService, NotificationFromDataBaseService>(new ContainerControlledLifetimeManager());
             Container.RegisterType<INotificationGeneratorService, NotificationGeneratorService>(new ContainerControlledLifetimeManager());
@@ -233,6 +234,7 @@ namespace HVTApp
             //{ }
             //#endregion
 
+            Container.Resolve<INotificationServiceClient>().StartAsync().Await();
             Container.Resolve<INotificationMainService>().Start();
 
             Container.Resolve<IEventAggregator>().GetEvent<ModuleIsInitializedEvent>().Subscribe(moduleType =>

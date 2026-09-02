@@ -61,19 +61,21 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
                     //    _container.Resolve<IMessageService>().Message(e.GetType().ToString(), e.PrintAllExceptions());
                     //}
 
-                    var sb = new StringBuilder();
+                    ////var sb = new StringBuilder();
 
-                    using (var unitOfWork = container.Resolve<IUnitOfWork>())
-                    {
-                        var tasks = unitOfWork.Repository<PriceEngineeringTask>().Find(task => task.Amount == 0);
-                        tasks.ForEach(task => task.Amount = 1);
-                        unitOfWork.SaveChanges();
-                    }
+                    ////using (var unitOfWork = container.Resolve<IUnitOfWork>())
+                    ////{
+                    ////    var tasks = unitOfWork.Repository<PriceEngineeringTask>().Find(task => task.Amount == 0);
+                    ////    tasks.ForEach(task => task.Amount = 1);
+                    ////    unitOfWork.SaveChanges();
+                    ////}
 
-                    Result = sb.ToString();
-                    container.Resolve<IMessageService>().Message(sb.ToString());
+                    ////Result = sb.ToString();
+                    ////container.Resolve<IMessageService>().Message(sb.ToString());
 
                     //Clipboard.SetText(sb.ToString());
+
+                    container.Resolve<INotificationServiceClient>().SendNotificationToHub("ttt").Await();
                 });
 
             Command2 = new DelegateLogCommand(() =>

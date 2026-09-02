@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35327.3
+# Visual Studio Version 18
+VisualStudioVersion = 18.8.12009.203 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVTApp", "HVTApp\HVTApp.csproj", "{99C9E82C-C594-446D-AA59-8FFBC43AD226}"
 EndProject
@@ -118,6 +118,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailNotificationsService", "EmailNotificationsService\EmailNotificationsService.csproj", "{939714ED-AECF-4AEA-9353-F8151AD1A1C6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailNotificationsServiceHost", "EmailNotificationsServiceHost\EmailNotificationsServiceHost.csproj", "{551F9079-F1DE-4551-8F8E-A2AF4798539C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HVTApp.Api", "HVTApp.Api\HVTApp.Api.csproj", "{E0B22E3C-E8FF-4B0C-B12B-F6242739C41E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -333,6 +335,10 @@ Global
 		{551F9079-F1DE-4551-8F8E-A2AF4798539C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{551F9079-F1DE-4551-8F8E-A2AF4798539C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{551F9079-F1DE-4551-8F8E-A2AF4798539C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0B22E3C-E8FF-4B0C-B12B-F6242739C41E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0B22E3C-E8FF-4B0C-B12B-F6242739C41E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0B22E3C-E8FF-4B0C-B12B-F6242739C41E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0B22E3C-E8FF-4B0C-B12B-F6242739C41E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
