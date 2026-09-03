@@ -75,7 +75,12 @@ namespace HVTApp.UI.Modules.Settings.ViewModels
 
                     //Clipboard.SetText(sb.ToString());
 
-                    container.Resolve<INotificationServiceClient>().SendNotificationToHub("ttt").Await();
+                    NotificationHvtApp notification = new NotificationHvtApp()
+                    {
+                        UserId = GlobalAppProperties.User.Id, 
+                        Message = $"{DateTime.Now.Date} {DateTime.Now.TimeOfDay}"
+                    };
+                    container.Resolve<INotificationServiceClient>().SendNotificationToHub(notification).Await();
                 });
 
             Command2 = new DelegateLogCommand(() =>

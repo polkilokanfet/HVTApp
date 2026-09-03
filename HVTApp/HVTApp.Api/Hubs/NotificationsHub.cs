@@ -5,26 +5,39 @@ namespace HVTApp.Api.Hubs;
 
 public class NotificationsHub : Hub<INotificationServiceClient>
 {
-    public Task Send(string message)
+    public Task Send(NotificationHvtApp notification)
     {
-        return this.Clients.Caller.ShowNotification(message);
+        Console.WriteLine($"Task Send");
+        return this.Clients.Caller.ShowNotification(notification);
     }
 
-    private string GetGroupName(string userId, string role)
-    {
-        return $"userId: {userId}; role: {role}";
-    }
+    private static string GroupName(string userId, string role) => $"userId: {userId}; role: {role}";
 
-    public override Task OnConnectedAsync()
+    public override async Task OnConnectedAsync()
     {
         var httpContext = Context.GetHttpContext();
         if (httpContext != null)
         {
-            var userId = httpContext.Request.Query["userId"].ToString();
-            var role = httpContext.Request.Query["role"].ToString();
-            Groups.AddToGroupAsync(Context.ConnectionId, this.GetGroupName(userId, role));
+            var userId = httpContext.Request.Headers["X-User-Id"].ToString();
+            var role = httpContext.Request.Headers["X-Role"].ToString();
+            if (string.IsNullOrWhiteSpace(userId) == false)
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(userId, role));
         }
 
-        return base.OnConnectedAsync();
+        await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var httpContext = Context.GetHttpContext();
+        if (httpContext != null)
+        {
+            var userId = httpContext.Request.Headers["X-User-Id"].ToString();
+            var role = httpContext.Request.Headers["X-Role"].ToString();
+            if (string.IsNullOrWhiteSpace(userId) == false)
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(userId, role));
+        }
+
+        await base.OnDisconnectedAsync(exception);
     }
 }

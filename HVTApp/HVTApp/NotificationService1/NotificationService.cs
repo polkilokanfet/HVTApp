@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Threading.Tasks;
+using System.Windows;
 using HVTApp.Model;
+using System.Configuration;
 
 namespace HVTApp.NotificationService1
 {
@@ -12,12 +14,21 @@ namespace HVTApp.NotificationService1
 
         public NotificationService()
         {
+            var baseUrl = ConfigurationManager.AppSettings["NotificationHubBaseUrl"];
             _connection = new HubConnectionBuilder()
-                .WithUrl($"https://localhost:7204/notificationsHub?userId={GlobalAppProperties.User.Id}&role={GlobalAppProperties.User.RoleCurrent}")
+                .WithUrl($"{baseUrl}/notificationsHub", options =>
+                {
+                    // Для не‑чувствительных метаданных можно добавить кастомные заголовки
+                    options.Headers.Add("X-User-Id", GlobalAppProperties.User.Id.ToString());
+                    options.Headers.Add("X-Role", GlobalAppProperties.User.RoleCurrent.ToString());
+
+                    // Для аутентификации используйте AccessTokenProvider
+                    // options.AccessTokenProvider = () => Task.FromResult(yourJwtToken);
+                })
                 .WithAutomaticReconnect()
                 .Build();
 
-            _connection.On<string>(nameof(ShowNotification), ShowNotification);
+            _connection.On<NotificationHvtApp>(nameof(ShowNotification), ShowNotification);
 
             _connection.Closed += async (ex) =>
             {
@@ -32,26 +43,20 @@ namespace HVTApp.NotificationService1
             await _connection.StartAsync();
         }
 
-        //private void ShowNotification(string title, string message)
-        //{
-        //    // Важно: колбэк SignalR приходит не из UI‑потока
-        //    Application.Current.Dispatcher.Invoke(() =>
-        //    {
-        //        // Тут можно показать всплывающее окно, добавить в список уведомлений и т. п.
-        //        MessageBox.Show($"{title}\n{message}", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
-
-        //        // Или свой кастомный toast‑блок в интерфейсе
-        //    });
-        //}
-
-        public Task ShowNotification(string message)
+        public Task ShowNotification(NotificationHvtApp notification)
         {
+            // Важно: колбэк SignalR приходит не из UI‑потока
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // Тут можно показать всплывающее окно, добавить в список уведомлений и т. п.
+                MessageBox.Show($"{notification.Message}", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+            });
             return Task.CompletedTask;
         }
 
-        public async Task SendNotificationToHub(string message)
+        public async Task SendNotificationToHub(NotificationHvtApp notification)
         {
-            await _connection.InvokeAsync("Send", "test");
+            await _connection.InvokeAsync("Send", notification);
         }
 
         public async ValueTask DisposeAsync()

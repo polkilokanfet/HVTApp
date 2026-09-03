@@ -1,3 +1,4 @@
+using System.Text.Json;
 using HVTApp.Api.Hubs;
 
 namespace HVTApp.Api;
@@ -8,7 +9,12 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddSignalR();
+        builder.Services
+            .AddSignalR()
+            .AddJsonProtocol(opts =>
+            {
+                opts.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            });
 
         var app = builder.Build();
 
